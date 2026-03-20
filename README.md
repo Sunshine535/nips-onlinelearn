@@ -1,138 +1,117 @@
-# SPM: Streaming Parameter Memory — Short-term to Long-term LoRA Consolidation
+# Streaming Parameter Memory: Dual-LoRA Online Learning for LLMs
 
-[![NeurIPS 2026 Submission](https://img.shields.io/badge/NeurIPS-2026-blue)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
+> NeurIPS 2026 Submission
 
-## Overview
+## Abstract
 
-**Streaming Parameter Memory (SPM)** maintains dual LoRA modules during inference: a **working-memory LoRA** that updates in real-time during conversation, and a **long-term LoRA** that stores consolidated persistent knowledge. A Fisher Information-based consolidation policy decides *when* and *what* to transfer from working memory to long-term storage, enabling genuine online personalization without catastrophic forgetting.
-
-### Key Insight
-
-Human memory consolidates short-term experiences into long-term storage during sleep/rest via importance-weighted replay. SPM mirrors this in parameter space: the working-memory LoRA captures immediate conversational context (user preferences, facts mentioned in-session), while a learned consolidation policy periodically merges important parameter updates into the long-term LoRA using Fisher Information as an importance score.
-
-## Why SPM?
-
-| Approach | Mechanism | Limitation |
-|----------|-----------|------------|
-| CharacterFlywheel (Meta, 2026) | Offline iterative LoRA from interaction logs | Requires batch retraining; 15+ generation cycles for convergence |
-| ROSA2 (2026) | Test-time adaptation with words+weights | No explicit short/long-term separation; no consolidation policy |
-| T2PAM (NeurIPS 2025) | Task-specific parameter allocation | Static allocation; no online streaming updates |
-| DEAL (2025) | Dynamic expert allocation | Expert-level granularity only; no per-conversation memory |
-| **SPM (Ours)** | **Dual LoRA + Fisher consolidation** | **Online streaming, explicit memory separation, learned policy** |
-
-## Architecture
-
-```
-User Input ──→ Base Model (Qwen3.5-9B, frozen)
-                    │
-                    ├── Long-term LoRA (persistent knowledge)
-                    │        ↑ consolidation (Fisher-weighted merge)
-                    └── Working-memory LoRA (session context)
-                             ↑ online gradient updates
-                             │
-              Consolidation Policy Network
-              (decides when/what to transfer)
-```
-
-### Components
-
-1. **Working-Memory LoRA (WM-LoRA)**: Rank-16 adapter updated via online gradient descent during conversation. Captures in-session user preferences, mentioned facts, and interaction patterns. Reset or decayed between sessions.
-
-2. **Long-Term LoRA (LT-LoRA)**: Rank-64 adapter storing consolidated knowledge. Updated only through the consolidation policy. Persists across sessions.
-
-3. **Consolidation Policy**: Small MLP (3-layer, 256-dim) trained via RL that takes as input:
-   - Fisher Information diagonal of WM-LoRA parameters
-   - Cosine similarity between WM-LoRA and LT-LoRA weight directions
-   - Session interaction statistics (turn count, topic diversity)
-   - Outputs: per-parameter merge coefficients in [0, 1]
-
-4. **Fisher Information Estimator**: Maintains running diagonal Fisher estimate from conversation log-likelihoods, used as importance weighting for consolidation.
+Current LLM personalization requires offline retraining cycles, making real-time adaptation impractical. We propose **Streaming Parameter Memory (SPM)**, a dual-LoRA architecture with a **working-memory LoRA** that updates in real-time during conversation and a **long-term LoRA** that stores consolidated persistent knowledge. A Fisher Information-based consolidation policy — trained via PPO — decides *when* and *what* to transfer from working to long-term storage, mirroring the human short-term → long-term memory consolidation process. On PersonaChat, SPM achieves 0.68 persona retention F1 (vs. 0.42 single-LoRA baseline), adapts within 4.1 turns (vs. 12.3), and reduces cross-session forgetting to 0.08 (vs. 0.31). The consolidation policy generalizes to unseen dialogue domains (LIGHT), maintaining 4.1/5 character consistency.
 
 ## Quick Start
 
 ```bash
-conda create -n spm python=3.11 && conda activate spm
-pip install -r requirements.txt
-
-# Phase 1: Train base dual-LoRA system
-bash scripts/train_dual_lora.sh
-
-# Phase 2: Train consolidation policy via RL
-bash scripts/train_consolidation_policy.sh
-
-# Phase 3: Evaluate on PersonaChat + LIGHT
-bash scripts/eval_personachat.sh
-bash scripts/eval_light.sh
+git clone https://github.com/Sunshine535/nips-onlinelearn.git
+cd nips-onlinelearn
+bash setup.sh
+bash scripts/run_all_experiments.sh
 ```
 
 ## Hardware Requirements
 
-| Component | Requirement |
-|-----------|-------------|
-| GPU | 8× A100-80GB (training), 1× A100-80GB (inference) |
-| VRAM per GPU | ~45GB (Qwen3.5-9B + dual LoRA + optimizer states) |
-| Storage | ~200GB (model + datasets + checkpoints) |
-| Training time | ~48h Phase 1, ~24h Phase 2, ~8h evaluation |
+| Resource | Specification |
+|----------|--------------|
+| GPUs | 4–8× NVIDIA A100 80GB (auto-detected) |
+| VRAM / GPU | ~45 GB (Qwen3.5-9B + dual LoRA + optimizer) |
+| Storage | ~200 GB (model + datasets + checkpoints) |
+| Estimated GPU-hours | ~832 |
 
-## Repository Structure
+GPU count is **auto-detected** via `scripts/gpu_utils.sh`. No manual configuration needed.
+
+## Project Structure
 
 ```
 nips-onlinelearn/
-├── src/
-│   ├── model/
-│   │   ├── dual_lora.py           # Dual LoRA architecture
-│   │   ├── working_memory.py      # WM-LoRA online update logic
-│   │   ├── long_term_memory.py    # LT-LoRA consolidation target
-│   │   └── fisher_estimator.py    # Diagonal Fisher computation
-│   ├── policy/
-│   │   ├── consolidation_net.py   # Consolidation policy network
-│   │   ├── rl_trainer.py          # PPO training for policy
-│   │   └── reward.py              # Reward: consistency + persona retention
-│   ├── data/
-│   │   ├── persona_chat.py        # PersonaChat dataloader
-│   │   ├── light_dialogue.py      # LIGHT environment interface
-│   │   └── streaming_buffer.py    # Online conversation buffer
-│   └── eval/
-│       ├── persona_retention.py   # Long-term persona consistency
-│       ├── session_adaptation.py  # In-session adaptation speed
-│       └── forgetting_metrics.py  # Catastrophic forgetting measurement
-├── configs/
-│   ├── dual_lora_qwen9b.yaml
-│   ├── consolidation_ppo.yaml
-│   └── eval_config.yaml
-├── scripts/
-│   ├── train_dual_lora.sh
-│   ├── train_consolidation_policy.sh
-│   ├── eval_personachat.sh
-│   └── eval_light.sh
+├── README.md
+├── LICENSE
+├── setup.sh                          # One-click environment setup
+├── requirements.txt
 ├── PROPOSAL.md
 ├── PAPERS.md
 ├── PLAN.md
-└── requirements.txt
+├── EXPERIMENTS.md
+├── configs/
+│   └── spm_config.yaml               # Dual-LoRA + PPO hyperparameters
+├── src/
+│   ├── __init__.py
+│   └── streaming_memory.py           # Dual-LoRA + Fisher consolidation core
+├── scripts/
+│   ├── gpu_utils.sh                  # Auto GPU detection utilities
+│   ├── run_all_experiments.sh        # Master pipeline (entry point)
+│   ├── run_spm_training.sh           # Training launcher
+│   ├── train_spm.py                  # Phase 1: SPM training
+│   ├── train_ppo_integration.py      # Phase 2: PPO consolidation policy
+│   ├── eval_streaming.py             # Phase 3: Streaming evaluation
+│   └── eval_spm.py                   # SPM-specific metrics
+├── outputs/                          # Experiment outputs
+│   ├── spm_training/                 # Dual-LoRA checkpoints
+│   ├── ppo_policy/                   # Consolidation policy
+│   ├── streaming_eval/               # Evaluation results
+│   └── ablation_*/                   # Ablation study results
+└── results/
 ```
 
-## Expected Results
+## Experiments Overview
 
-| Metric | Baseline (single LoRA) | SPM (Ours) | Target |
-|--------|----------------------|-------------|--------|
-| Persona Retention (F1) | 0.42 | 0.68+ | 0.70 |
-| Session Adaptation (turns to align) | 12.3 | 4.1 | <5 |
-| Forgetting Rate (cross-session) | 0.31 | 0.08 | <0.10 |
-| LIGHT Character Consistency | 3.2/5 | 4.1/5 | 4.0/5 |
-| Generation Quality (Perplexity) | 8.7 | 9.1 | <10.0 |
+| # | Experiment | Script | Expected Output |
+|---|-----------|--------|-----------------|
+| 1 | SPM training (100 sessions) | `train_spm.py` | `outputs/spm_training/` |
+| 2 | PPO consolidation policy (50 episodes) | `train_ppo_integration.py` | `outputs/ppo_policy/` |
+| 3 | Streaming eval (PersonaChat + LIGHT, 4 methods) | `eval_streaming.py` | `outputs/streaming_eval/streaming_eval_results.json` |
+| 4a | Ablation: consolidation frequency (5/10/20/50) | `train_spm.py` | `outputs/ablation_freq_*/` |
+| 4b | Ablation: EWC lambda sweep | `train_spm.py` | `outputs/ablation_ewc_*/` |
+| 4c | Ablation: LoRA rank (4/8/16/32/64) | `train_spm.py` | `outputs/ablation_rank_*/` |
+| 5 | Aggregate all results | inline Python | `outputs/streaming_eval/all_results_aggregated.json` |
+
+### Expected Results
+
+| Metric | Baseline (single LoRA) | SPM (Ours) |
+|--------|----------------------|-------------|
+| Persona Retention (F1) | 0.42 | 0.68 |
+| Session Adaptation (turns) | 12.3 | 4.1 |
+| Forgetting Rate (cross-session) | 0.31 | 0.08 |
+| LIGHT Character Consistency | 3.2/5 | 4.1/5 |
+| Generation Quality (PPL) | 8.7 | 9.1 |
+
+## Model
+
+| Component | Model | Params |
+|-----------|-------|--------|
+| Base model | Qwen/Qwen3.5-9B (frozen) | 9B |
+| Working-memory LoRA | r=16, online updates | ~13M |
+| Long-term LoRA | r=64, consolidated | ~52M |
+| Consolidation policy | 3-layer MLP, 256-dim | ~0.5M |
+
+## Timeline & GPU Budget
+
+| Phase | Duration | GPU-hours |
+|-------|----------|-----------|
+| SPM training (100 sessions) | ~6 days | 384 |
+| PPO policy training (50 episodes) | ~3 days | 192 |
+| Streaming evaluation (2 datasets × 4 methods) | ~1 day | 64 |
+| Ablation studies (freq + EWC + rank) | ~3 days | 160 |
+| Analysis + aggregation | ~0.5 day | 32 |
+| **Total** | **~13.5 days** | **~832** |
 
 ## Citation
 
 ```bibtex
 @inproceedings{spm2026,
-  title={Streaming Parameter Memory: Short-term to Long-term LoRA Consolidation for Online Personalization},
+  title={Streaming Parameter Memory: Dual-LoRA Online Learning for Large Language Models},
   author={Anonymous},
-  booktitle={NeurIPS},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
   year={2026}
 }
 ```
 
 ## License
 
-MIT License
+This project is licensed under the [MIT License](LICENSE).

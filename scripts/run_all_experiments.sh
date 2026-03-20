@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/gpu_utils.sh"
+auto_setup
+
 # ─── SPM: Full Experiment Pipeline ──────────────────────────────────────────
 # spm_training → ppo_integration → eval (PersonaChat + LIGHT) → ablations
-export HF_ENDPOINT='https://hf-mirror.com'
-export HF_HOME="${HF_HOME:-/home/nwh/.cache/huggingface}"
-export TRANSFORMERS_CACHE="$HF_HOME/hub"
 export WANDB_PROJECT="onlinelearn"
-export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3,4,5,6,7}"
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG="${PROJECT_DIR}/configs/spm_config.yaml"
 SPM_DIR="${PROJECT_DIR}/outputs/spm_training"
