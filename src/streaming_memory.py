@@ -2,6 +2,7 @@
 Uses Fisher Information for importance-weighted consolidation."""
 
 import copy
+import os
 import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
@@ -50,7 +51,6 @@ class FisherEstimator:
         self.model = model
         self.num_samples = num_samples
 
-    @torch.no_grad()
     def estimate(self, dataloader) -> Dict[str, torch.Tensor]:
         """Estimate diagonal Fisher using empirical gradients."""
         fisher = {}
@@ -299,8 +299,10 @@ class StreamingParameterMemory:
     def generate(self, input_ids: torch.Tensor, max_new_tokens: int = 256, use_longterm: bool = True) -> torch.Tensor:
         """Generate with combined working + long-term memory."""
         self.model.eval()
-        adapter = "longterm" if use_longterm else "working"
-        self.model.set_adapter(adapter)
+        if use_longterm:
+            self.model.set_adapter(["working", "longterm"])
+        else:
+            self.model.set_adapter("working")
         output = self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
         return output
 
@@ -312,6 +314,3 @@ class StreamingParameterMemory:
         with open(os.path.join(output_dir, "memory_buffer.pkl"), "wb") as f:
             pickle.dump(self.memory_buffer, f)
         logger.info("Saved SPM state to %s", output_dir)
-
-
-import os
