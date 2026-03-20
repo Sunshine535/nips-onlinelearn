@@ -1,0 +1,60 @@
+model:
+  base_model: "Qwen/Qwen3.5-9B"
+  hf_endpoint: "https://hf-mirror.com"
+
+working_memory:
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  learning_rate: 5.0e-4
+  max_turns_before_consolidation: 10
+  online_update_steps: 5
+  online_batch_size: 1
+
+long_term_memory:
+  lora_r: 64
+  lora_alpha: 128
+  lora_dropout: 0.02
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  consolidation_lr: 1.0e-4
+  consolidation_epochs: 3
+  fisher_threshold: 0.01
+  fisher_samples: 200
+  ewc_lambda: 5000.0
+  max_memory_buffer: 5000
+
+training:
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+  num_train_epochs: 5
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.05
+  lr_scheduler_type: "cosine"
+  bf16: true
+  logging_steps: 10
+  save_steps: 500
+  max_seq_length: 2048
+  gradient_checkpointing: true
+  dataloader_num_workers: 4
+
+streaming:
+  session_length: 20
+  num_sessions: 100
+  consolidation_frequency: 10
+  replay_ratio: 0.2
+
+evaluation:
+  datasets:
+    - name: "personachat"
+      dataset_id: "bavard/personachat_truecased"
+      split: "validation"
+      max_samples: 1000
+    - name: "light"
+      dataset_id: "light_dialog"
+      split: "test"
+      max_samples: 1000
+  metrics: ["perplexity", "bleu", "memory_retention", "cross_session_accuracy"]
+  cross_session_probes: 50
+
+output_dir: "./outputs"
