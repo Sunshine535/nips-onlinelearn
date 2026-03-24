@@ -72,15 +72,20 @@ if ! is_phase_done 3; then
     phase_done 3
 fi
 
-# Phase 4: Ablations
+# Phase 4: Ablations (parallel across GPUs; gpu_id captured before each subshell to avoid GPU_IDX races)
 if ! is_phase_done 4; then
     echo ">>> Phase 4: Ablations"
 
     echo "  4a: Consolidation frequency"
+    GPU_IDX=0
+    PIDS=()
+    LABELS=()
     for freq in 5 10 20 50; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_freq_${freq}"
-        mkdir -p "$ABL_DIR"
-        python3 -c "
+        gpu_id=$((GPU_IDX % NUM_GPUS))
+        (
+            mkdir -p "$ABL_DIR"
+            python3 -c "
 import yaml
 with open('${CONFIG}') as f:
     cfg = yaml.safe_load(f)
@@ -89,18 +94,32 @@ cfg['streaming']['consolidation_frequency'] = ${freq}
 with open('${ABL_DIR}/config.yaml', 'w') as f:
     yaml.dump(cfg, f)
 "
-        python "${SCRIPT_DIR}/train_spm.py" \
-            --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
-        python "${SCRIPT_DIR}/eval_streaming.py" \
-            --config "${ABL_DIR}/config.yaml" --output_dir "${ABL_DIR}/eval" \
-            --num_sessions 20 --methods spm --datasets personachat
+            CUDA_VISIBLE_DEVICES="${gpu_id}" python "${SCRIPT_DIR}/train_spm.py" \
+                --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
+            CUDA_VISIBLE_DEVICES="${gpu_id}" python "${SCRIPT_DIR}/eval_streaming.py" \
+                --config "${ABL_DIR}/config.yaml" --output_dir "${ABL_DIR}/eval" \
+                --num_sessions 20 --methods spm --datasets personachat
+        ) > "${LOG_DIR}/ablation_freq_${freq}.log" 2>&1 &
+        PIDS+=($!)
+        LABELS+=("freq_${freq}")
+        GPU_IDX=$((GPU_IDX + 1))
     done
+    FAIL=0
+    for j in "${!PIDS[@]}"; do
+        wait "${PIDS[$j]}" || { echo "ERROR: ${LABELS[$j]} failed"; FAIL=1; }
+    done
+    if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
     echo "  4b: EWC lambda sweep"
+    GPU_IDX=0
+    PIDS=()
+    LABELS=()
     for ewc_lambda in 100 1000 5000 10000 50000; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_ewc_${ewc_lambda}"
-        mkdir -p "$ABL_DIR"
-        python3 -c "
+        gpu_id=$((GPU_IDX % NUM_GPUS))
+        (
+            mkdir -p "$ABL_DIR"
+            python3 -c "
 import yaml
 with open('${CONFIG}') as f:
     cfg = yaml.safe_load(f)
@@ -108,15 +127,29 @@ cfg['long_term_memory']['ewc_lambda'] = ${ewc_lambda}
 with open('${ABL_DIR}/config.yaml', 'w') as f:
     yaml.dump(cfg, f)
 "
-        python "${SCRIPT_DIR}/train_spm.py" \
-            --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
+            CUDA_VISIBLE_DEVICES="${gpu_id}" python "${SCRIPT_DIR}/train_spm.py" \
+                --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
+        ) > "${LOG_DIR}/ablation_ewc_${ewc_lambda}.log" 2>&1 &
+        PIDS+=($!)
+        LABELS+=("ewc_${ewc_lambda}")
+        GPU_IDX=$((GPU_IDX + 1))
     done
+    FAIL=0
+    for j in "${!PIDS[@]}"; do
+        wait "${PIDS[$j]}" || { echo "ERROR: ${LABELS[$j]} failed"; FAIL=1; }
+    done
+    if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
     echo "  4c: LoRA rank"
+    GPU_IDX=0
+    PIDS=()
+    LABELS=()
     for rank in 4 8 16 32 64; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_rank_${rank}"
-        mkdir -p "$ABL_DIR"
-        python3 -c "
+        gpu_id=$((GPU_IDX % NUM_GPUS))
+        (
+            mkdir -p "$ABL_DIR"
+            python3 -c "
 import yaml
 with open('${CONFIG}') as f:
     cfg = yaml.safe_load(f)
@@ -125,9 +158,19 @@ cfg['working_memory']['lora_alpha'] = ${rank} * 2
 with open('${ABL_DIR}/config.yaml', 'w') as f:
     yaml.dump(cfg, f)
 "
-        python "${SCRIPT_DIR}/train_spm.py" \
-            --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
+            CUDA_VISIBLE_DEVICES="${gpu_id}" python "${SCRIPT_DIR}/train_spm.py" \
+                --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
+        ) > "${LOG_DIR}/ablation_rank_${rank}.log" 2>&1 &
+        PIDS+=($!)
+        LABELS+=("rank_${rank}")
+        GPU_IDX=$((GPU_IDX + 1))
     done
+    FAIL=0
+    for j in "${!PIDS[@]}"; do
+        wait "${PIDS[$j]}" || { echo "ERROR: ${LABELS[$j]} failed"; FAIL=1; }
+    done
+    if [ "$FAIL" -ne 0 ]; then exit 1; fi
+
     phase_done 4
 fi
 
