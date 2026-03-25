@@ -239,7 +239,7 @@ def load_eval_sessions(config: dict, dataset_name: str, max_sessions: int = 50):
 
     if dataset_name == "personachat":
         try:
-            ds = load_dataset("bavard/personachat_truecased", split="validation", trust_remote_code=True)
+            ds = load_dataset("bavard/personachat_truecased", split="validation")
             current = []
             for ex in ds:
                 history = ex.get("history", [])
@@ -261,7 +261,7 @@ def load_eval_sessions(config: dict, dataset_name: str, max_sessions: int = 50):
 
     elif dataset_name == "light":
         try:
-            ds = load_dataset("light_dialog", split="test", trust_remote_code=True)
+            ds = load_dataset("light_dialog", split="test")
             for ex in ds:
                 dialog = ex.get("dialog", [])
                 if len(dialog) >= 4:
@@ -392,13 +392,13 @@ def main():
         for method_name in args.methods:
             logger.info("\n>>> Method: %s on %s", method_name, ds_name)
 
-            tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+            tokenizer = AutoTokenizer.from_pretrained(base_model_name)
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
             base_model = AutoModelForCausalLM.from_pretrained(
-                base_model_name, torch_dtype=torch.bfloat16,
-                trust_remote_code=True, device_map="auto")
+                base_model_name, dtype=torch.bfloat16,
+                device_map="auto")
             base_model.config.use_cache = False
 
             if method_name == "no_adapt":

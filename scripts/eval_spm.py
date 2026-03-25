@@ -99,7 +99,7 @@ def load_eval_data(config: dict):
     for ds_cfg in config["evaluation"]["datasets"]:
         name = ds_cfg["name"]
         try:
-            ds = load_dataset(ds_cfg["dataset_id"], split=ds_cfg["split"], trust_remote_code=True)
+            ds = load_dataset(ds_cfg["dataset_id"], split=ds_cfg["split"])
             max_s = ds_cfg.get("max_samples", 1000)
             if len(ds) > max_s:
                 ds = ds.shuffle(seed=42).select(range(max_s))
@@ -126,14 +126,13 @@ def main():
     logger.info("=== SPM Evaluation ===")
     logger.info("Loading base model: %s", base_model_name)
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     base_model = AutoModelForCausalLM.from_pretrained(
         base_model_name,
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
+        dtype=torch.bfloat16,
         device_map="auto",
     )
 

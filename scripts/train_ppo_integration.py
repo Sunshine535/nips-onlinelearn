@@ -216,7 +216,7 @@ def main():
 
     logger.info("=== PPO Consolidation Policy Training ===")
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -225,7 +225,7 @@ def main():
     for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
-                base_model_name, torch_dtype=torch.bfloat16, trust_remote_code=True,
+                base_model_name, dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
@@ -249,7 +249,7 @@ def main():
 
     # Load training conversations
     try:
-        ds = load_dataset("bavard/personachat_truecased", split="train", trust_remote_code=True)
+        ds = load_dataset("bavard/personachat_truecased", split="train")
         conversations = []
         for i, ex in enumerate(ds):
             if i >= 10000:

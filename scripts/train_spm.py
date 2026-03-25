@@ -31,7 +31,7 @@ def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
     sessions = []
 
     try:
-        ds = load_dataset("bavard/personachat_truecased", split="train", trust_remote_code=True)
+        ds = load_dataset("bavard/personachat_truecased", split="train")
         logger.info("Loaded PersonaChat: %d examples", len(ds))
 
         persona_sessions = {}
@@ -150,7 +150,7 @@ def main():
     logger.info("Sessions: %d, Turns/session: %d", num_sessions,
                 config["streaming"]["session_length"])
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -160,8 +160,7 @@ def main():
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
-                torch_dtype=torch.bfloat16,
-                trust_remote_code=True,
+                dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )

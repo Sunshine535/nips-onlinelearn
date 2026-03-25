@@ -30,8 +30,9 @@ if [ "$SYSTEM_TORCH_OK" -eq 1 ] && [ -z "$FORCE_VENV" ]; then
     echo "[1/3] Using system Python (torch+CUDA detected)"
     echo "[2/3] Installing project dependencies ..."
     _pip_install -r "$PROJ_DIR/requirements.txt" -i "$PIP_MIRROR" 2>&1 | tail -5
-    echo "[3/3] Installing flash-attn (optional) ..."
-    _pip_install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped (optional)"
+    echo "[3/3] Installing optional accelerators ..."
+    _pip_install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped"
+    _pip_install flash-linear-attention causal-conv1d --no-build-isolation 2>/dev/null || echo "  flash-linear-attention skipped"
 else
     # --- Local/fresh mode: create venv and install everything ---
     if ! command -v uv &>/dev/null; then
@@ -62,8 +63,9 @@ else
         --extra-index-url "$PYTORCH_INDEX" \
         --index-strategy unsafe-best-match
 
-    echo "[5/5] Installing flash-attn (optional) ..."
-    uv pip install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped (optional)"
+    echo "[5/5] Installing optional accelerators ..."
+    uv pip install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped"
+    uv pip install flash-linear-attention causal-conv1d --no-build-isolation 2>/dev/null || echo "  flash-linear-attention skipped"
 fi
 
 # --- Verify ---
