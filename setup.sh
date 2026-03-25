@@ -21,7 +21,7 @@ _pip_install() {
     if command -v uv &>/dev/null && [ -n "$VIRTUAL_ENV" ]; then
         uv pip install "$@"
     else
-        pip3 install "$@"
+        pip3 install --break-system-packages "$@"
     fi
 }
 
