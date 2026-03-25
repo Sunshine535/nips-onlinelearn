@@ -143,10 +143,14 @@ def main():
         longterm_config=config["long_term_memory"],
     )
 
-    # Try loading saved state
     adapter_path = os.path.join(args.model_dir, "adapters")
     if os.path.exists(adapter_path):
         logger.info("Loading saved adapters from %s", adapter_path)
+        from peft import PeftModel
+        spm.model = PeftModel.from_pretrained(
+            base_model, adapter_path, is_trainable=True,
+        )
+        logger.info("Adapters loaded successfully")
     else:
         logger.warning("No saved model found at %s, evaluating initialized model", args.model_dir)
 

@@ -30,17 +30,29 @@ echo " Project: $(basename "$PROJ_DIR")"
 echo " Time:    $(date)"
 echo "============================================================"
 
-# Step 1: Setup environment (skip if already done)
-if [ ! -f "$PROJ_DIR/.venv/bin/activate" ]; then
-    echo ""
-    echo "[1/2] Setting up environment..."
-    bash setup.sh
-else
-    echo ""
-    echo "[1/2] Environment already set up (.venv exists)"
+# Step 1: Activate venv if present
+if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
+    source "$PROJ_DIR/.venv/bin/activate"
 fi
 
-# Step 2: Run all experiments with real-time output + log file
+# Step 2: Check key dependencies, run setup if missing
+DEPS_OK=1
+python3 -c "import torch, transformers, peft, datasets" 2>/dev/null || DEPS_OK=0
+
+if [ "$DEPS_OK" -eq 0 ]; then
+    echo ""
+    echo "[1/2] Missing dependencies detected, running setup..."
+    bash setup.sh
+    # Re-activate venv if it was created
+    if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
+        source "$PROJ_DIR/.venv/bin/activate"
+    fi
+else
+    echo ""
+    echo "[1/2] Dependencies OK"
+fi
+
+# Step 3: Run all experiments with real-time output + log file
 echo ""
 echo "[2/2] Running all experiments (full production mode)..."
 echo "  Log file: $PROJ_DIR/run.log"

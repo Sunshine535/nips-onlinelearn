@@ -154,13 +154,23 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    base_model = AutoModelForCausalLM.from_pretrained(
-        base_model_name,
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-        attn_implementation="flash_attention_2",
-        device_map={"": int(os.environ.get("LOCAL_RANK", 0))},
-    )
+    device_idx = int(os.environ.get("LOCAL_RANK", 0))
+    base_model = None
+    for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
+        try:
+            base_model = AutoModelForCausalLM.from_pretrained(
+                base_model_name,
+                torch_dtype=torch.bfloat16,
+                trust_remote_code=True,
+                attn_implementation=attn_impl,
+                device_map={"": device_idx},
+            )
+            logger.info("Attention implementation: %s", attn_impl)
+            break
+        except (ImportError, ValueError) as e:
+            logger.warning("attn_implementation=%s failed: %s", attn_impl, e)
+    if base_model is None:
+        raise RuntimeError(f"Cannot load model {base_model_name}")
     base_model.config.use_cache = False
 
     spm = StreamingParameterMemory(
