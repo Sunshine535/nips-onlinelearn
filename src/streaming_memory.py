@@ -300,7 +300,10 @@ class StreamingParameterMemory:
         """Generate with combined working + long-term memory."""
         self.model.eval()
         if use_longterm:
-            self.model.set_adapter(["working", "longterm"])
+            try:
+                self.model.set_adapter(["working", "longterm"])
+            except TypeError:
+                self.model.set_adapter("longterm")
         else:
             self.model.set_adapter("working")
         output = self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
