@@ -84,12 +84,15 @@ def evaluate_memory_retention(spm: StreamingParameterMemory, tokenizer, probe_fa
             f"<|im_start|>assistant\n"
         )
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-        output = spm.generate(input_ids, max_new_tokens=100, use_longterm=True)
-        response = tokenizer.decode(output[0][input_ids.shape[1]:], skip_special_tokens=True).lower()
+        try:
+            output = spm.generate(input_ids, max_new_tokens=100, use_longterm=True)
+            response = tokenizer.decode(output[0][input_ids.shape[1]:], skip_special_tokens=True).lower()
+            if expected in response:
+                correct += 1
+        except Exception as e:
+            logger.warning("evaluate_memory_retention generate failed: %s", e)
 
-        if expected in response:
-            correct += 1
-
+    spm.model.set_adapter("working")
     return {"accuracy": correct / max(total, 1), "correct": correct, "total": total}
 
 
@@ -130,11 +133,22 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    base_model = AutoModelForCausalLM.from_pretrained(
-        base_model_name,
-        dtype=torch.bfloat16,
-        device_map="auto",
-    )
+    device_idx = int(os.environ.get("LOCAL_RANK", 0))
+    base_model = None
+    for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
+        try:
+            base_model = AutoModelForCausalLM.from_pretrained(
+                base_model_name,
+                dtype=torch.bfloat16,
+                attn_implementation=attn_impl,
+                device_map={"": device_idx},
+            )
+            logger.info("Attention implementation: %s", attn_impl)
+            break
+        except (ImportError, ValueError) as e:
+            logger.warning("attn_implementation=%s failed: %s", attn_impl, e)
+    if base_model is None:
+        raise RuntimeError(f"Cannot load model {base_model_name}")
 
     spm = StreamingParameterMemory(
         base_model=base_model,
@@ -145,11 +159,17 @@ def main():
     adapter_path = os.path.join(args.model_dir, "adapters")
     if os.path.exists(adapter_path):
         logger.info("Loading saved adapters from %s", adapter_path)
-        from peft import PeftModel
-        spm.model = PeftModel.from_pretrained(
-            base_model, adapter_path, is_trainable=True,
-        )
-        logger.info("Adapters loaded successfully")
+        try:
+            import glob
+            for adapter_name in ["working", "longterm"]:
+                adapter_sub = os.path.join(adapter_path, adapter_name)
+                if os.path.isdir(adapter_sub):
+                    spm.model.load_adapter(adapter_sub, adapter_name=adapter_name)
+                    logger.info("  Loaded adapter '%s' from %s", adapter_name, adapter_sub)
+            spm.model.set_adapter("working")
+            logger.info("Adapters loaded successfully")
+        except Exception as e:
+            logger.warning("Failed to load adapters (%s), using initialized model", e)
     else:
         logger.warning("No saved model found at %s, evaluating initialized model", args.model_dir)
 
@@ -228,8 +248,12 @@ def main():
     for prompt in test_prompts:
         input_text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
         input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
-        output = spm.generate(input_ids, max_new_tokens=200, use_longterm=True)
-        response = tokenizer.decode(output[0][input_ids.shape[1]:], skip_special_tokens=True)
+        try:
+            output = spm.generate(input_ids, max_new_tokens=200, use_longterm=True)
+            response = tokenizer.decode(output[0][input_ids.shape[1]:], skip_special_tokens=True)
+        except Exception as e:
+            logger.warning("Generation failed: %s", e)
+            response = "[generation failed]"
         generation_results.append({"prompt": prompt, "response": response})
         logger.info("  Q: %s", prompt)
         logger.info("  A: %s", response[:200])

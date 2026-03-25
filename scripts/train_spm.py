@@ -118,10 +118,14 @@ def probe_retention(spm, tokenizer, probe_facts: list) -> float:
     for fact in probe_facts:
         prompt = f"<|im_start|>user\n{fact['question']}<|im_end|>\n<|im_start|>assistant\n"
         ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-        out = spm.generate(ids, max_new_tokens=100, use_longterm=True)
-        response = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-        if fact["answer"].lower() in response:
-            correct += 1
+        try:
+            out = spm.generate(ids, max_new_tokens=100, use_longterm=True)
+            response = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
+            if fact["answer"].lower() in response:
+                correct += 1
+        except Exception as e:
+            logger.warning("probe_retention generate failed: %s", e)
+    spm.model.set_adapter("working")
     return correct / max(len(probe_facts), 1)
 
 

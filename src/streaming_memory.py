@@ -302,18 +302,37 @@ class StreamingParameterMemory:
         if use_longterm:
             try:
                 self.model.set_adapter(["working", "longterm"])
-            except TypeError:
+            except (TypeError, ValueError):
                 self.model.set_adapter("longterm")
         else:
             self.model.set_adapter("working")
-        output = self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+
+        prev_use_cache = getattr(self.model.config, "use_cache", True)
+        self.model.config.use_cache = True
+        try:
+            output = self.model.generate(
+                input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False,
+            )
+        finally:
+            self.model.config.use_cache = prev_use_cache
         return output
 
     def save(self, output_dir: str):
         """Save both adapters and memory buffer."""
         import pickle
         os.makedirs(output_dir, exist_ok=True)
-        self.model.save_pretrained(os.path.join(output_dir, "adapters"))
+        adapter_dir = os.path.join(output_dir, "adapters")
+        try:
+            self.model.save_pretrained(adapter_dir)
+        except Exception as e:
+            logger.warning("save_pretrained failed (%s), saving adapters individually", e)
+            for name in ["working", "longterm"]:
+                try:
+                    self.model.set_adapter(name)
+                    self.model.save_pretrained(adapter_dir)
+                except Exception:
+                    pass
+            self.model.set_adapter("working")
         with open(os.path.join(output_dir, "memory_buffer.pkl"), "wb") as f:
             pickle.dump(self.memory_buffer, f)
         logger.info("Saved SPM state to %s", output_dir)

@@ -188,14 +188,19 @@ def quick_retention(spm, tokenizer, facts: list) -> float:
         return 1.0
     device = next(spm.model.parameters()).device
     correct = 0
-    for f in facts[-10:]:
+    test_facts = facts[-10:]
+    for f in test_facts:
         prompt = f"<|im_start|>user\n{f['q']}<|im_end|>\n<|im_start|>assistant\n"
         ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-        out = spm.generate(ids, max_new_tokens=50, use_longterm=True)
-        resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-        if f["a"].lower() in resp:
-            correct += 1
-    return correct / max(len(facts[-10:]), 1)
+        try:
+            out = spm.generate(ids, max_new_tokens=50, use_longterm=True)
+            resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
+            if f["a"].lower() in resp:
+                correct += 1
+        except Exception as e:
+            logger.warning("quick_retention generate failed: %s", e)
+    spm.model.set_adapter("working")
+    return correct / max(len(test_facts), 1)
 
 
 def main():

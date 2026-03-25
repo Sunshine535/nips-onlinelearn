@@ -70,15 +70,20 @@ def compute_persona_consistency(model, tokenizer, persona_facts: list,
                                 probe_questions: list, device) -> float:
     """Measure how well the model retains persona-specific information."""
     model.eval()
+    prev_cache = getattr(model.config, "use_cache", True)
+    model.config.use_cache = True
     correct = 0
-    for fact, question in zip(persona_facts, probe_questions):
-        prompt = f"<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
-        ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-        with torch.no_grad():
-            out = model.generate(input_ids=ids, max_new_tokens=100, do_sample=False)
-        resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-        if fact.lower() in resp:
-            correct += 1
+    try:
+        for fact, question in zip(persona_facts, probe_questions):
+            prompt = f"<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
+            ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+            with torch.no_grad():
+                out = model.generate(input_ids=ids, max_new_tokens=100, do_sample=False)
+            resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
+            if fact.lower() in resp:
+                correct += 1
+    finally:
+        model.config.use_cache = prev_cache
     return correct / max(len(persona_facts), 1)
 
 
@@ -116,24 +121,33 @@ class NoAdaptationBaseline:
         pass
 
     def generate(self, input_ids, max_new_tokens=200):
-        with torch.no_grad():
-            return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+        prev_cache = getattr(self.model.config, "use_cache", True)
+        self.model.config.use_cache = True
+        try:
+            with torch.no_grad():
+                return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+        finally:
+            self.model.config.use_cache = prev_cache
 
 
 class FullFineTuneMethod:
-    """Full fine-tuning on every turn (no catastrophic forgetting protection)."""
+    """LoRA fine-tuning on every turn (no catastrophic forgetting protection)."""
 
-    def __init__(self, model, tokenizer, lr=5e-5):
-        self.model = model
+    def __init__(self, model, tokenizer, lr=5e-4):
+        lora_cfg = LoraConfig(r=16, lora_alpha=32, target_modules=["q_proj", "v_proj"],
+                              task_type=TaskType.CAUSAL_LM, bias="none")
+        self.model = get_peft_model(model, lora_cfg)
         self.tokenizer = tokenizer
-        self.optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+        self.optimizer = torch.optim.AdamW(
+            [p for p in self.model.parameters() if p.requires_grad], lr=lr)
 
     def process_turn(self, input_ids, labels):
         self.model.train()
         outputs = self.model(input_ids=input_ids, labels=labels)
         loss = outputs.loss
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(
+            [p for p in self.model.parameters() if p.requires_grad], 1.0)
         self.optimizer.step()
         self.optimizer.zero_grad()
         return {"loss": loss.item(), "consolidated": False}
@@ -143,8 +157,13 @@ class FullFineTuneMethod:
 
     def generate(self, input_ids, max_new_tokens=200):
         self.model.eval()
-        with torch.no_grad():
-            return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+        prev_cache = getattr(self.model.config, "use_cache", True)
+        self.model.config.use_cache = True
+        try:
+            with torch.no_grad():
+                return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+        finally:
+            self.model.config.use_cache = prev_cache
 
 
 class EWCMethod:
@@ -202,8 +221,13 @@ class EWCMethod:
 
     def generate(self, input_ids, max_new_tokens=200):
         self.model.eval()
-        with torch.no_grad():
-            return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+        prev_cache = getattr(self.model.config, "use_cache", True)
+        self.model.config.use_cache = True
+        try:
+            with torch.no_grad():
+                return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+        finally:
+            self.model.config.use_cache = prev_cache
 
 
 class SPMMethod:
@@ -378,7 +402,6 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
     base_model_name = config["model"]["base_model"]
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     all_results = {}
     for ds_name in args.datasets:
@@ -396,9 +419,20 @@ def main():
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
-            base_model = AutoModelForCausalLM.from_pretrained(
-                base_model_name, dtype=torch.bfloat16,
-                device_map="auto")
+            device_idx = int(os.environ.get("LOCAL_RANK", os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0]))
+            base_model = None
+            for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
+                try:
+                    base_model = AutoModelForCausalLM.from_pretrained(
+                        base_model_name, dtype=torch.bfloat16,
+                        attn_implementation=attn_impl,
+                        device_map={"": device_idx},
+                    )
+                    break
+                except (ImportError, ValueError):
+                    pass
+            if base_model is None:
+                raise RuntimeError(f"Cannot load model {base_model_name}")
             base_model.config.use_cache = False
 
             if method_name == "no_adapt":
@@ -412,6 +446,7 @@ def main():
             else:
                 continue
 
+            device = next(method.model.parameters()).device
             results = evaluate_method(method, method_name, tokenizer, sessions, device)
             ds_results[method_name] = results
 
