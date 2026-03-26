@@ -1,152 +1,14 @@
-2026-03-25 15:10:02,259 [INFO] === Streaming Parameter Memory Training ===
-2026-03-25 15:10:02,259 [INFO] Base model: Qwen/Qwen3.5-9B
-2026-03-25 15:10:02,260 [INFO] Sessions: 100, Turns/session: 20
-2026-03-25 15:10:03,496 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:03,724 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:04,370 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:04,693 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/tokenizer_config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:05,104 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:05,310 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/tokenizer_config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:05,519 [INFO] HTTP Request: GET https://hf-mirror.com/api/models/Qwen/Qwen3.5-9B/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
-2026-03-25 15:10:05,789 [INFO] HTTP Request: GET https://hf-mirror.com/api/models/Qwen/Qwen3.5-9B/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
-2026-03-25 15:10:07,353 [INFO] HTTP Request: GET https://hf-mirror.com/api/models/Qwen/Qwen3.5-9B "HTTP/1.1 200 OK"
-2026-03-25 15:10:07,894 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:08,253 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:08,710 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:08,925 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:09,300 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
-2026-03-25 15:10:09,708 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/model.safetensors.index.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:10,124 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/model.safetensors.index.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:10,339 [INFO] HTTP Request: GET https://hf-mirror.com/api/models/Qwen/Qwen3.5-9B/revision/main "HTTP/1.1 200 OK"
-Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|██████████| 4/4 [00:00<00:00, 21399.51it/s]
-2026-03-25 15:10:10,414 [WARNING] attn_implementation=flash_attention_2 failed: FlashAttention2 has been toggled on, but it cannot be used due to the following error: the package flash_attn seems to be not installed. Please refer to the documentation of https://huggingface.co/docs/transformers/perf_infer_gpu_one#flashattention-2 to install Flash Attention 2.
-2026-03-25 15:10:10,778 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:10,984 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:11,362 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:11,590 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:11,958 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
-2026-03-25 15:10:12,421 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/model.safetensors.index.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:12,676 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/model.safetensors.index.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:12,889 [INFO] HTTP Request: GET https://hf-mirror.com/api/models/Qwen/Qwen3.5-9B/revision/main "HTTP/1.1 200 OK"
-Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|██████████| 4/4 [00:00<00:00, 34309.24it/s]
-The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
-Loading weights:   0%|          | 0/427 [00:00<?, ?it/s]Loading weights:   0%|          | 1/427 [00:00<01:36,  4.42it/s]Loading weights:   0%|          | 2/427 [00:00<01:52,  3.77it/s]Loading weights:   6%|▌         | 26/427 [00:00<00:06, 59.93it/s]Loading weights:  10%|▉         | 42/427 [00:00<00:04, 82.52it/s]Loading weights:  15%|█▍        | 62/427 [00:00<00:03, 109.95it/s]Loading weights:  19%|█▊        | 80/427 [00:00<00:02, 124.37it/s]Loading weights:  22%|██▏       | 95/427 [00:01<00:02, 131.19it/s]Loading weights:  27%|██▋       | 115/427 [00:01<00:02, 146.10it/s]Loading weights:  31%|███       | 133/427 [00:01<00:01, 150.38it/s]Loading weights:  35%|███▍      | 149/427 [00:01<00:01, 145.96it/s]Loading weights:  40%|████      | 171/427 [00:01<00:01, 157.75it/s]Loading weights:  44%|████▍     | 188/427 [00:01<00:01, 154.68it/s]Loading weights:  48%|████▊     | 206/427 [00:01<00:01, 159.45it/s]Loading weights:  53%|█████▎    | 227/427 [00:01<00:01, 167.27it/s]Loading weights:  59%|█████▉    | 251/427 [00:01<00:00, 186.83it/s]Loading weights:  63%|██████▎   | 270/427 [00:02<00:00, 170.27it/s]Loading weights:  68%|██████▊   | 291/427 [00:02<00:00, 180.46it/s]Loading weights:  73%|███████▎  | 310/427 [00:02<00:00, 168.98it/s]Loading weights:  78%|███████▊  | 331/427 [00:02<00:00, 173.16it/s]Loading weights:  82%|████████▏ | 349/427 [00:02<00:00, 169.02it/s]Loading weights:  86%|████████▌ | 367/427 [00:02<00:00, 163.68it/s]Loading weights:  90%|█████████ | 386/427 [00:02<00:00, 169.74it/s]Loading weights:  96%|█████████▌| 409/427 [00:02<00:00, 184.77it/s]Loading weights: 100%|██████████| 427/427 [00:03<00:00, 141.68it/s]
-2026-03-25 15:10:17,454 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/generation_config.json "HTTP/1.1 404 Not Found"
-2026-03-25 15:10:17,827 [INFO] HTTP Request: HEAD https://hf-mirror.com/Qwen/Qwen3.5-9B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:18,047 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/models/Qwen/Qwen3.5-9B/c202236235762e1c871ad0ccb60c8ee5ba337b9a/config.json "HTTP/1.1 200 OK"
-2026-03-25 15:10:18,049 [INFO] Attention implementation: sdpa
-2026-03-25 15:10:19,578 [INFO] HTTP Request: HEAD https://hf-mirror.com/datasets/bavard/personachat_truecased/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:19,788 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/datasets/bavard/personachat_truecased/be2fcc045e5f4a9a645527ffbf5ea627218f7c5e/README.md "HTTP/1.1 200 OK"
-2026-03-25 15:10:20,078 [INFO] HTTP Request: GET https://hf-mirror.com/api/resolve-cache/datasets/bavard/personachat_truecased/be2fcc045e5f4a9a645527ffbf5ea627218f7c5e/README.md "HTTP/1.1 200 OK"
-2026-03-25 15:10:20,454 [INFO] HTTP Request: HEAD https://hf-mirror.com/datasets/bavard/personachat_truecased/resolve/be2fcc045e5f4a9a645527ffbf5ea627218f7c5e/personachat_truecased.py "HTTP/1.1 307 Temporary Redirect"
-2026-03-25 15:10:20,663 [INFO] HTTP Request: HEAD https://hf-mirror.com/api/resolve-cache/datasets/bavard/personachat_truecased/be2fcc045e5f4a9a645527ffbf5ea627218f7c5e/personachat_truecased.py "HTTP/1.1 200 OK"
-2026-03-25 15:10:20,945 [INFO] HTTP Request: GET https://hf-mirror.com/api/resolve-cache/datasets/bavard/personachat_truecased/be2fcc045e5f4a9a645527ffbf5ea627218f7c5e/personachat_truecased.py "HTTP/1.1 200 OK"
-2026-03-25 15:10:20,946 [WARNING] Failed to load PersonaChat: Dataset scripts are no longer supported, but found personachat_truecased.py. Using synthetic data.
-2026-03-25 15:10:20,947 [INFO] Generating synthetic conversation sessions...
-2026-03-25 15:10:20,949 [INFO] Loaded 100 conversation sessions
-2026-03-25 15:10:20,967 [INFO] Started new session 1
-2026-03-25 15:10:25,293 [INFO] Session 1/100 Turn 1/20 | Loss: 1.5838 | Consolidated: False | Buffer: 1
-2026-03-25 15:10:42,017 [INFO] Session 1/100 Turn 6/20 | Loss: 0.0212 | Consolidated: False | Buffer: 6
-2026-03-25 15:10:55,291 [INFO] Consolidating working memory → long-term (session 1, turn 10)
-2026-03-25 15:11:22,143 [INFO] Consolidation complete
-2026-03-25 15:11:25,476 [INFO] Session 1/100 Turn 11/20 | Loss: 0.0291 | Consolidated: False | Buffer: 11
-2026-03-25 15:11:42,190 [INFO] Session 1/100 Turn 16/20 | Loss: 0.0173 | Consolidated: False | Buffer: 16
-2026-03-25 15:11:55,463 [INFO] Consolidating working memory → long-term (session 1, turn 20)
-2026-03-25 15:12:47,586 [INFO] Consolidation complete
-2026-03-25 15:12:47,598 [INFO] Started new session 2
-2026-03-25 15:12:50,877 [INFO] Session 2/100 Turn 1/20 | Loss: 1.7311 | Consolidated: False | Buffer: 21
-2026-03-25 15:13:07,723 [INFO] Session 2/100 Turn 6/20 | Loss: 0.0355 | Consolidated: False | Buffer: 26
-2026-03-25 15:13:20,847 [INFO] Consolidating working memory → long-term (session 2, turn 30)
-2026-03-25 15:14:37,764 [INFO] Consolidation complete
-2026-03-25 15:14:41,121 [INFO] Session 2/100 Turn 11/20 | Loss: 0.1274 | Consolidated: False | Buffer: 31
-2026-03-25 15:14:57,742 [INFO] Session 2/100 Turn 16/20 | Loss: 0.0226 | Consolidated: False | Buffer: 36
-2026-03-25 15:15:10,965 [INFO] Consolidating working memory → long-term (session 2, turn 40)
-2026-03-25 15:16:34,755 [INFO] Consolidation complete
-2026-03-25 15:16:34,766 [INFO] Started new session 3
-2026-03-25 15:16:38,111 [INFO] Session 3/100 Turn 1/20 | Loss: 1.7297 | Consolidated: False | Buffer: 41
-2026-03-25 15:16:54,893 [INFO] Session 3/100 Turn 6/20 | Loss: 0.0293 | Consolidated: False | Buffer: 46
-2026-03-25 15:17:08,172 [INFO] Consolidating working memory → long-term (session 3, turn 50)
-2026-03-25 15:18:33,986 [INFO] Consolidation complete
-2026-03-25 15:18:37,351 [INFO] Session 3/100 Turn 11/20 | Loss: 0.1852 | Consolidated: False | Buffer: 51
-2026-03-25 15:18:54,059 [INFO] Session 3/100 Turn 16/20 | Loss: 0.0606 | Consolidated: False | Buffer: 56
-2026-03-25 15:19:07,243 [INFO] Consolidating working memory → long-term (session 3, turn 60)
-2026-03-25 15:20:33,871 [INFO] Consolidation complete
-2026-03-25 15:20:33,882 [INFO] Started new session 4
-2026-03-25 15:20:37,227 [INFO] Session 4/100 Turn 1/20 | Loss: 1.7212 | Consolidated: False | Buffer: 61
-2026-03-25 15:20:53,648 [INFO] Session 4/100 Turn 6/20 | Loss: 0.0450 | Consolidated: False | Buffer: 66
-2026-03-25 15:21:06,946 [INFO] Consolidating working memory → long-term (session 4, turn 70)
-2026-03-25 15:22:34,907 [INFO] Consolidation complete
-2026-03-25 15:22:38,434 [INFO] Session 4/100 Turn 11/20 | Loss: 0.1323 | Consolidated: False | Buffer: 71
-2026-03-25 15:22:54,769 [INFO] Session 4/100 Turn 16/20 | Loss: 0.0146 | Consolidated: False | Buffer: 76
-2026-03-25 15:23:07,873 [INFO] Consolidating working memory → long-term (session 4, turn 80)
-2026-03-25 15:24:37,769 [INFO] Consolidation complete
-2026-03-25 15:24:37,780 [INFO] Started new session 5
-2026-03-25 15:24:41,048 [INFO] Session 5/100 Turn 1/20 | Loss: 1.6943 | Consolidated: False | Buffer: 81
-2026-03-25 15:24:57,660 [INFO] Session 5/100 Turn 6/20 | Loss: 0.0480 | Consolidated: False | Buffer: 86
-2026-03-25 15:25:10,953 [INFO] Consolidating working memory → long-term (session 5, turn 90)
-2026-03-25 15:26:43,769 [INFO] Consolidation complete
-2026-03-25 15:26:47,056 [INFO] Session 5/100 Turn 11/20 | Loss: 0.1631 | Consolidated: False | Buffer: 91
-2026-03-25 15:27:03,571 [INFO] Session 5/100 Turn 16/20 | Loss: 0.0282 | Consolidated: False | Buffer: 96
-2026-03-25 15:27:16,929 [INFO] Consolidating working memory → long-term (session 5, turn 100)
-2026-03-25 15:28:51,275 [INFO] Consolidation complete
-2026-03-25 15:28:51,286 [INFO] Started new session 6
-2026-03-25 15:28:54,570 [INFO] Session 6/100 Turn 1/20 | Loss: 1.7145 | Consolidated: False | Buffer: 101
-2026-03-25 15:29:10,977 [INFO] Session 6/100 Turn 6/20 | Loss: 0.0482 | Consolidated: False | Buffer: 106
-2026-03-25 15:29:24,336 [INFO] Consolidating working memory → long-term (session 6, turn 110)
-2026-03-25 15:31:00,566 [INFO] Consolidation complete
-2026-03-25 15:31:03,854 [INFO] Session 6/100 Turn 11/20 | Loss: 0.2852 | Consolidated: False | Buffer: 111
-2026-03-25 15:31:20,403 [INFO] Session 6/100 Turn 16/20 | Loss: 0.0268 | Consolidated: False | Buffer: 116
-2026-03-25 15:31:33,522 [INFO] Consolidating working memory → long-term (session 6, turn 120)
-2026-03-25 15:33:11,129 [INFO] Consolidation complete
-2026-03-25 15:33:11,141 [INFO] Started new session 7
-2026-03-25 15:33:14,429 [INFO] Session 7/100 Turn 1/20 | Loss: 1.7063 | Consolidated: False | Buffer: 121
-2026-03-25 15:33:31,017 [INFO] Session 7/100 Turn 6/20 | Loss: 0.0641 | Consolidated: False | Buffer: 126
-2026-03-25 15:33:44,209 [INFO] Consolidating working memory → long-term (session 7, turn 130)
-2026-03-25 15:35:24,446 [INFO] Consolidation complete
-2026-03-25 15:35:27,716 [INFO] Session 7/100 Turn 11/20 | Loss: 0.1541 | Consolidated: False | Buffer: 131
-2026-03-25 15:35:44,136 [INFO] Session 7/100 Turn 16/20 | Loss: 0.0187 | Consolidated: False | Buffer: 136
-2026-03-25 15:35:57,323 [INFO] Consolidating working memory → long-term (session 7, turn 140)
-2026-03-25 15:37:39,192 [INFO] Consolidation complete
-2026-03-25 15:37:39,203 [INFO] Started new session 8
-2026-03-25 15:37:42,519 [INFO] Session 8/100 Turn 1/20 | Loss: 1.7202 | Consolidated: False | Buffer: 141
-2026-03-25 15:37:58,999 [INFO] Session 8/100 Turn 6/20 | Loss: 0.0146 | Consolidated: False | Buffer: 146
-2026-03-25 15:38:12,072 [INFO] Consolidating working memory → long-term (session 8, turn 150)
-2026-03-25 15:39:55,966 [INFO] Consolidation complete
-2026-03-25 15:39:59,246 [INFO] Session 8/100 Turn 11/20 | Loss: 0.2273 | Consolidated: False | Buffer: 151
-2026-03-25 15:40:15,645 [INFO] Session 8/100 Turn 16/20 | Loss: 0.0164 | Consolidated: False | Buffer: 156
-2026-03-25 15:40:28,939 [INFO] Consolidating working memory → long-term (session 8, turn 160)
-2026-03-25 15:42:14,394 [INFO] Consolidation complete
-2026-03-25 15:42:14,406 [INFO] Started new session 9
-2026-03-25 15:42:17,663 [INFO] Session 9/100 Turn 1/20 | Loss: 1.7072 | Consolidated: False | Buffer: 161
-2026-03-25 15:42:34,116 [INFO] Session 9/100 Turn 6/20 | Loss: 0.1162 | Consolidated: False | Buffer: 166
-2026-03-25 15:42:47,246 [INFO] Consolidating working memory → long-term (session 9, turn 170)
-2026-03-25 15:44:35,249 [INFO] Consolidation complete
-2026-03-25 15:44:38,574 [INFO] Session 9/100 Turn 11/20 | Loss: 0.0804 | Consolidated: False | Buffer: 171
-2026-03-25 15:44:55,001 [INFO] Session 9/100 Turn 16/20 | Loss: 0.0227 | Consolidated: False | Buffer: 176
-2026-03-25 15:45:08,313 [INFO] Consolidating working memory → long-term (session 9, turn 180)
-2026-03-25 15:46:58,273 [INFO] Consolidation complete
-2026-03-25 15:46:58,284 [INFO] Started new session 10
-2026-03-25 15:47:01,641 [INFO] Session 10/100 Turn 1/20 | Loss: 1.7983 | Consolidated: False | Buffer: 181
-2026-03-25 15:47:18,044 [INFO] Session 10/100 Turn 6/20 | Loss: 0.0118 | Consolidated: False | Buffer: 186
-2026-03-25 15:47:31,177 [INFO] Consolidating working memory → long-term (session 10, turn 190)
-2026-03-25 15:49:23,623 [INFO] Consolidation complete
-2026-03-25 15:49:26,925 [INFO] Session 10/100 Turn 11/20 | Loss: 0.1157 | Consolidated: False | Buffer: 191
-2026-03-25 15:49:43,383 [INFO] Session 10/100 Turn 16/20 | Loss: 0.0142 | Consolidated: False | Buffer: 196
-2026-03-25 15:49:56,693 [INFO] Consolidating working memory → long-term (session 10, turn 200)
-2026-03-25 15:51:49,963 [INFO] Consolidation complete
+/usr/local/lib/python3.8/dist-packages/transformers/utils/hub.py:127: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+2026-03-26 15:39:23,305 [INFO] === Streaming Parameter Memory Training ===
+2026-03-26 15:39:23,305 [INFO] Base model: Qwen/Qwen3.5-9B
+2026-03-26 15:39:23,305 [INFO] Sessions: 100, Turns/session: 20
+2026-03-26 15:39:31,683 [WARNING] attn_implementation=flash_attention_2 failed: The checkpoint you are trying to load has model type `qwen3_5` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
+2026-03-26 15:39:32,325 [WARNING] attn_implementation=sdpa failed: The checkpoint you are trying to load has model type `qwen3_5` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
+2026-03-26 15:39:33,192 [WARNING] attn_implementation=eager failed: The checkpoint you are trying to load has model type `qwen3_5` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
 Traceback (most recent call last):
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 324, in <module>
+  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 328, in <module>
     main()
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 231, in main
-    retention = probe_retention(spm, tokenizer, probe_facts)
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
-    return func(*args, **kwargs)
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 121, in probe_retention
-    out = spm.generate(ids, max_new_tokens=100, use_longterm=True)
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
-    return func(*args, **kwargs)
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/../src/streaming_memory.py", line 303, in generate
-    self.model.set_adapter(["working", "longterm"])
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/.venv/lib/python3.10/site-packages/peft/peft_model.py", line 1471, in set_adapter
-    if adapter_name not in self.peft_config:
-TypeError: unhashable type: 'list'
+  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 176, in main
+    raise RuntimeError(f"Cannot load model {base_model_name}")
+RuntimeError: Cannot load model Qwen/Qwen3.5-9B

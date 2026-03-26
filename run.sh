@@ -30,26 +30,17 @@ echo " Project: $(basename "$PROJ_DIR")"
 echo " Time:    $(date)"
 echo "============================================================"
 
-# Step 1: Activate venv if present
+# Step 1: Setup/Update environment
+echo ""
+echo "[1/2] Syncing environment (Ensuring up-to-date)..."
+bash setup.sh
+
+# Step 2: Activate the virtual environment
 if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
     source "$PROJ_DIR/.venv/bin/activate"
-fi
-
-# Step 2: Check key dependencies, run setup if missing
-DEPS_OK=1
-python3 -c "import torch, transformers, peft, datasets" 2>/dev/null || DEPS_OK=0
-
-if [ "$DEPS_OK" -eq 0 ]; then
-    echo ""
-    echo "[1/2] Missing dependencies detected, running setup..."
-    bash setup.sh
-    # Re-activate venv if it was created
-    if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
-        source "$PROJ_DIR/.venv/bin/activate"
-    fi
 else
-    echo ""
-    echo "[1/2] Dependencies OK"
+    echo "Error: .venv not found even after setup!"
+    exit 1
 fi
 
 # Step 3: Run all experiments with real-time output + log file
