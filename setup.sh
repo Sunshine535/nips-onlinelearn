@@ -68,18 +68,12 @@ else
     fi
     source "$VENV_DIR/bin/activate"
 
-    echo "[3/5] Installing PyTorch + CUDA ..."
-    uv pip install torch torchvision torchaudio --index-url "$PYTORCH_INDEX"
-
-    echo "[4/5] Installing project dependencies ..."
-    uv pip install -r "$PROJ_DIR/requirements.txt" \
-        --index-url "$PIP_MIRROR" \
-        --extra-index-url "$PYTORCH_INDEX" \
-        --index-strategy unsafe-best-match
-
-    # Re-ensure PyTorch CUDA (pip mirror may have pulled CPU-only torch)
+    echo "[3/5] Installing PyTorch CUDA + project deps ..."
     uv pip install torch torchvision torchaudio \
-        --index-url "$PYTORCH_INDEX" --reinstall-package torch
+        -r "$PROJ_DIR/requirements.txt" \
+        --index-url "$PYTORCH_INDEX" \
+        --extra-index-url "$PIP_MIRROR" \
+        --index-strategy unsafe-best-match
 
     echo "[5/5] Installing optional accelerators ..."
     uv pip install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped"
