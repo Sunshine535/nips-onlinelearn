@@ -7,13 +7,11 @@ set -e
 PROJ_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJ_DIR"
 
-# ====== 插入这段 ======
 export UV_CACHE_DIR="/tmp/uv-cache-$(hostname)"
 mkdir -p "$UV_CACHE_DIR"
 
-if [ -L "$PROJ_DIR/.venv" ]; then
-    rm -f "$PROJ_DIR/.venv"
-elif [ -d "$PROJ_DIR/.venv" ]; then
+# Only remove genuinely broken venvs (not working symlinks)
+if [ -d "$PROJ_DIR/.venv" ] || [ -L "$PROJ_DIR/.venv" ]; then
     if [ ! -f "$PROJ_DIR/.venv/bin/activate" ] || \
        ! "$PROJ_DIR/.venv/bin/python" --version &>/dev/null; then
         echo "[FIX] .venv is broken, removing..."
@@ -21,8 +19,6 @@ elif [ -d "$PROJ_DIR/.venv" ]; then
             mv "$PROJ_DIR/.venv" "/tmp/.venv_dead_$(date +%s)" 2>/dev/null || true
     fi
 fi
-# ====== 插入结束 ======
-
 
 echo "============================================================"
 echo " Starting full experiment pipeline"
@@ -30,17 +26,36 @@ echo " Project: $(basename "$PROJ_DIR")"
 echo " Time:    $(date)"
 echo "============================================================"
 
-# Step 1: Setup/Update environment
-echo ""
-echo "[1/2] Syncing environment (Ensuring up-to-date)..."
-bash setup.sh
-
-# Step 2: Activate the virtual environment
+# Step 1: Activate venv if present
 if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
     source "$PROJ_DIR/.venv/bin/activate"
+fi
+
+# Step 2: Check deps — need torch + transformers with Qwen3.5 support (>=4.48)
+DEPS_OK=1
+python3 -c "
+import torch, transformers, peft, datasets
+v = tuple(int(x) for x in transformers.__version__.split('.')[:2])
+assert v >= (4, 48), f'transformers {transformers.__version__} too old for Qwen3.5'
+assert torch.cuda.is_available(), 'CUDA not available'
+" 2>/dev/null || DEPS_OK=0
+
+if [ "$DEPS_OK" -eq 0 ]; then
+    echo ""
+    echo "[1/2] Dependencies missing or outdated. Running setup with isolated venv..."
+    export FORCE_VENV=1
+    bash setup.sh
+    if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
+        source "$PROJ_DIR/.venv/bin/activate"
+    fi
+    # Verify after setup
+    python3 -c "import torch, transformers, peft; assert torch.cuda.is_available()" || {
+        echo "[ERROR] Setup failed. Check setup.sh output."
+        exit 1
+    }
 else
-    echo "Error: .venv not found even after setup!"
-    exit 1
+    echo ""
+    echo "[1/2] Dependencies OK"
 fi
 
 # Step 3: Run all experiments with real-time output + log file

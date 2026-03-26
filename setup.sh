@@ -12,9 +12,23 @@ PYTORCH_INDEX="https://download.pytorch.org/whl/cu128"
 # --- Detect existing PyTorch + CUDA ---
 SYSTEM_TORCH_OK=0
 if python3 -c "import torch; assert torch.cuda.is_available()" 2>/dev/null; then
-    SYSTEM_TORCH_OK=1
-    echo "[INFO] System Python already has PyTorch + CUDA"
-    python3 -c "import torch; print(f'  PyTorch={torch.__version__}  CUDA={torch.version.cuda}  GPUs={torch.cuda.device_count()}')"
+    # Also verify transformers is new enough for Qwen3.5
+    TRANSFORMERS_OK=0
+    python3 -c "
+import transformers
+v = tuple(int(x) for x in transformers.__version__.split('.')[:2])
+assert v >= (4, 48)
+" 2>/dev/null && TRANSFORMERS_OK=1
+
+    if [ "$TRANSFORMERS_OK" -eq 1 ]; then
+        SYSTEM_TORCH_OK=1
+        echo "[INFO] System Python has PyTorch + CUDA + compatible transformers"
+        python3 -c "import torch, transformers; print(f'  PyTorch={torch.__version__}  CUDA={torch.version.cuda}  GPUs={torch.cuda.device_count()}  transformers={transformers.__version__}')"
+    else
+        echo "[INFO] System has torch+CUDA but transformers is too old for Qwen3.5"
+        echo "[INFO] Will create isolated venv with up-to-date packages"
+        export FORCE_VENV=1
+    fi
 fi
 
 _pip_install() {
