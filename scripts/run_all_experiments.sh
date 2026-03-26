@@ -89,6 +89,7 @@ if ! is_phase_done 4; then
     for freq in 5 10 20 50; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_freq_${freq}"
         gpu_id=$((GPU_IDX % NUM_GPUS))
+        phys_gpu=$(gpu_at_index $gpu_id)
         (
             mkdir -p "$ABL_DIR"
             python3 -c "
@@ -100,9 +101,9 @@ cfg['streaming']['consolidation_frequency'] = ${freq}
 with open('${ABL_DIR}/config.yaml', 'w') as f:
     yaml.dump(cfg, f)
 "
-            CUDA_VISIBLE_DEVICES="${gpu_id}" python3 "${SCRIPT_DIR}/train_spm.py" \
+            CUDA_VISIBLE_DEVICES="${phys_gpu}" python3 "${SCRIPT_DIR}/train_spm.py" \
                 --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
-            CUDA_VISIBLE_DEVICES="${gpu_id}" python3 "${SCRIPT_DIR}/eval_streaming.py" \
+            CUDA_VISIBLE_DEVICES="${phys_gpu}" python3 "${SCRIPT_DIR}/eval_streaming.py" \
                 --config "${ABL_DIR}/config.yaml" --output_dir "${ABL_DIR}/eval" \
                 --num_sessions 20 --methods spm --datasets personachat
         ) > "${LOG_DIR}/ablation_freq_${freq}.log" 2>&1 &
@@ -123,6 +124,7 @@ with open('${ABL_DIR}/config.yaml', 'w') as f:
     for ewc_lambda in 100 1000 5000 10000 50000; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_ewc_${ewc_lambda}"
         gpu_id=$((GPU_IDX % NUM_GPUS))
+        phys_gpu=$(gpu_at_index $gpu_id)
         (
             mkdir -p "$ABL_DIR"
             python3 -c "
@@ -133,7 +135,7 @@ cfg['long_term_memory']['ewc_lambda'] = ${ewc_lambda}
 with open('${ABL_DIR}/config.yaml', 'w') as f:
     yaml.dump(cfg, f)
 "
-            CUDA_VISIBLE_DEVICES="${gpu_id}" python3 "${SCRIPT_DIR}/train_spm.py" \
+            CUDA_VISIBLE_DEVICES="${phys_gpu}" python3 "${SCRIPT_DIR}/train_spm.py" \
                 --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
         ) > "${LOG_DIR}/ablation_ewc_${ewc_lambda}.log" 2>&1 &
         PIDS+=($!)
@@ -153,6 +155,7 @@ with open('${ABL_DIR}/config.yaml', 'w') as f:
     for rank in 4 8 16 32 64; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_rank_${rank}"
         gpu_id=$((GPU_IDX % NUM_GPUS))
+        phys_gpu=$(gpu_at_index $gpu_id)
         (
             mkdir -p "$ABL_DIR"
             python3 -c "
@@ -164,7 +167,7 @@ cfg['working_memory']['lora_alpha'] = ${rank} * 2
 with open('${ABL_DIR}/config.yaml', 'w') as f:
     yaml.dump(cfg, f)
 "
-            CUDA_VISIBLE_DEVICES="${gpu_id}" python3 "${SCRIPT_DIR}/train_spm.py" \
+            CUDA_VISIBLE_DEVICES="${phys_gpu}" python3 "${SCRIPT_DIR}/train_spm.py" \
                 --config "${ABL_DIR}/config.yaml" --output_dir "$ABL_DIR" --num_sessions 30
         ) > "${LOG_DIR}/ablation_rank_${rank}.log" 2>&1 &
         PIDS+=($!)
