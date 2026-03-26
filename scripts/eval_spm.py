@@ -139,7 +139,7 @@ def main():
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
-                dtype=torch.bfloat16,
+                torch_dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
@@ -159,17 +159,28 @@ def main():
     adapter_path = os.path.join(args.model_dir, "adapters")
     if os.path.exists(adapter_path):
         logger.info("Loading saved adapters from %s", adapter_path)
-        try:
-            import glob
-            for adapter_name in ["working", "longterm"]:
-                adapter_sub = os.path.join(adapter_path, adapter_name)
-                if os.path.isdir(adapter_sub):
-                    spm.model.load_adapter(adapter_sub, adapter_name=adapter_name)
-                    logger.info("  Loaded adapter '%s' from %s", adapter_name, adapter_sub)
-            spm.model.set_adapter("working")
-            logger.info("Adapters loaded successfully")
-        except Exception as e:
-            logger.warning("Failed to load adapters (%s), using initialized model", e)
+        from peft import set_peft_model_state_dict
+        for adapter_name in ["working", "longterm"]:
+            adapter_sub = os.path.join(adapter_path, adapter_name)
+            if not os.path.isdir(adapter_sub):
+                continue
+            try:
+                safetensors_file = os.path.join(adapter_sub, "adapter_model.safetensors")
+                bin_file = os.path.join(adapter_sub, "adapter_model.bin")
+                if os.path.exists(safetensors_file):
+                    from safetensors.torch import load_file
+                    state_dict = load_file(safetensors_file)
+                elif os.path.exists(bin_file):
+                    state_dict = torch.load(bin_file, map_location="cpu", weights_only=True)
+                else:
+                    logger.warning("  No weights found for adapter '%s'", adapter_name)
+                    continue
+                set_peft_model_state_dict(spm.model, state_dict, adapter_name=adapter_name)
+                logger.info("  Loaded adapter '%s' from %s", adapter_name, adapter_sub)
+            except Exception as e:
+                logger.warning("  Failed to load adapter '%s': %s", adapter_name, e)
+        spm.model.set_adapter("working")
+        logger.info("Adapter loading complete")
     else:
         logger.warning("No saved model found at %s, evaluating initialized model", args.model_dir)
 

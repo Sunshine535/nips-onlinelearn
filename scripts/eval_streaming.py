@@ -210,6 +210,7 @@ class EWCMethod:
         loss.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
+        self._compute_fisher(input_ids, labels)
         return {"loss": out.loss.item(), "consolidated": False}
 
     def start_session(self):
@@ -339,8 +340,12 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
             prompt = (f"<|im_start|>user\n{turn['user']}<|im_end|>\n"
                       f"<|im_start|>assistant\n")
             ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-            out = method.generate(ids, max_new_tokens=100)
-            pred = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
+            try:
+                out = method.generate(ids, max_new_tokens=100)
+                pred = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
+            except Exception as e:
+                logger.warning("generate failed (%s): %s", method_name, e)
+                pred = ""
             predictions.append(pred)
             references.append(turn["assistant"])
 
@@ -351,10 +356,13 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
                 q_prompt = (f"<|im_start|>user\nRemind me: {fact['user']}<|im_end|>\n"
                             f"<|im_start|>assistant\n")
                 ids = tokenizer(q_prompt, return_tensors="pt").input_ids.to(device)
-                out = method.generate(ids, max_new_tokens=50)
-                resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-                if any(w in resp for w in fact["assistant"].lower().split()[:3]):
-                    correct += 1
+                try:
+                    out = method.generate(ids, max_new_tokens=50)
+                    resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
+                    if any(w in resp for w in fact["assistant"].lower().split()[:3]):
+                        correct += 1
+                except Exception as e:
+                    logger.warning("retention probe generate failed: %s", e)
             retention = correct / max(len(taught_facts[-10:]), 1)
             session_retention.append({"session": sess_idx, "retention": retention})
 
@@ -424,7 +432,7 @@ def main():
             for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
                 try:
                     base_model = AutoModelForCausalLM.from_pretrained(
-                        base_model_name, dtype=torch.bfloat16,
+                        base_model_name, torch_dtype=torch.bfloat16,
                         attn_implementation=attn_impl,
                         device_map={"": device_idx},
                     )

@@ -230,7 +230,7 @@ def main():
     for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
-                base_model_name, dtype=torch.bfloat16,
+                base_model_name, torch_dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )

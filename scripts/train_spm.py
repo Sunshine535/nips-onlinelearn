@@ -164,7 +164,7 @@ def main():
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
-                dtype=torch.bfloat16,
+                torch_dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
