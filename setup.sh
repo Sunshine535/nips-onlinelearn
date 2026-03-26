@@ -77,6 +77,10 @@ else
         --extra-index-url "$PYTORCH_INDEX" \
         --index-strategy unsafe-best-match
 
+    # Re-ensure PyTorch CUDA (pip mirror may have pulled CPU-only torch)
+    uv pip install torch torchvision torchaudio \
+        --index-url "$PYTORCH_INDEX" --reinstall-package torch
+
     echo "[5/5] Installing optional accelerators ..."
     uv pip install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped"
     uv pip install flash-linear-attention causal-conv1d --no-build-isolation 2>/dev/null || echo "  flash-linear-attention skipped"
