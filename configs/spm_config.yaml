@@ -1,7 +1,6 @@
 model:
   base_model: "Qwen/Qwen3.5-9B"
-  hf_endpoint: "https://hf-mirror.com"
-
+  
 working_memory:
   lora_r: 16
   lora_alpha: 32

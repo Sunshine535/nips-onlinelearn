@@ -6,7 +6,7 @@ echo "============================================"
 echo " Environment Setup (uv + PyTorch 2.10 + CUDA 12.8)"
 echo "============================================"
 
-PIP_MIRROR="https://mirrors.aliyun.com/pypi/simple/"
+PIP_MIRROR="https://pypi.org/simple/"
 PYTORCH_INDEX="https://download.pytorch.org/whl/cu128"
 
 # --- Install uv if missing ---
