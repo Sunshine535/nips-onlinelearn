@@ -428,7 +428,7 @@ def main():
 
             device_idx = int(os.environ.get("LOCAL_RANK", os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0]))
             base_model = None
-            for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
+            for attn_impl in ["sdpa", "eager"]:
                 try:
                     base_model = AutoModelForCausalLM.from_pretrained(
                         base_model_name, torch_dtype=torch.bfloat16,

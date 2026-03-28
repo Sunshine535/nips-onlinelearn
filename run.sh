@@ -1,24 +1,12 @@
 #!/bin/bash
 # =============================================================================
-# ONE-COMMAND entry point: setup environment + run ALL experiments + show progress
-# Usage: bash run.sh
+# RUN experiments only (environment assumed ready)
+# Install deps first:  bash setup.sh
+# Then run:            bash run.sh
 # =============================================================================
 set -e
 PROJ_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJ_DIR"
-
-export UV_CACHE_DIR="/tmp/uv-cache-$(hostname)"
-mkdir -p "$UV_CACHE_DIR"
-
-# Only remove genuinely broken venvs (not working symlinks)
-if [ -d "$PROJ_DIR/.venv" ] || [ -L "$PROJ_DIR/.venv" ]; then
-    if [ ! -f "$PROJ_DIR/.venv/bin/activate" ] || \
-       ! "$PROJ_DIR/.venv/bin/python" --version &>/dev/null; then
-        echo "[FIX] .venv is broken, removing..."
-        rm -rf "$PROJ_DIR/.venv" 2>/dev/null || \
-            mv "$PROJ_DIR/.venv" "/tmp/.venv_dead_$(date +%s)" 2>/dev/null || true
-    fi
-fi
 
 echo "============================================================"
 echo " Starting full experiment pipeline"
@@ -26,43 +14,23 @@ echo " Project: $(basename "$PROJ_DIR")"
 echo " Time:    $(date)"
 echo "============================================================"
 
-# Step 1: Activate venv if present
+# Activate venv if present; otherwise use system Python
 if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
     source "$PROJ_DIR/.venv/bin/activate"
-fi
-
-# Step 2: Check deps — need torch + transformers with Qwen3.5 support (>=4.48)
-DEPS_OK=1
-python3 -c "
-import torch, transformers, peft, datasets
-v = tuple(int(x) for x in transformers.__version__.split('.')[:2])
-assert v >= (4, 48), f'transformers {transformers.__version__} too old for Qwen3.5'
-assert torch.cuda.is_available(), 'CUDA not available'
-" 2>/dev/null || DEPS_OK=0
-
-if [ "$DEPS_OK" -eq 0 ]; then
-    echo ""
-    echo "[1/2] Dependencies missing or outdated. Running setup with isolated venv..."
-    export FORCE_VENV=1
-    bash setup.sh
-    if [ -f "$PROJ_DIR/.venv/bin/activate" ]; then
-        source "$PROJ_DIR/.venv/bin/activate"
-    fi
-    # Verify after setup
-    python3 -c "import torch, transformers, peft; assert torch.cuda.is_available()" || {
-        echo "[ERROR] Setup failed. Check setup.sh output."
-        exit 1
-    }
+    echo "[env] Activated venv: $PROJ_DIR/.venv"
 else
-    echo ""
-    echo "[1/2] Dependencies OK"
+    echo "[env] No .venv found, using system Python"
 fi
 
-# Step 3: Run all experiments with real-time output + log file
+# Quick dependency check
+python3 -c "import torch, transformers, datasets" 2>/dev/null || {
+    echo "[ERROR] Missing dependencies. Run: bash setup.sh"
+    exit 1
+}
+
 echo ""
-echo "[2/2] Running all experiments (full production mode)..."
+echo "Running all experiments..."
 echo "  Log file: $PROJ_DIR/run.log"
-echo "  Progress is shown below in real-time."
 echo "  To run in background: nohup bash run.sh > run.log 2>&1 &"
 echo ""
 
@@ -74,15 +42,11 @@ if [ $EXIT_CODE -eq 0 ]; then
     echo "============================================================"
     echo " Pipeline completed successfully!"
     echo " Results: $PROJ_DIR/results/"
-    echo " Log:     $PROJ_DIR/run.log"
-    echo ""
-    echo " To package results: bash collect_results.sh"
     echo "============================================================"
 else
     echo "============================================================"
     echo " Pipeline failed (exit code: $EXIT_CODE)"
     echo " Check log: $PROJ_DIR/run.log"
-    echo " To resume: bash run.sh (completed phases are skipped)"
     echo "============================================================"
     exit $EXIT_CODE
 fi

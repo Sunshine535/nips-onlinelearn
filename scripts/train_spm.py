@@ -159,7 +159,7 @@ def main():
 
     device_idx = int(os.environ.get("LOCAL_RANK", 0))
     base_model = None
-    for attn_impl in ["flash_attention_2", "sdpa", "eager"]:
+    for attn_impl in ["sdpa", "eager"]:
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
@@ -169,7 +169,7 @@ def main():
             )
             logger.info("Attention implementation: %s", attn_impl)
             break
-        except (ImportError, ValueError) as e:
+        except (ImportError, ValueError, RuntimeError) as e:
             logger.warning("attn_implementation=%s failed: %s", attn_impl, e)
     if base_model is None:
         raise RuntimeError(f"Cannot load model {base_model_name}")
