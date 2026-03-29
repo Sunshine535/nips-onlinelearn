@@ -6,6 +6,7 @@ Action: consolidate now / wait.
 Reward: response_quality - forgetting_penalty."""
 
 import argparse
+import glob
 import json
 import logging
 import math
@@ -26,6 +27,27 @@ logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.streaming_memory import StreamingParameterMemory, FisherEstimator
+
+
+def save_training_checkpoint(path, model, optimizer, epoch, step, **extra):
+    torch.save({"epoch": epoch, "step": step,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict() if optimizer else None,
+                **extra}, path)
+
+
+def load_training_checkpoint(path, model, optimizer=None):
+    ckpt = torch.load(path, map_location="cpu", weights_only=False)
+    model.load_state_dict(ckpt["model_state_dict"])
+    if optimizer and ckpt.get("optimizer_state_dict"):
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+    return ckpt.get("epoch", 0), ckpt.get("step", 0)
+
+
+def find_latest_checkpoint(output_dir, pattern="checkpoint_*.pt"):
+    ckpts = sorted(glob.glob(os.path.join(output_dir, pattern)),
+                   key=os.path.getmtime)
+    return ckpts[-1] if ckpts else None
 
 
 class ConsolidationPolicy(nn.Module):
@@ -210,6 +232,8 @@ def main():
     parser.add_argument("--turns_per_episode", type=int, default=40)
     parser.add_argument("--policy_lr", type=float, default=3e-4)
     parser.add_argument("--ppo_epochs", type=int, default=4)
+    parser.add_argument("--resume_from_checkpoint", type=str, default=None,
+                        help="'auto' to resume from latest checkpoint, or path")
     args = parser.parse_args()
 
     with open(args.config) as f:
@@ -272,8 +296,19 @@ def main():
     device = next(spm.model.parameters()).device
     episode_rewards = []
     training_log = []
+    start_episode = 0
 
-    for episode in range(args.num_episodes):
+    if args.resume_from_checkpoint:
+        ckpt_path = find_latest_checkpoint(args.output_dir, "checkpoint_episode*.pt")
+        if ckpt_path:
+            logger.info("Resuming from %s", ckpt_path)
+            start_episode, _ = load_training_checkpoint(ckpt_path, policy, ppo.optimizer)
+            ckpt_data = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+            episode_rewards = ckpt_data.get("episode_rewards", [])
+            training_log = ckpt_data.get("training_log", [])
+            logger.info("  Resuming from episode %d", start_episode)
+
+    for episode in range(start_episode, args.num_episodes):
         logger.info(">>> Episode %d/%d", episode + 1, args.num_episodes)
         spm.start_new_session()
 
@@ -352,6 +387,13 @@ def main():
 
         logger.info("  Reward: %.4f | PPO loss: %.4f | Consol rate: %.2f",
                      episode_reward, ppo_loss, consolidation_rate)
+
+        if (episode + 1) % 10 == 0:
+            save_training_checkpoint(
+                os.path.join(args.output_dir, f"checkpoint_episode{episode + 1}.pt"),
+                policy, ppo.optimizer, episode + 1, episode + 1,
+                episode_rewards=episode_rewards, training_log=training_log,
+            )
 
     # Save policy
     torch.save(policy.state_dict(), os.path.join(args.output_dir, "consolidation_policy.pt"))

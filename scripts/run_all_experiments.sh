@@ -14,6 +14,8 @@ if [ -f "$PROJ_DIR_ROOT/.venv/bin/activate" ]; then
 fi
 export PATH="$HOME/.local/bin:$PATH"
 
+TORCHRUN=$(get_torchrun_cmd)
+
 # Verify key dependencies before running
 if ! python3 -c "import torch, transformers, peft" 2>/dev/null; then
     echo "[ERROR] Missing dependencies. Run: bash setup.sh"
@@ -49,7 +51,7 @@ echo "========================================="
 # Phase 1: SPM Training
 if ! is_phase_done 1; then
     echo ">>> Phase 1: Streaming Parameter Memory training"
-    python3 "${SCRIPT_DIR}/train_spm.py" \
+    $TORCHRUN "${SCRIPT_DIR}/train_spm.py" \
         --config "${CONFIG}" --output_dir "${PROJECT_DIR}/outputs" \
         --num_sessions 100 --probe_interval 10 \
         2>&1 | tee "${LOG_DIR}/phase1_spm.log"
@@ -59,7 +61,7 @@ fi
 # Phase 2: PPO Integration
 if ! is_phase_done 2; then
     echo ">>> Phase 2: PPO consolidation policy training"
-    python3 "${SCRIPT_DIR}/train_ppo_integration.py" \
+    $TORCHRUN "${SCRIPT_DIR}/train_ppo_integration.py" \
         --config "${CONFIG}" --output_dir "${PPO_DIR}" \
         --num_episodes 50 --turns_per_episode 40 --ppo_epochs 4 \
         2>&1 | tee "${LOG_DIR}/phase2_ppo.log"

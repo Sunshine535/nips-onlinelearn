@@ -5,6 +5,7 @@ For each session: update working LoRA → estimate Fisher → consolidate to lon
 Tracks: response quality, knowledge retention, forgetting rate."""
 
 import argparse
+import glob
 import json
 import logging
 import math
@@ -22,6 +23,27 @@ logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.streaming_memory import StreamingParameterMemory
+
+
+def save_training_checkpoint(path, model, optimizer, epoch, step, **extra):
+    torch.save({"epoch": epoch, "step": step,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict() if optimizer else None,
+                **extra}, path)
+
+
+def load_training_checkpoint(path, model, optimizer=None):
+    ckpt = torch.load(path, map_location="cpu", weights_only=False)
+    model.load_state_dict(ckpt["model_state_dict"])
+    if optimizer and ckpt.get("optimizer_state_dict"):
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+    return ckpt.get("epoch", 0), ckpt.get("step", 0)
+
+
+def find_latest_checkpoint(output_dir, pattern="checkpoint_*.pt"):
+    ckpts = sorted(glob.glob(os.path.join(output_dir, pattern)),
+                   key=os.path.getmtime)
+    return ckpts[-1] if ckpts else None
 
 
 def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
@@ -136,6 +158,8 @@ def main():
     parser.add_argument("--probe_interval", type=int, default=10,
                         help="Sessions between retention probes")
     parser.add_argument("--local_rank", type=int, default=-1)
+    parser.add_argument("--resume_from_checkpoint", type=str, default=None,
+                        help="'auto' to resume from latest checkpoint, or path")
     args = parser.parse_args()
 
     with open(args.config) as f:
@@ -198,8 +222,23 @@ def main():
     training_log = []
     forgetting_curve = []
     consolidation_count = 0
+    start_session = 0
+
+    if args.resume_from_checkpoint:
+        ckpt_path = find_latest_checkpoint(output_dir, "checkpoint_session*.pt")
+        if ckpt_path:
+            logger.info("Resuming from %s", ckpt_path)
+            state = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+            start_session = state.get("session_idx", 0) + 1
+            consolidation_count = state.get("consolidation_count", 0)
+            training_log = state.get("training_log", [])
+            forgetting_curve = state.get("forgetting_curve", [])
+            probe_facts = state.get("probe_facts", probe_facts)
+            logger.info("  Resuming from session %d", start_session)
 
     for session_idx, session in enumerate(sessions):
+        if session_idx < start_session:
+            continue
         spm.start_new_session()
         session_losses = []
         persona = session.get("persona", "")
@@ -266,6 +305,13 @@ def main():
         if (session_idx + 1) % 50 == 0:
             ckpt_dir = os.path.join(output_dir, f"checkpoint-session-{session_idx + 1}")
             spm.save(ckpt_dir)
+            torch.save({
+                "session_idx": session_idx,
+                "consolidation_count": consolidation_count,
+                "training_log": training_log,
+                "forgetting_curve": forgetting_curve,
+                "probe_facts": probe_facts,
+            }, os.path.join(output_dir, f"checkpoint_session{session_idx + 1}.pt"))
 
     # Save final model
     spm.save(os.path.join(output_dir, "final"))
