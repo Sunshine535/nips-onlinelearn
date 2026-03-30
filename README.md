@@ -1,130 +1,131 @@
-# Streaming Parameter Memory: Dual-LoRA Online Learning for LLMs
+# Behavioral Distillation Consolidation for Two-Timescale Streaming Persona Retention
 
----
+Two-timescale residual LoRA with session-end KL-distillation consolidation for online persona adaptation in frozen LLMs.
+
+**Core idea**: A zero-initialized Working-Memory LoRA (WM) captures session-local adaptations atop a persistent Long-Term LoRA (LT). At session boundaries, behavioral distillation transfers knowledge from WM into LT via a split-objective:
+- **Behavior transfer**: KL divergence on current-session data (teacher = LT+WM, student = LT')
+- **Retention**: NTP replay on reservoir-sampled past data
 
 ## Quick Start
 
 ```bash
-# 1. Clone and enter project
-git clone https://github.com/Sunshine535/nips-onlinelearn.git
-cd nips-onlinelearn
-
-# 2. Install dependencies
+# 1. Install dependencies
 bash setup.sh
 
-# 3. Run all experiments
+# 2. Run full pipeline (training → evaluation → ablations)
 bash run.sh
 
-# 4. (Optional) Run in background for long experiments
+# 3. (Optional) background
 nohup bash run.sh > run.log 2>&1 &
 tail -f run.log
 ```
 
+### Resume After Interruption
+
+Re-run `bash run.sh` — completed phases are automatically skipped; training resumes from the latest checkpoint. To force re-run: `FORCE_RERUN=1 bash run.sh`.
+
 ### Check Completion
 
 ```bash
-cat results/.pipeline_done   # Shows PIPELINE_COMPLETE when all phases finish
-ls results/.phase_markers/   # See which individual phases completed
+cat results/.pipeline_done       # Shows PIPELINE_COMPLETE when all phases finish
+ls results/.phase_markers/       # Per-phase completion markers
 ```
-
-### Save and Send Results
-
-```bash
-# Option A: Push to GitHub
-git add results/ logs/
-git commit -m "Experiment results"
-git push origin main
-
-# Option B: Package as tarball
-bash collect_results.sh
-# Output: results_archive/nips-onlinelearn_results_YYYYMMDD_HHMMSS.tar.gz
-```
-
-### Resume After Interruption
-
-Re-run `bash run.sh` — completed phases are automatically skipped.
-To force re-run all phases: `FORCE_RERUN=1 bash run.sh`
 
 ## Project Structure
 
 ```
 nips-onlinelearn/
-├── README.md
-├── LICENSE
-├── setup.sh                          # One-click environment setup
-├── requirements.txt
-├── PROPOSAL.md
-├── PAPERS.md
-├── PLAN.md
-├── EXPERIMENTS.md
 ├── configs/
-│   └── spm_config.yaml               # Dual-LoRA + PPO hyperparameters
+│   └── spm_config.yaml               # Hyperparameters (beta, gamma, LoRA rank, etc.)
 ├── src/
-│   ├── __init__.py
-│   └── streaming_memory.py           # Dual-LoRA + Fisher consolidation core
+│   └── streaming_memory.py           # Core: dual-LoRA + behavioral distillation consolidation
 ├── scripts/
-│   ├── gpu_utils.sh                  # Auto GPU detection utilities
-│   ├── run_all_experiments.sh        # Master pipeline (entry point)
-│   ├── run_spm_training.sh           # Training launcher
-│   ├── train_spm.py                  # Phase 1: SPM training
-│   ├── train_ppo_integration.py      # Phase 2: PPO consolidation policy
-│   ├── eval_streaming.py             # Phase 3: Streaming evaluation
-│   └── eval_spm.py                   # SPM-specific metrics
-├── outputs/                          # Experiment outputs
-│   ├── spm_training/                 # Dual-LoRA checkpoints
-│   ├── ppo_policy/                   # Consolidation policy
-│   ├── streaming_eval/               # Evaluation results
-│   └── ablation_*/                   # Ablation study results
-└── results/
+│   ├── gpu_utils.sh                  # Auto GPU detection
+│   ├── run_all_experiments.sh        # Master pipeline
+│   ├── train_spm.py                  # SPM streaming training
+│   ├── eval_streaming.py             # 7-method × 2-dataset evaluation
+│   └── eval_spm.py                   # Per-model evaluation
+├── refine-logs/
+│   └── FINAL_PROPOSAL.md            # NeurIPS-ready proposal (research-refine output)
+└── outputs/                          # All experiment outputs
 ```
 
-## Experiments Overview
+## Method
 
-| # | Experiment | Script | Expected Output |
-|---|-----------|--------|-----------------|
-| 1 | SPM training (100 sessions) | `train_spm.py` | `outputs/spm_training/` |
-| 2 | PPO consolidation policy (50 episodes) | `train_ppo_integration.py` | `outputs/ppo_policy/` |
-| 3 | Streaming eval (PersonaChat + LIGHT, 4 methods) | `eval_streaming.py` | `outputs/streaming_eval/streaming_eval_results.json` |
-| 4a | Ablation: consolidation frequency (5/10/20/50) | `train_spm.py` | `outputs/ablation_freq_*/` |
-| 4b | Ablation: EWC lambda sweep | `train_spm.py` | `outputs/ablation_ewc_*/` |
-| 4c | Ablation: LoRA rank (4/8/16/32/64) | `train_spm.py` | `outputs/ablation_rank_*/` |
-| 5 | Aggregate all results | inline Python | `outputs/streaming_eval/all_results_aggregated.json` |
-
-### Expected Results
-
-| Metric | Baseline (single LoRA) | SPM (Ours) |
-|--------|----------------------|-------------|
-| Persona Retention (F1) | 0.42 | 0.68 |
-| Session Adaptation (turns) | 12.3 | 4.1 |
-| Forgetting Rate (cross-session) | 0.31 | 0.08 |
-| LIGHT Character Consistency | 3.2/5 | 4.1/5 |
-| Generation Quality (PPL) | 8.7 | 9.1 |
-
-## Model
-
-| Component | Model | Params |
-|-----------|-------|--------|
+| Component | Description | Params |
+|-----------|-------------|--------|
 | Base model | Qwen/Qwen3.5-9B (frozen) | 9B |
-| Working-memory LoRA | r=16, online updates | ~13M |
-| Long-term LoRA | r=64, consolidated | ~52M |
-| Consolidation policy | 3-layer MLP, 256-dim | ~0.5M |
+| Working-Memory LoRA | r=16, zero-init per session, 3-step NTP updates | ~13M |
+| Long-Term LoRA | r=64, persistent, behavioral distillation consolidation | ~52M |
 
-## Timeline & GPU Budget
+### Core Equation
 
-| Phase | Duration | GPU-hours |
-|-------|----------|-----------|
-| SPM training (100 sessions) | ~6 days | 384 |
-| PPO policy training (50 episodes) | ~3 days | 192 |
-| Streaming evaluation (2 datasets × 4 methods) | ~1 day | 64 |
-| Ablation studies (freq + EWC + rank) | ~3 days | 160 |
-| Analysis + aggregation | ~0.5 day | 32 |
-| **Total** | **~13.5 days** | **~832** |
+```
+L = L_ntp(θ_LT'; B_reservoir)  +  β · E_{x∈B_session}[D_KL(p_{LT+WM}(·|x) || p_{LT'}(·|x))]  +  γ · Fisher_trust_region
+```
+
+### Algorithm (per session k)
+
+1. **Zero-init WM**: Reset WM-LoRA to zero (residual over LT)
+2. **Online adaptation**: For each turn, 1-3 NTP gradient steps on WM-LoRA
+3. **Buffer data**: Add each turn to the session buffer
+4. **Consolidation** (session end):
+   - Cache teacher logits from combined LT+WM on session data
+   - Switch to LT-only, optimize split objective:
+     - NTP on reservoir samples (retention)
+     - KL distillation on session data (behavior transfer)
+5. **Merge session data into reservoir** (reservoir sampling)
+
+## Experiments
+
+### Pipeline Phases
+
+| # | Phase | Description | Output |
+|---|-------|-------------|--------|
+| 1 | SPM Training | 100-session streaming training | `outputs/spm_training/` |
+| 2 | Evaluation | 7 methods × 2 datasets (PersonaChat, LIGHT) | `outputs/streaming_eval/` |
+| 3a | Ablation: beta | KL weight sweep (0, 0.1, 0.5, 1.0, 5.0) | `outputs/ablation_beta_*/` |
+| 3b | Ablation: gamma | Fisher trust-region sweep (0, 0.01, 0.1, 1.0) | `outputs/ablation_gamma_*/` |
+| 3c | Ablation: WM rank | LoRA rank sweep (4, 8, 16, 32) | `outputs/ablation_rank_*/` |
+| 3d | Ablation: reservoir | Buffer size sweep (500, 2k, 5k, 10k) | `outputs/ablation_reservoir_*/` |
+| 4 | Aggregation | Collect all results | `outputs/streaming_eval/all_results_aggregated.json` |
+
+### Baselines (7 methods)
+
+| Method | Description |
+|--------|-------------|
+| Frozen | No adaptation (lower bound) |
+| Single-LoRA | Online NTP, no protection |
+| Single-LoRA + EWC + Replay | r=16, continual learning baseline |
+| Param-matched Single-LoRA | r=80 (~65M, matched to WM+LT) |
+| Retrieval-Augmented | Top-k context prepending |
+| Dual-LoRA + EWC | Parameter-space consolidation |
+| **SPM (Ours)** | Behavioral distillation consolidation |
+
+### Target Metrics
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| Semantic Retention F1 | NLI-based persona fact retention | ≥ 0.65 |
+| Adaptation Speed | Turns to reach RetF1 ≥ 0.5 | ≤ 5 |
+| Forgetting Rate | Per-session retention decline | ≤ 0.10 |
+| Generation Quality | PPL degradation vs. frozen | ≤ 5% |
+
+## GPU Budget
+
+| Phase | Est. GPU-hours |
+|-------|---------------|
+| SPM training | ~150 |
+| Evaluation (7×2) | ~60 |
+| Ablation studies | ~200 |
+| Buffer + contingency | ~90 |
+| **Total** | **~500** |
 
 ## Citation
 
 ```bibtex
 @inproceedings{spm2026,
-  title={Streaming Parameter Memory: Dual-LoRA Online Learning for Large Language Models},
+  title={Behavioral Distillation Consolidation for Two-Timescale Streaming Persona Retention in Large Language Models},
   author={Anonymous},
   booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
   year={2026}
@@ -133,4 +134,4 @@ nips-onlinelearn/
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+[MIT License](LICENSE)

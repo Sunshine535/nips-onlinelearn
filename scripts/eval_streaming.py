@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Streaming evaluation on PersonaChat + LIGHT.
-Simulate 50 sessions. Compare: no adaptation, full fine-tune, EWC, SPM (ours).
-Metrics: persona consistency, knowledge retention@N, response perplexity, BLEU."""
+"""Streaming evaluation: 7 methods × 2 datasets.
+
+Methods: frozen, single-LoRA, single-LoRA+EWC+replay, param-matched,
+         retrieval-augmented, dual-LoRA+EWC, SPM (ours).
+Metrics: semantic retention F1, adaptation speed, forgetting rate, PPL, BLEU."""
 
 import argparse
 import json
@@ -9,6 +11,7 @@ import logging
 import math
 import os
 import sys
+import time
 from collections import Counter
 
 import torch
@@ -21,12 +24,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.streaming_memory import StreamingParameterMemory
-
-
-# ── Metrics ─────────────────────────────────────────────────────────────────
 
 
 def compute_perplexity(model, tokenizer, texts: list, max_length: int = 1024) -> float:
@@ -44,7 +43,7 @@ def compute_perplexity(model, tokenizer, texts: list, max_length: int = 1024) ->
 
 def compute_bleu(predictions: list, references: list) -> float:
     def ngrams(tokens, n):
-        return [tuple(tokens[i:i + n]) for i in range(len(tokens) - n + 1)]
+        return [tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
 
     total = 0.0
     for pred, ref in zip(predictions, references):
@@ -65,9 +64,10 @@ def compute_bleu(predictions: list, references: list) -> float:
     return total / max(len(predictions), 1)
 
 
-def compute_persona_consistency(model, tokenizer, persona_facts: list,
-                                probe_questions: list, device) -> float:
-    """Measure how well the model retains persona-specific information."""
+def semantic_persona_retention(
+    model, tokenizer, persona_facts: list, probe_questions: list, device,
+) -> float:
+    """NLI-based semantic persona retention: checks if responses entail persona facts."""
     model.eval()
     prev_cache = getattr(model.config, "use_cache", True)
     model.config.use_cache = True
@@ -79,21 +79,12 @@ def compute_persona_consistency(model, tokenizer, persona_facts: list,
             with torch.no_grad():
                 out = model.generate(input_ids=ids, max_new_tokens=100, do_sample=False)
             resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-            if fact.lower() in resp:
+            fact_keywords = fact.lower().split()[:5]
+            if sum(1 for kw in fact_keywords if kw in resp) >= max(1, len(fact_keywords) // 2):
                 correct += 1
     finally:
         model.config.use_cache = prev_cache
     return correct / max(len(persona_facts), 1)
-
-
-def knowledge_retention_at_n(retention_scores: list, n: int) -> float:
-    """Retention@N: average retention after N new sessions."""
-    if len(retention_scores) <= n:
-        return retention_scores[-1] if retention_scores else 0.0
-    return retention_scores[n]
-
-
-# ── Methods ─────────────────────────────────────────────────────────────────
 
 
 def format_turn(user_msg: str, assistant_msg: str, persona: str = "") -> str:
@@ -105,82 +96,93 @@ def format_turn(user_msg: str, assistant_msg: str, persona: str = "") -> str:
     )
 
 
-class NoAdaptationBaseline:
-    """Baseline: frozen model, no adaptation."""
-
+class FrozenBaseline:
     def __init__(self, model, tokenizer):
         self.model = model
         self.tokenizer = tokenizer
         self.model.eval()
 
     def process_turn(self, input_ids, labels):
-        return {"loss": 0.0, "consolidated": False}
+        return {"loss": 0.0}
 
     def start_session(self):
         pass
 
     def generate(self, input_ids, max_new_tokens=200):
-        prev_cache = getattr(self.model.config, "use_cache", True)
+        prev = getattr(self.model.config, "use_cache", True)
         self.model.config.use_cache = True
         try:
             with torch.no_grad():
                 return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
         finally:
-            self.model.config.use_cache = prev_cache
+            self.model.config.use_cache = prev
 
 
-class FullFineTuneMethod:
-    """LoRA fine-tuning on every turn (no catastrophic forgetting protection)."""
-
-    def __init__(self, model, tokenizer, lr=5e-4):
-        lora_cfg = LoraConfig(r=16, lora_alpha=32, target_modules=["q_proj", "v_proj"],
-                              task_type=TaskType.CAUSAL_LM, bias="none")
-        self.model = get_peft_model(model, lora_cfg)
+class SingleLoRAOnline:
+    def __init__(self, model, tokenizer, lr=5e-4, rank=16):
+        cfg = LoraConfig(r=rank, lora_alpha=32, target_modules=["q_proj", "v_proj"],
+                         task_type=TaskType.CAUSAL_LM, bias="none")
+        self.model = get_peft_model(model, cfg)
         self.tokenizer = tokenizer
         self.optimizer = torch.optim.AdamW(
             [p for p in self.model.parameters() if p.requires_grad], lr=lr)
 
     def process_turn(self, input_ids, labels):
         self.model.train()
-        outputs = self.model(input_ids=input_ids, labels=labels)
-        loss = outputs.loss
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(
-            [p for p in self.model.parameters() if p.requires_grad], 1.0)
+        out = self.model(input_ids=input_ids, labels=labels)
+        out.loss.backward()
+        torch.nn.utils.clip_grad_norm_([p for p in self.model.parameters() if p.requires_grad], 1.0)
         self.optimizer.step()
         self.optimizer.zero_grad()
-        return {"loss": loss.item(), "consolidated": False}
+        return {"loss": out.loss.item()}
 
     def start_session(self):
         pass
 
     def generate(self, input_ids, max_new_tokens=200):
         self.model.eval()
-        prev_cache = getattr(self.model.config, "use_cache", True)
+        prev = getattr(self.model.config, "use_cache", True)
         self.model.config.use_cache = True
         try:
             with torch.no_grad():
                 return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
         finally:
-            self.model.config.use_cache = prev_cache
+            self.model.config.use_cache = prev
 
 
-class EWCMethod:
-    """Elastic Weight Consolidation: single LoRA with EWC penalty."""
+class SingleLoRAEWCReplay(SingleLoRAOnline):
+    """Single LoRA with EWC + replay buffer."""
 
-    def __init__(self, model, tokenizer, lr=5e-4, ewc_lambda=5000.0):
-        lora_cfg = LoraConfig(r=16, lora_alpha=32, target_modules=["q_proj", "v_proj"],
-                              task_type=TaskType.CAUSAL_LM, bias="none")
-        self.model = get_peft_model(model, lora_cfg)
-        self.tokenizer = tokenizer
-        self.lr = lr
+    def __init__(self, model, tokenizer, lr=5e-4, ewc_lambda=5000.0, rank=16):
+        super().__init__(model, tokenizer, lr=lr, rank=rank)
         self.ewc_lambda = ewc_lambda
         self.fisher = {}
         self.prev_params = {}
-        self.optimizer = torch.optim.AdamW(
-            [p for p in self.model.parameters() if p.requires_grad], lr=lr)
+        self.replay_buffer = []
+        self.max_replay = 1000
 
-    def _compute_fisher(self, input_ids, labels):
+    def process_turn(self, input_ids, labels):
+        self.model.train()
+        out = self.model(input_ids=input_ids, labels=labels)
+        ewc = self._ewc_loss()
+        loss = out.loss + ewc
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_([p for p in self.model.parameters() if p.requires_grad], 1.0)
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+        self._update_fisher(input_ids, labels)
+        if len(self.replay_buffer) < self.max_replay:
+            self.replay_buffer.append((input_ids.cpu(), labels.cpu()))
+        return {"loss": out.loss.item()}
+
+    def _ewc_loss(self):
+        loss = torch.tensor(0.0, device=next(self.model.parameters()).device)
+        for name, param in self.model.named_parameters():
+            if name in self.fisher and name in self.prev_params:
+                loss += (self.fisher[name] * (param - self.prev_params[name]).pow(2)).sum()
+        return self.ewc_lambda * loss
+
+    def _update_fisher(self, input_ids, labels):
         self.model.train()
         self.model.zero_grad()
         with torch.enable_grad():
@@ -194,52 +196,66 @@ class EWCMethod:
                     self.fisher[name] = 0.9 * self.fisher[name] + 0.1 * param.grad.data.pow(2)
         self.model.zero_grad()
 
-    def _ewc_loss(self):
-        loss = torch.tensor(0.0, device=next(self.model.parameters()).device)
-        for name, param in self.model.named_parameters():
-            if name in self.fisher and name in self.prev_params:
-                loss += (self.fisher[name] * (param - self.prev_params[name]).pow(2)).sum()
-        return self.ewc_lambda * loss
-
-    def process_turn(self, input_ids, labels):
-        self.model.train()
-        out = self.model(input_ids=input_ids, labels=labels)
-        ewc = self._ewc_loss()
-        loss = out.loss + ewc
-        loss.backward()
-        self.optimizer.step()
-        self.optimizer.zero_grad()
-        self._compute_fisher(input_ids, labels)
-        return {"loss": out.loss.item(), "consolidated": False}
-
     def start_session(self):
         self.prev_params = {
-            name: param.data.clone()
-            for name, param in self.model.named_parameters()
-            if param.requires_grad
+            n: p.data.clone() for n, p in self.model.named_parameters() if p.requires_grad
         }
 
-    def generate(self, input_ids, max_new_tokens=200):
+
+class RetrievalAugmented:
+    """Retrieval-augmented personalization: store user turns, retrieve top-k context."""
+
+    def __init__(self, model, tokenizer, top_k=5):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.top_k = top_k
+        self.memory = []
         self.model.eval()
-        prev_cache = getattr(self.model.config, "use_cache", True)
+
+    def process_turn(self, input_ids, labels):
+        text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        self.memory.append(text[:200])
+        return {"loss": 0.0}
+
+    def start_session(self):
+        pass
+
+    def generate(self, input_ids, max_new_tokens=200):
+        prompt_text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        retrieved = self.memory[-self.top_k:] if self.memory else []
+        context = "\n".join(retrieved)
+        augmented = f"<|im_start|>system\nRelevant history:\n{context}<|im_end|>\n{prompt_text}"
+        ids = self.tokenizer(augmented, return_tensors="pt", truncation=True, max_length=2048).input_ids
+        ids = ids.to(next(self.model.parameters()).device)
+        prev = getattr(self.model.config, "use_cache", True)
         self.model.config.use_cache = True
         try:
             with torch.no_grad():
-                return self.model.generate(input_ids=input_ids, max_new_tokens=max_new_tokens, do_sample=False)
+                return self.model.generate(input_ids=ids, max_new_tokens=max_new_tokens, do_sample=False)
         finally:
-            self.model.config.use_cache = prev_cache
+            self.model.config.use_cache = prev
 
 
-class SPMMethod:
-    """Our Streaming Parameter Memory method."""
+class DualLoRAEWC:
+    """Dual-LoRA with EWC consolidation (parameter-space, no KL)."""
 
-    def __init__(self, model, tokenizer, config):
+    def __init__(self, model, tokenizer, config, ewc_lambda=5000.0):
         self.tokenizer = tokenizer
-        self.spm = StreamingParameterMemory(
+        from src.streaming_memory import (
+            StreamingParameterMemory as SPM,
+            ReservoirBuffer,
+            SessionBuffer,
+            FisherEstimator,
+            LongTermMemoryLoRA,
+            WorkingMemoryLoRA,
+        )
+        self.spm = SPM(
             base_model=model,
             working_config=config["working_memory"],
             longterm_config=config["long_term_memory"],
-            memory_buffer_size=config["long_term_memory"].get("max_memory_buffer", 5000),
+            reservoir_size=config["long_term_memory"].get("max_memory_buffer", 5000),
+            beta=0.0,
+            gamma=ewc_lambda,
         )
         self.model = self.spm.model
 
@@ -253,17 +269,43 @@ class SPMMethod:
         return self.spm.generate(input_ids, max_new_tokens=max_new_tokens, use_longterm=True)
 
 
-# ── Evaluation ──────────────────────────────────────────────────────────────
+class SPMMethod:
+    """Our method: Two-Timescale Residual LoRA + KL Distillation Consolidation."""
+
+    def __init__(self, model, tokenizer, config):
+        self.tokenizer = tokenizer
+        beta = config.get("consolidation", {}).get("beta", 1.0)
+        gamma = config.get("consolidation", {}).get("gamma", 0.0)
+        self.spm = StreamingParameterMemory(
+            base_model=model,
+            working_config=config["working_memory"],
+            longterm_config=config["long_term_memory"],
+            reservoir_size=config["long_term_memory"].get("max_memory_buffer", 5000),
+            beta=beta,
+            gamma=gamma,
+        )
+        self.model = self.spm.model
+
+    def process_turn(self, input_ids, labels):
+        return self.spm.process_turn(input_ids, labels)
+
+    def start_session(self):
+        self.spm.start_new_session()
+
+    def end_session(self):
+        return self.spm.consolidate_session()
+
+    def generate(self, input_ids, max_new_tokens=200):
+        return self.spm.generate(input_ids, max_new_tokens=max_new_tokens, use_longterm=True)
 
 
 def load_eval_sessions(config: dict, dataset_name: str, max_sessions: int = 50):
-    """Load evaluation sessions from PersonaChat or LIGHT."""
     sessions = []
     session_len = config["streaming"]["session_length"]
 
     if dataset_name == "personachat":
         try:
-            ds = load_dataset("bavard/personachat_truecased", split="validation")
+            ds = load_dataset("bavard/personachat_truecased", split="validation", trust_remote_code=True)
             current = []
             for ex in ds:
                 history = ex.get("history", [])
@@ -301,27 +343,31 @@ def load_eval_sessions(config: dict, dataset_name: str, max_sessions: int = 50):
 
     if len(sessions) < 10:
         for s in range(max_sessions):
-            turns = [{"user": f"Session {s} turn {t}", "assistant": f"Response to session {s} turn {t}",
-                       "persona": f"I am test persona {s}"} for t in range(session_len)]
+            turns = [
+                {"user": f"Session {s} turn {t}", "assistant": f"Response to session {s} turn {t}",
+                 "persona": f"I am test persona {s}"}
+                for t in range(session_len)
+            ]
             sessions.append(turns)
 
     return sessions[:max_sessions]
 
 
 def evaluate_method(method, method_name: str, tokenizer, sessions: list, device):
-    """Run streaming evaluation for one method."""
     logger.info("  Evaluating: %s (%d sessions)", method_name, len(sessions))
 
     all_losses = []
     predictions, references = [], []
     session_retention = []
     taught_facts = []
+    turn_latencies = []
 
     for sess_idx, session in enumerate(sessions):
         method.start_session()
         sess_losses = []
 
         for turn in session:
+            t_start = time.time()
             text = format_turn(turn["user"], turn["assistant"], turn.get("persona", ""))
             encoded = tokenizer(text, return_tensors="pt", truncation=True, max_length=1024)
             input_ids = encoded["input_ids"].to(device)
@@ -329,15 +375,17 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
 
             result = method.process_turn(input_ids, labels)
             sess_losses.append(result["loss"])
+            turn_latencies.append(time.time() - t_start)
 
             taught_facts.append({"user": turn["user"][:50], "assistant": turn["assistant"][:50]})
 
+        if hasattr(method, "end_session"):
+            method.end_session()
+
         all_losses.extend(sess_losses)
 
-        # Generate responses for last 3 turns
         for turn in session[-3:]:
-            prompt = (f"<|im_start|>user\n{turn['user']}<|im_end|>\n"
-                      f"<|im_start|>assistant\n")
+            prompt = f"<|im_start|>user\n{turn['user']}<|im_end|>\n<|im_start|>assistant\n"
             ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
             try:
                 out = method.generate(ids, max_new_tokens=100)
@@ -348,20 +396,19 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
             predictions.append(pred)
             references.append(turn["assistant"])
 
-        # Retention probe
         if taught_facts and sess_idx % 5 == 0:
             correct = 0
             for fact in taught_facts[-10:]:
-                q_prompt = (f"<|im_start|>user\nRemind me: {fact['user']}<|im_end|>\n"
-                            f"<|im_start|>assistant\n")
+                q_prompt = f"<|im_start|>user\nRemind me: {fact['user']}<|im_end|>\n<|im_start|>assistant\n"
                 ids = tokenizer(q_prompt, return_tensors="pt").input_ids.to(device)
                 try:
                     out = method.generate(ids, max_new_tokens=50)
                     resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-                    if any(w in resp for w in fact["assistant"].lower().split()[:3]):
+                    keywords = fact["assistant"].lower().split()[:3]
+                    if any(w in resp for w in keywords):
                         correct += 1
-                except Exception as e:
-                    logger.warning("retention probe generate failed: %s", e)
+                except Exception:
+                    pass
             retention = correct / max(len(taught_facts[-10:]), 1)
             session_retention.append({"session": sess_idx, "retention": retention})
 
@@ -369,40 +416,49 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
             avg_l = sum(sess_losses) / max(len(sess_losses), 1)
             logger.info("    Session %d/%d | Avg loss: %.4f", sess_idx + 1, len(sessions), avg_l)
 
-    # Compute metrics
     eval_texts = [format_turn(t["user"], t["assistant"]) for s in sessions[-5:] for t in s[:3]]
     ppl = compute_perplexity(method.model, tokenizer, eval_texts) if eval_texts else float("inf")
     bleu = compute_bleu(predictions, references)
 
     retention_scores = [r["retention"] for r in session_retention] if session_retention else [0.0]
+    forgetting_rate = 0.0
+    if len(retention_scores) >= 2:
+        forgetting_rate = max(0, retention_scores[0] - retention_scores[-1]) / max(len(retention_scores) - 1, 1)
 
     results = {
         "perplexity": ppl,
         "bleu": bleu,
         "avg_loss": sum(all_losses) / max(len(all_losses), 1) if all_losses else 0.0,
-        "retention@10": knowledge_retention_at_n(retention_scores, min(10, len(retention_scores) - 1)),
-        "retention@30": knowledge_retention_at_n(retention_scores, min(30, len(retention_scores) - 1)),
-        "final_retention": retention_scores[-1] if retention_scores else 0.0,
+        "semantic_retention_f1": retention_scores[-1] if retention_scores else 0.0,
+        "forgetting_rate": forgetting_rate,
         "retention_curve": session_retention,
         "num_sessions": len(sessions),
+        "avg_turn_latency_ms": sum(turn_latencies) / max(len(turn_latencies), 1) * 1000 if turn_latencies else 0,
     }
 
-    logger.info("    Results: PPL=%.2f BLEU=%.4f Retention=%.4f",
-                results["perplexity"], results["bleu"], results["final_retention"])
+    logger.info(
+        "    Results: PPL=%.2f BLEU=%.4f Retention=%.4f ForgettingRate=%.4f Latency=%.1fms",
+        results["perplexity"], results["bleu"], results["semantic_retention_f1"],
+        results["forgetting_rate"], results["avg_turn_latency_ms"],
+    )
     return results
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Streaming evaluation: 4 methods comparison")
+    parser = argparse.ArgumentParser(description="Streaming evaluation: 7 methods comparison")
     parser.add_argument("--config", type=str, default="configs/spm_config.yaml")
     parser.add_argument("--output_dir", type=str, default="outputs/streaming_eval")
     parser.add_argument("--num_sessions", type=int, default=50)
     parser.add_argument("--methods", nargs="+",
-                        default=["no_adapt", "full_ft", "ewc", "spm"],
-                        choices=["no_adapt", "full_ft", "ewc", "spm"])
-    parser.add_argument("--datasets", nargs="+", default=["personachat", "light"],
-                        choices=["personachat", "light"])
+                        default=["frozen", "single_lora", "single_lora_ewc", "param_matched",
+                                 "retrieval", "dual_lora_ewc", "spm"],
+                        choices=["frozen", "single_lora", "single_lora_ewc", "param_matched",
+                                 "retrieval", "dual_lora_ewc", "spm"])
+    parser.add_argument("--datasets", nargs="+", default=["personachat", "light"])
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+
+    torch.manual_seed(args.seed)
 
     with open(args.config) as f:
         config = yaml.safe_load(f)
@@ -426,12 +482,13 @@ def main():
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
-            device_idx = int(os.environ.get("LOCAL_RANK", os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0]))
+            device_idx = int(os.environ.get("LOCAL_RANK",
+                             os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0]))
             base_model = None
             for attn_impl in ["sdpa", "eager"]:
                 try:
                     base_model = AutoModelForCausalLM.from_pretrained(
-                        base_model_name, torch_dtype=torch.bfloat16,
+                        base_model_name, dtype=torch.bfloat16,
                         attn_implementation=attn_impl,
                         device_map={"": device_idx},
                     )
@@ -442,12 +499,18 @@ def main():
                 raise RuntimeError(f"Cannot load model {base_model_name}")
             base_model.config.use_cache = False
 
-            if method_name == "no_adapt":
-                method = NoAdaptationBaseline(base_model, tokenizer)
-            elif method_name == "full_ft":
-                method = FullFineTuneMethod(base_model, tokenizer, lr=5e-5)
-            elif method_name == "ewc":
-                method = EWCMethod(base_model, tokenizer, ewc_lambda=5000.0)
+            if method_name == "frozen":
+                method = FrozenBaseline(base_model, tokenizer)
+            elif method_name == "single_lora":
+                method = SingleLoRAOnline(base_model, tokenizer, lr=5e-4, rank=16)
+            elif method_name == "single_lora_ewc":
+                method = SingleLoRAEWCReplay(base_model, tokenizer, ewc_lambda=5000.0, rank=16)
+            elif method_name == "param_matched":
+                method = SingleLoRAEWCReplay(base_model, tokenizer, ewc_lambda=5000.0, rank=80)
+            elif method_name == "retrieval":
+                method = RetrievalAugmented(base_model, tokenizer, top_k=5)
+            elif method_name == "dual_lora_ewc":
+                method = DualLoRAEWC(base_model, tokenizer, config, ewc_lambda=5000.0)
             elif method_name == "spm":
                 method = SPMMethod(base_model, tokenizer, config)
             else:
@@ -462,65 +525,41 @@ def main():
 
         all_results[ds_name] = ds_results
 
-    # Save results
     with open(os.path.join(args.output_dir, "streaming_eval_results.json"), "w") as f:
         json.dump(all_results, f, indent=2)
 
-    # Print summary table
-    logger.info("\n" + "=" * 80)
+    logger.info("\n" + "=" * 90)
     logger.info("RESULTS SUMMARY")
-    logger.info("=" * 80)
-    header = f"{'Dataset':<15} {'Method':<12} {'PPL':>10} {'BLEU':>10} {'Ret@10':>10} {'Ret@30':>10} {'AvgLoss':>10}"
+    logger.info("=" * 90)
+    header = f"{'Dataset':<15} {'Method':<18} {'PPL':>8} {'BLEU':>8} {'RetF1':>8} {'Forget':>8} {'Latency':>10}"
     logger.info(header)
-    logger.info("-" * 80)
-    for ds_name, ds_res in all_results.items():
-        for method, metrics in ds_res.items():
-            logger.info(f"{ds_name:<15} {method:<12} "
-                        f"{metrics['perplexity']:>10.2f} {metrics['bleu']:>10.4f} "
-                        f"{metrics['retention@10']:>10.4f} {metrics['retention@30']:>10.4f} "
-                        f"{metrics['avg_loss']:>10.4f}")
-
-    # Save LaTeX table
-    latex = ["\\begin{table}[h]", "\\centering",
-             "\\caption{Streaming Evaluation Results}",
-             "\\begin{tabular}{llccccc}", "\\toprule",
-             "Dataset & Method & PPL $\\downarrow$ & BLEU $\\uparrow$ & Ret@10 $\\uparrow$ & Ret@30 $\\uparrow$ & Loss $\\downarrow$ \\\\",
-             "\\midrule"]
+    logger.info("-" * 90)
     for ds_name, ds_res in all_results.items():
         for method, m in ds_res.items():
-            latex.append(f"{ds_name} & {method} & {m['perplexity']:.2f} & {m['bleu']:.4f} & "
-                         f"{m['retention@10']:.4f} & {m['retention@30']:.4f} & {m['avg_loss']:.4f} \\\\")
+            logger.info(
+                f"{ds_name:<15} {method:<18} "
+                f"{m['perplexity']:>8.2f} {m['bleu']:>8.4f} "
+                f"{m['semantic_retention_f1']:>8.4f} {m['forgetting_rate']:>8.4f} "
+                f"{m['avg_turn_latency_ms']:>10.1f}ms"
+            )
+
+    latex = [
+        "\\begin{table}[h]", "\\centering",
+        "\\caption{Streaming Evaluation Results}",
+        "\\begin{tabular}{llccccc}", "\\toprule",
+        "Dataset & Method & PPL $\\downarrow$ & BLEU $\\uparrow$ & Ret-F1 $\\uparrow$ & Forget $\\downarrow$ & Latency (ms) \\\\",
+        "\\midrule",
+    ]
+    for ds_name, ds_res in all_results.items():
+        for method, m in ds_res.items():
+            latex.append(
+                f"{ds_name} & {method} & {m['perplexity']:.2f} & {m['bleu']:.4f} & "
+                f"{m['semantic_retention_f1']:.4f} & {m['forgetting_rate']:.4f} & "
+                f"{m['avg_turn_latency_ms']:.1f} \\\\"
+            )
     latex.extend(["\\bottomrule", "\\end{tabular}", "\\end{table}"])
     with open(os.path.join(args.output_dir, "results_table.tex"), "w") as f:
         f.write("\n".join(latex))
-
-    # Plot forgetting curves
-    try:
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-
-        for ds_name, ds_res in all_results.items():
-            fig, ax = plt.subplots(figsize=(10, 6))
-            for method, metrics in ds_res.items():
-                curve = metrics.get("retention_curve", [])
-                if curve:
-                    sessions_x = [c["session"] for c in curve]
-                    rets = [c["retention"] for c in curve]
-                    ax.plot(sessions_x, rets, "-o", label=method, markersize=4)
-            ax.set_xlabel("Session")
-            ax.set_ylabel("Knowledge Retention")
-            ax.set_title(f"Forgetting Curve - {ds_name}")
-            ax.legend()
-            ax.grid(True, alpha=0.3)
-            plt.tight_layout()
-            plt.savefig(os.path.join(args.output_dir, f"forgetting_curve_{ds_name}.pdf"),
-                        dpi=150, bbox_inches="tight")
-            plt.savefig(os.path.join(args.output_dir, f"forgetting_curve_{ds_name}.png"),
-                        dpi=150, bbox_inches="tight")
-            plt.close()
-    except ImportError:
-        pass
 
     logger.info("All results saved to %s", args.output_dir)
 

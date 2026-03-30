@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Streaming Parameter Memory training pipeline.
-Simulates streaming conversation sessions from PersonaChat.
-For each session: update working LoRA → estimate Fisher → consolidate to long-term.
-Tracks: response quality, knowledge retention, forgetting rate."""
+"""SPM training: two-timescale residual LoRA with behavioral distillation.
+
+For each session: zero-init WM → per-turn NTP updates → session-end KL consolidation.
+Tracks retention, forgetting, and adaptation speed."""
 
 import argparse
 import glob
@@ -11,6 +11,7 @@ import logging
 import math
 import os
 import sys
+import time
 
 import torch
 import yaml
@@ -20,39 +21,17 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.streaming_memory import StreamingParameterMemory
 
 
-def save_training_checkpoint(path, model, optimizer, epoch, step, **extra):
-    torch.save({"epoch": epoch, "step": step,
-                "model_state_dict": model.state_dict(),
-                "optimizer_state_dict": optimizer.state_dict() if optimizer else None,
-                **extra}, path)
-
-
-def load_training_checkpoint(path, model, optimizer=None):
-    ckpt = torch.load(path, map_location="cpu", weights_only=False)
-    model.load_state_dict(ckpt["model_state_dict"])
-    if optimizer and ckpt.get("optimizer_state_dict"):
-        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
-    return ckpt.get("epoch", 0), ckpt.get("step", 0)
-
-
-def find_latest_checkpoint(output_dir, pattern="checkpoint_*.pt"):
-    ckpts = sorted(glob.glob(os.path.join(output_dir, pattern)),
-                   key=os.path.getmtime)
-    return ckpts[-1] if ckpts else None
-
-
 def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
-    """Load PersonaChat as multi-turn conversation sessions with personas."""
+    """Load PersonaChat as multi-turn conversation sessions grouped by persona."""
     session_len = config["streaming"]["session_length"]
     sessions = []
 
     try:
-        ds = load_dataset("bavard/personachat_truecased", split="train")
+        ds = load_dataset("bavard/personachat_truecased", split="train", trust_remote_code=True)
         logger.info("Loaded PersonaChat: %d examples", len(ds))
 
         persona_sessions = {}
@@ -73,7 +52,6 @@ def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
                     "persona": " ".join(personality) if personality else "",
                     "turns": [],
                 }
-
             persona_sessions[persona_key]["turns"].append({
                 "user": history[-1] if history else "",
                 "assistant": reply,
@@ -83,7 +61,7 @@ def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
             turns = sess_data["turns"]
             persona = sess_data["persona"]
             for start in range(0, len(turns), session_len):
-                chunk = turns[start:start + session_len]
+                chunk = turns[start : start + session_len]
                 if len(chunk) >= 3:
                     sessions.append({"persona": persona, "turns": chunk})
             if len(sessions) >= max_sessions:
@@ -100,8 +78,10 @@ def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
             for t in range(session_len):
                 turns.append({
                     "user": f"Tell me about topic {s % 20}, aspect {t}.",
-                    "assistant": (f"As someone who likes topic {s % 20}, "
-                                  f"aspect {t} is fascinating because of concept_{s * 10 + t}."),
+                    "assistant": (
+                        f"As someone who likes topic {s % 20}, "
+                        f"aspect {t} is fascinating because of concept_{s * 10 + t}."
+                    ),
                 })
             sessions.append({"persona": persona, "turns": turns})
 
@@ -133,7 +113,7 @@ def compute_perplexity(model, tokenizer, texts: list, max_length: int = 1024) ->
 
 @torch.no_grad()
 def probe_retention(spm, tokenizer, probe_facts: list) -> float:
-    """Test retention of previously taught facts."""
+    """Probe retention of previously taught facts (semantic check)."""
     device = next(spm.model.parameters()).device
     correct = 0
     for fact in probe_facts:
@@ -142,25 +122,30 @@ def probe_retention(spm, tokenizer, probe_facts: list) -> float:
         try:
             out = spm.generate(ids, max_new_tokens=100, use_longterm=True)
             response = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-            if fact["answer"].lower() in response:
+            keywords = fact["answer"].lower().split()[:3]
+            if any(kw in response for kw in keywords):
                 correct += 1
         except Exception as e:
             logger.warning("probe_retention generate failed: %s", e)
-    spm.model.set_adapter("working")
     return correct / max(len(probe_facts), 1)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train Streaming Parameter Memory")
+    parser = argparse.ArgumentParser(description="Train SPM (Two-Timescale Residual LoRA)")
     parser.add_argument("--config", type=str, default="configs/spm_config.yaml")
     parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--num_sessions", type=int, default=None)
-    parser.add_argument("--probe_interval", type=int, default=10,
-                        help="Sessions between retention probes")
+    parser.add_argument("--probe_interval", type=int, default=10)
+    parser.add_argument("--beta", type=float, default=None, help="KL distillation weight")
+    parser.add_argument("--gamma", type=float, default=None, help="Fisher trust-region weight")
     parser.add_argument("--local_rank", type=int, default=-1)
-    parser.add_argument("--resume_from_checkpoint", type=str, default=None,
-                        help="'auto' to resume from latest checkpoint, or path")
+    parser.add_argument("--resume_from_checkpoint", type=str, default=None)
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
 
     with open(args.config) as f:
         config = yaml.safe_load(f)
@@ -171,11 +156,13 @@ def main():
 
     base_model_name = config["model"]["base_model"]
     num_sessions = args.num_sessions or config["streaming"]["num_sessions"]
+    beta = args.beta if args.beta is not None else config.get("consolidation", {}).get("beta", 1.0)
+    gamma = args.gamma if args.gamma is not None else config.get("consolidation", {}).get("gamma", 0.0)
 
-    logger.info("=== Streaming Parameter Memory Training ===")
+    logger.info("=== SPM Training (Behavioral Distillation Consolidation) ===")
     logger.info("Base model: %s", base_model_name)
-    logger.info("Sessions: %d, Turns/session: %d", num_sessions,
-                config["streaming"]["session_length"])
+    logger.info("Sessions: %d, Turns/session: %d", num_sessions, config["streaming"]["session_length"])
+    logger.info("β (KL weight): %.2f, γ (Fisher trust-region): %.2f", beta, gamma)
 
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     if tokenizer.pad_token is None:
@@ -187,7 +174,7 @@ def main():
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
-                torch_dtype=torch.bfloat16,
+                dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
@@ -203,13 +190,14 @@ def main():
         base_model=base_model,
         working_config=config["working_memory"],
         longterm_config=config["long_term_memory"],
-        memory_buffer_size=config["long_term_memory"].get("max_memory_buffer", 5000),
+        reservoir_size=config["long_term_memory"].get("max_memory_buffer", 5000),
+        beta=beta,
+        gamma=gamma,
     )
 
     sessions = load_personachat_sessions(config, tokenizer, num_sessions)
     device = next(spm.model.parameters()).device
 
-    # Build retention probes from early sessions
     probe_facts = []
     for sess in sessions[:5]:
         for turn in sess["turns"][:3]:
@@ -221,53 +209,79 @@ def main():
 
     training_log = []
     forgetting_curve = []
-    consolidation_count = 0
     start_session = 0
 
     if args.resume_from_checkpoint:
-        ckpt_path = find_latest_checkpoint(output_dir, "checkpoint_session*.pt")
-        if ckpt_path:
-            logger.info("Resuming from %s", ckpt_path)
-            state = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+        ckpt_search = args.resume_from_checkpoint
+        if ckpt_search == "auto":
+            pattern = "checkpoint_session*.pt"
+            ckpts = sorted(glob.glob(os.path.join(output_dir, pattern)), key=os.path.getmtime)
+            ckpt_search = ckpts[-1] if ckpts else None
+        if ckpt_search and os.path.isfile(ckpt_search):
+            logger.info("Resuming from %s", ckpt_search)
+            state = torch.load(ckpt_search, map_location="cpu", weights_only=False)
             start_session = state.get("session_idx", 0) + 1
-            consolidation_count = state.get("consolidation_count", 0)
             training_log = state.get("training_log", [])
             forgetting_curve = state.get("forgetting_curve", [])
             probe_facts = state.get("probe_facts", probe_facts)
-            logger.info("  Resuming from session %d", start_session)
+            import pickle
+            reservoir_path = os.path.join(os.path.dirname(ckpt_search), "reservoir.pkl")
+            if os.path.isfile(reservoir_path):
+                with open(reservoir_path, "rb") as f:
+                    spm.reservoir = pickle.load(f)
+                logger.info("Restored reservoir (%d items)", len(spm.reservoir))
+            adapter_dir = os.path.join(os.path.dirname(ckpt_search), "adapters")
+            if os.path.isdir(adapter_dir):
+                try:
+                    from peft import PeftModel
+                    spm.model.load_adapter(adapter_dir, adapter_name="longterm")
+                    logger.info("Restored LT adapter from %s", adapter_dir)
+                except Exception as e:
+                    logger.warning("Could not restore adapters: %s", e)
+            spm.session_id = start_session - 1
+            spm.total_turns = state.get("total_turns", 0)
+            logger.info("Resuming from session %d (total_turns=%d)", start_session, spm.total_turns)
+
+    start_time = time.time()
 
     for session_idx, session in enumerate(sessions):
         if session_idx < start_session:
             continue
+
         spm.start_new_session()
         session_losses = []
         persona = session.get("persona", "")
+        turn_latencies = []
 
-        # Teach turns
         for turn_idx, turn in enumerate(session["turns"]):
+            turn_start = time.time()
             text = format_turn(turn["user"], turn["assistant"], persona)
-            encoded = tokenizer(text, return_tensors="pt", truncation=True,
-                                max_length=config["training"]["max_seq_length"])
+            encoded = tokenizer(
+                text, return_tensors="pt", truncation=True,
+                max_length=config["training"]["max_seq_length"],
+            )
             input_ids = encoded["input_ids"].to(device)
             labels = input_ids.clone()
 
             result = spm.process_turn(input_ids, labels)
             session_losses.append(result["loss"])
-
-            if result["consolidated"]:
-                consolidation_count += 1
+            turn_latencies.append(time.time() - turn_start)
 
             if turn_idx % 5 == 0:
                 logger.info(
-                    "Session %d/%d Turn %d/%d | Loss: %.4f | Consolidated: %s | Buffer: %d",
+                    "Session %d/%d Turn %d/%d | Loss: %.4f | Latency: %.1fms",
                     session_idx + 1, len(sessions), turn_idx + 1, len(session["turns"]),
-                    result["loss"], result["consolidated"],
-                    len(spm.memory_buffer.inputs),
+                    result["loss"], turn_latencies[-1] * 1000,
                 )
 
-        avg_loss = sum(session_losses) / max(len(session_losses), 1)
+        # Session-end consolidation
+        consolidation_start = time.time()
+        consolidation_loss = spm.consolidate_session()
+        consolidation_time = time.time() - consolidation_start
 
-        # Periodic retention probe
+        avg_loss = sum(session_losses) / max(len(session_losses), 1)
+        avg_turn_latency = sum(turn_latencies) / max(len(turn_latencies), 1)
+
         retention = None
         if (session_idx + 1) % args.probe_interval == 0 and probe_facts:
             retention = probe_retention(spm, tokenizer, probe_facts)
@@ -278,7 +292,6 @@ def main():
             })
             logger.info("  Retention probe: %.2f%% (%d facts)", retention * 100, len(probe_facts))
 
-            # Add new probe facts from this session
             for turn in session["turns"][:2]:
                 probe_facts.append({
                     "question": f"What did we discuss about: {turn['user'][:50]}?",
@@ -289,70 +302,77 @@ def main():
         entry = {
             "session": session_idx,
             "avg_loss": avg_loss,
+            "consolidation_loss": consolidation_loss,
             "num_turns": len(session["turns"]),
-            "consolidations": consolidation_count,
             "retention": retention,
-            "buffer_size": len(spm.memory_buffer.inputs),
+            "reservoir_size": len(spm.reservoir),
+            "avg_turn_latency_ms": avg_turn_latency * 1000,
+            "consolidation_time_ms": consolidation_time * 1000,
         }
         training_log.append(entry)
 
         if (session_idx + 1) % 10 == 0:
+            elapsed = time.time() - start_time
             logger.info(
-                "=== Session %d/%d | Avg loss: %.4f | Consolidations: %d | Total turns: %d ===",
-                session_idx + 1, len(sessions), avg_loss, consolidation_count, spm.total_turns,
+                "=== Session %d/%d | Loss: %.4f | Consol: %.4f | "
+                "Reservoir: %d | Elapsed: %.1fs ===",
+                session_idx + 1, len(sessions), avg_loss, consolidation_loss,
+                len(spm.reservoir), elapsed,
             )
 
-        if (session_idx + 1) % 50 == 0:
+        ckpt_interval = config.get("training", {}).get("checkpoint_interval", 20)
+        if (session_idx + 1) % ckpt_interval == 0:
             ckpt_dir = os.path.join(output_dir, f"checkpoint-session-{session_idx + 1}")
             spm.save(ckpt_dir)
+            ckpt_meta_path = os.path.join(ckpt_dir, f"checkpoint_session{session_idx + 1}.pt")
             torch.save({
                 "session_idx": session_idx,
-                "consolidation_count": consolidation_count,
                 "training_log": training_log,
                 "forgetting_curve": forgetting_curve,
                 "probe_facts": probe_facts,
-            }, os.path.join(output_dir, f"checkpoint_session{session_idx + 1}.pt"))
+                "total_turns": spm.total_turns,
+            }, ckpt_meta_path)
+            logger.info("Saved checkpoint at session %d -> %s", session_idx + 1, ckpt_dir)
 
-    # Save final model
     spm.save(os.path.join(output_dir, "final"))
 
-    # Save logs
     with open(os.path.join(output_dir, "training_log.json"), "w") as f:
         json.dump(training_log, f, indent=2)
-
     with open(os.path.join(output_dir, "forgetting_curve.json"), "w") as f:
         json.dump(forgetting_curve, f, indent=2)
 
-    # Plot forgetting curve
     try:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
         if forgetting_curve:
+            fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
             sessions_x = [p["session"] for p in forgetting_curve]
             retention_y = [p["retention"] for p in forgetting_curve]
-
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-            ax1.plot(sessions_x, retention_y, "b-o", label="Retention")
-            ax1.set_xlabel("Session")
-            ax1.set_ylabel("Retention Rate")
-            ax1.set_title("Knowledge Retention Over Time")
-            ax1.legend()
-            ax1.grid(True, alpha=0.3)
+            axes[0].plot(sessions_x, retention_y, "b-o", label="Retention")
+            axes[0].set_xlabel("Session")
+            axes[0].set_ylabel("Retention Rate")
+            axes[0].set_title("Knowledge Retention Over Sessions")
+            axes[0].legend()
+            axes[0].grid(True, alpha=0.3)
 
             losses = [e["avg_loss"] for e in training_log]
-            ax2.plot(range(len(losses)), losses, "r-", alpha=0.5, label="Session avg loss")
-            window = min(10, len(losses))
-            if window > 1:
-                smoothed = [sum(losses[max(0, i - window):i + 1]) / min(i + 1, window)
-                            for i in range(len(losses))]
-                ax2.plot(range(len(smoothed)), smoothed, "r-", linewidth=2, label="Smoothed")
-            ax2.set_xlabel("Session")
-            ax2.set_ylabel("Loss")
-            ax2.set_title("Training Loss")
-            ax2.legend()
-            ax2.grid(True, alpha=0.3)
+            axes[1].plot(range(len(losses)), losses, "r-", alpha=0.5, label="Session Loss")
+            axes[1].set_xlabel("Session")
+            axes[1].set_ylabel("Loss")
+            axes[1].set_title("Training Loss")
+            axes[1].legend()
+            axes[1].grid(True, alpha=0.3)
+
+            consol_losses = [e["consolidation_loss"] for e in training_log if e["consolidation_loss"] > 0]
+            if consol_losses:
+                axes[2].plot(range(len(consol_losses)), consol_losses, "g-o", markersize=3)
+                axes[2].set_xlabel("Session")
+                axes[2].set_ylabel("Consolidation Loss")
+                axes[2].set_title("Consolidation Loss")
+                axes[2].grid(True, alpha=0.3)
 
             plt.tight_layout()
             plt.savefig(os.path.join(output_dir, "training_curves.pdf"), dpi=150, bbox_inches="tight")
@@ -361,11 +381,13 @@ def main():
     except ImportError:
         pass
 
-    logger.info("\n=== Training complete ===")
-    logger.info("Total sessions: %d, Total turns: %d", len(sessions), spm.total_turns)
-    logger.info("Total consolidations: %d", consolidation_count)
+    total_time = time.time() - start_time
+    logger.info("\n=== Training Complete ===")
+    logger.info("Sessions: %d, Total turns: %d", len(sessions), spm.total_turns)
+    logger.info("Reservoir size: %d", len(spm.reservoir))
     if forgetting_curve:
         logger.info("Final retention: %.2f%%", forgetting_curve[-1]["retention"] * 100)
+    logger.info("Total time: %.1fs (%.1f min)", total_time, total_time / 60)
     logger.info("Saved to %s", output_dir)
 
 

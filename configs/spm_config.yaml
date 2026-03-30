@@ -1,14 +1,13 @@
 model:
   base_model: "Qwen/Qwen3.5-9B"
-  
+
 working_memory:
   lora_r: 16
   lora_alpha: 32
   lora_dropout: 0.05
   target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   learning_rate: 5.0e-4
-  max_turns_before_consolidation: 10
-  online_update_steps: 5
+  online_update_steps: 3
   online_batch_size: 1
 
 long_term_memory:
@@ -18,10 +17,11 @@ long_term_memory:
   target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
   consolidation_lr: 1.0e-4
   consolidation_epochs: 3
-  fisher_threshold: 0.01
-  fisher_samples: 200
-  ewc_lambda: 5000.0
   max_memory_buffer: 5000
+
+consolidation:
+  beta: 1.0
+  gamma: 0.0
 
 training:
   per_device_train_batch_size: 4
@@ -53,7 +53,7 @@ evaluation:
       dataset_id: "light_dialog"
       split: "test"
       max_samples: 1000
-  metrics: ["perplexity", "bleu", "memory_retention", "cross_session_accuracy"]
+  metrics: ["perplexity", "bleu", "semantic_retention_f1", "adaptation_speed", "forgetting_rate"]
   cross_session_probes: 50
 
 output_dir: "./outputs"
