@@ -174,7 +174,7 @@ def main():
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
-                dtype=torch.bfloat16,
+                torch_dtype=torch.bfloat16,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
@@ -214,8 +214,10 @@ def main():
     if args.resume_from_checkpoint:
         ckpt_search = args.resume_from_checkpoint
         if ckpt_search == "auto":
-            pattern = "checkpoint_session*.pt"
-            ckpts = sorted(glob.glob(os.path.join(output_dir, pattern)), key=os.path.getmtime)
+            ckpts = sorted(
+                glob.glob(os.path.join(output_dir, "checkpoint-session-*", "checkpoint_session*.pt")),
+                key=os.path.getmtime,
+            )
             ckpt_search = ckpts[-1] if ckpts else None
         if ckpt_search and os.path.isfile(ckpt_search):
             logger.info("Resuming from %s", ckpt_search)

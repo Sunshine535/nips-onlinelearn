@@ -269,7 +269,7 @@ def main():
         base_model=base_model,
         working_config=config["working_memory"],
         longterm_config=config["long_term_memory"],
-        memory_buffer_size=config["long_term_memory"].get("max_memory_buffer", 5000),
+        reservoir_size=config["long_term_memory"].get("max_memory_buffer", 5000),
     )
 
     policy = ConsolidationPolicy(state_dim=8, hidden_dim=64)
@@ -299,7 +299,10 @@ def main():
     start_episode = 0
 
     if args.resume_from_checkpoint:
-        ckpt_path = find_latest_checkpoint(args.output_dir, "checkpoint_episode*.pt")
+        if args.resume_from_checkpoint == "auto":
+            ckpt_path = find_latest_checkpoint(args.output_dir, "checkpoint_episode*.pt")
+        else:
+            ckpt_path = args.resume_from_checkpoint if os.path.isfile(args.resume_from_checkpoint) else None
         if ckpt_path:
             logger.info("Resuming from %s", ckpt_path)
             start_episode, _ = load_training_checkpoint(ckpt_path, policy, ppo.optimizer)
@@ -330,15 +333,18 @@ def main():
 
             state = build_state_vector(
                 spm, list(recent_losses), turn_idx,
-                len(spm.memory_buffer.inputs), episode)
+                len(spm.reservoir), episode)
 
             action, log_prob, value, probs = policy.get_action(state.unsqueeze(0))
             action = action.item()
             should_consolidate = (action == 1)
 
             override = spm.working.needs_consolidation()
+            did_consolidate = False
             if should_consolidate or override:
-                spm.working.max_turns = spm.working.update_count
+                spm.consolidate_session()
+                spm.start_new_session()
+                did_consolidate = True
 
             result = spm.process_turn(input_ids, labels)
             recent_losses.append(result["loss"])
@@ -352,7 +358,7 @@ def main():
                 loss_after=result["loss"],
                 retention_before=retention_before,
                 retention_after=retention_after,
-                did_consolidate=result["consolidated"],
+                did_consolidate=did_consolidate,
             )
             episode_reward += reward
             retention_before = retention_after
@@ -366,7 +372,7 @@ def main():
                 "done": (turn_idx == len(ep_convs) - 1),
             })
 
-            spm.working.max_turns = config["working_memory"].get("max_turns_before_consolidation", 10)
+            spm.working.update_count = min(spm.working.update_count, spm.working.max_turns - 1)
 
         if len(trajectories) >= 10:
             ppo_loss = ppo.update(trajectories, epochs=args.ppo_epochs)

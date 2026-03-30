@@ -34,12 +34,13 @@ is_phase_done() {
 
 export WANDB_PROJECT="onlinelearn"
 PROJECT_DIR="$PROJ_DIR_ROOT"
-CONFIG="${PROJECT_DIR}/configs/spm_config.yaml"
+CONFIG="${SPM_CONFIG:-${PROJECT_DIR}/configs/spm_config.yaml}"
 SPM_DIR="${PROJECT_DIR}/outputs/spm_training"
+PPO_DIR="${PROJECT_DIR}/outputs/ppo_policy"
 EVAL_DIR="${PROJECT_DIR}/outputs/streaming_eval"
 LOG_DIR="${PROJECT_DIR}/logs"
 
-mkdir -p "$SPM_DIR" "$EVAL_DIR" "$LOG_DIR"
+mkdir -p "$SPM_DIR" "$PPO_DIR" "$EVAL_DIR" "$LOG_DIR"
 
 echo "======================================================="
 echo " SPM: Two-Timescale Behavioral Distillation Pipeline"
@@ -52,7 +53,8 @@ echo "======================================================="
 # ========================
 if ! is_phase_done 1; then
     echo ">>> Phase 1: SPM Training (Behavioral Distillation Consolidation)"
-    CUDA_VISIBLE_DEVICES=0 python3 "${SCRIPT_DIR}/train_spm.py" \
+    GPU0=$(gpu_at_index 0)
+    CUDA_VISIBLE_DEVICES="$GPU0" python3 "${SCRIPT_DIR}/train_spm.py" \
         --config "${CONFIG}" --output_dir "${PROJECT_DIR}/outputs" \
         --num_sessions 100 --probe_interval 10 \
         --resume_from_checkpoint auto \
@@ -61,27 +63,72 @@ if ! is_phase_done 1; then
 fi
 
 # ========================
-# Phase 2: Streaming Evaluation (7 methods × 2 datasets)
+# Phase 2: PPO Consolidation Policy
 # ========================
 if ! is_phase_done 2; then
-    echo ">>> Phase 2: Streaming evaluation (all methods × PersonaChat + LIGHT)"
-    CUDA_VISIBLE_DEVICES=0 python3 "${SCRIPT_DIR}/eval_streaming.py" \
-        --config "${CONFIG}" --output_dir "${EVAL_DIR}" \
-        --num_sessions 50 \
-        --methods frozen single_lora single_lora_ewc_replay param_matched retrieval_augmented dual_lora_ewc spm \
-        --datasets personachat light \
-        2>&1 | tee "${LOG_DIR}/phase2_eval.log"
+    echo ">>> Phase 2: PPO Consolidation Policy Training"
+    GPU0=$(gpu_at_index 0)
+    CUDA_VISIBLE_DEVICES="$GPU0" python3 "${SCRIPT_DIR}/train_ppo_integration.py" \
+        --config "${CONFIG}" --output_dir "${PPO_DIR}" \
+        --num_episodes 50 --turns_per_episode 40 \
+        --resume_from_checkpoint auto \
+        2>&1 | tee "${LOG_DIR}/phase2_ppo.log"
     phase_done 2
 fi
 
 # ========================
-# Phase 3: Core Ablations (parallel across GPUs)
+# Phase 3: Streaming Evaluation (7 methods × 2 datasets, parallel across GPUs)
 # ========================
 if ! is_phase_done 3; then
-    echo ">>> Phase 3: Ablations"
+    echo ">>> Phase 3: Streaming evaluation (all methods × PersonaChat + LIGHT)"
+    METHODS=(frozen single_lora single_lora_ewc param_matched retrieval dual_lora_ewc spm)
+    DATASETS="personachat light"
+    GPU_IDX=0; PIDS=(); LABELS=()
+    for method in "${METHODS[@]}"; do
+        gpu_id=$((GPU_IDX % NUM_GPUS))
+        phys_gpu=$(gpu_at_index $gpu_id)
+        METH_DIR="${EVAL_DIR}/method_${method}"
+        mkdir -p "$METH_DIR"
+        (
+            CUDA_VISIBLE_DEVICES="$phys_gpu" python3 "${SCRIPT_DIR}/eval_streaming.py" \
+                --config "${CONFIG}" --output_dir "$METH_DIR" \
+                --num_sessions 50 \
+                --methods "$method" \
+                --datasets $DATASETS
+        ) > "${LOG_DIR}/phase3_eval_${method}.log" 2>&1 &
+        PIDS+=($!); LABELS+=("eval_${method}"); GPU_IDX=$((GPU_IDX + 1))
+    done
+    FAIL=0
+    for j in "${!PIDS[@]}"; do
+        wait "${PIDS[$j]}" || { echo "ERROR: ${LABELS[$j]} failed"; FAIL=1; }
+    done
+    if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
-    # --- 3a: Beta (KL distillation weight) sweep ---
-    echo "  3a: Beta sweep (beta=0, 0.1, 0.5, 1.0, 5.0)"
+    # Merge per-method results into single file
+    python3 -c "
+import json, os, glob
+merged = {}
+for f in sorted(glob.glob('${EVAL_DIR}/method_*/streaming_eval_results.json')):
+    with open(f) as fh:
+        partial = json.load(fh)
+    for ds_name, ds_res in partial.items():
+        merged.setdefault(ds_name, {}).update(ds_res)
+out = '${EVAL_DIR}/streaming_eval_results.json'
+with open(out, 'w') as fh:
+    json.dump(merged, fh, indent=2)
+print(f'Merged {len(merged)} dataset results -> {out}')
+"
+    phase_done 3
+fi
+
+# ========================
+# Phase 4: Core Ablations (parallel across GPUs)
+# ========================
+if ! is_phase_done 4; then
+    echo ">>> Phase 4: Ablations"
+
+    # --- 4a: Beta (KL distillation weight) sweep ---
+    echo "  4a: Beta sweep (beta=0, 0.1, 0.5, 1.0, 5.0)"
     GPU_IDX=0; PIDS=(); LABELS=()
     for beta in 0 0.1 0.5 1.0 5.0; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_beta_${beta}"
@@ -101,8 +148,8 @@ if ! is_phase_done 3; then
     done
     if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
-    # --- 3b: Gamma (Fisher trust-region) sweep ---
-    echo "  3b: Gamma sweep (gamma=0, 0.01, 0.1, 1.0)"
+    # --- 4b: Gamma (Fisher trust-region) sweep ---
+    echo "  4b: Gamma sweep (gamma=0, 0.01, 0.1, 1.0)"
     GPU_IDX=0; PIDS=(); LABELS=()
     for gamma in 0 0.01 0.1 1.0; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_gamma_${gamma}"
@@ -122,8 +169,8 @@ if ! is_phase_done 3; then
     done
     if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
-    # --- 3c: WM LoRA rank sweep ---
-    echo "  3c: WM rank sweep (rank=4, 8, 16, 32)"
+    # --- 4c: WM LoRA rank sweep ---
+    echo "  4c: WM rank sweep (rank=4, 8, 16, 32)"
     GPU_IDX=0; PIDS=(); LABELS=()
     for rank in 4 8 16 32; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_rank_${rank}"
@@ -152,8 +199,8 @@ with open('${ABL_DIR}/config.yaml', 'w') as f:
     done
     if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
-    # --- 3d: Reservoir size sweep ---
-    echo "  3d: Reservoir size sweep (500, 2000, 5000, 10000)"
+    # --- 4d: Reservoir size sweep ---
+    echo "  4d: Reservoir size sweep (500, 2000, 5000, 10000)"
     GPU_IDX=0; PIDS=(); LABELS=()
     for rsz in 500 2000 5000 10000; do
         ABL_DIR="${PROJECT_DIR}/outputs/ablation_reservoir_${rsz}"
@@ -181,14 +228,14 @@ with open('${ABL_DIR}/config.yaml', 'w') as f:
     done
     if [ "$FAIL" -ne 0 ]; then exit 1; fi
 
-    phase_done 3
+    phase_done 4
 fi
 
 # ========================
-# Phase 4: Aggregate results
+# Phase 5: Aggregate results
 # ========================
-if ! is_phase_done 4; then
-    echo ">>> Phase 4: Aggregate results"
+if ! is_phase_done 5; then
+    echo ">>> Phase 5: Aggregate results"
     python3 -c "
 import json, os, glob
 results = {}
@@ -196,6 +243,16 @@ eval_file = '${EVAL_DIR}/streaming_eval_results.json'
 if os.path.exists(eval_file):
     with open(eval_file) as f:
         results['main'] = json.load(f)
+
+ppo_file = '${PPO_DIR}/ppo_training_log.json'
+if os.path.exists(ppo_file):
+    with open(ppo_file) as f:
+        ppo_data = json.load(f)
+    results['ppo_policy'] = {
+        'num_episodes': len(ppo_data),
+        'final_reward': ppo_data[-1]['total_reward'] if ppo_data else None,
+        'final_consol_rate': ppo_data[-1]['consolidation_rate'] if ppo_data else None,
+    }
 
 for ablation in sorted(glob.glob('${PROJECT_DIR}/outputs/ablation_*/spm_training/training_log.json')):
     name = ablation.split('ablation_')[1].split('/')[0]
@@ -212,7 +269,7 @@ with open(out_path, 'w') as f:
     json.dump(results, f, indent=2)
 print(f'Aggregated {len(results)} experiment results -> {out_path}')
 "
-    phase_done 4
+    phase_done 5
 fi
 
 echo "======================================================="

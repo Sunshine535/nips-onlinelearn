@@ -127,6 +127,10 @@ class WorkingMemoryLoRA:
             bias="none",
         )
         self.update_count = 0
+        self.max_turns = config.get("max_turns_before_consolidation", 10)
+
+    def needs_consolidation(self) -> bool:
+        return self.update_count >= self.max_turns
 
     def zero_init(self, model: PeftModel):
         """Zero-initialize WM-LoRA for new session (residual design)."""
@@ -399,7 +403,7 @@ class StreamingParameterMemory:
         self.session_buffer.add(input_ids, labels)
         self.total_turns += 1
 
-        return {"loss": loss, "total_turns": self.total_turns}
+        return {"loss": loss, "total_turns": self.total_turns, "consolidated": False}
 
     def consolidate_session(self) -> float:
         """Session-end consolidation via behavioral distillation."""

@@ -449,11 +449,15 @@ def main():
     parser.add_argument("--config", type=str, default="configs/spm_config.yaml")
     parser.add_argument("--output_dir", type=str, default="outputs/streaming_eval")
     parser.add_argument("--num_sessions", type=int, default=50)
+    _all_methods = [
+        "frozen", "single_lora", "single_lora_ewc", "param_matched",
+        "retrieval", "dual_lora_ewc", "spm",
+        "single_lora_ewc_replay", "retrieval_augmented",
+    ]
     parser.add_argument("--methods", nargs="+",
                         default=["frozen", "single_lora", "single_lora_ewc", "param_matched",
                                  "retrieval", "dual_lora_ewc", "spm"],
-                        choices=["frozen", "single_lora", "single_lora_ewc", "param_matched",
-                                 "retrieval", "dual_lora_ewc", "spm"])
+                        choices=_all_methods)
     parser.add_argument("--datasets", nargs="+", default=["personachat", "light"])
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
@@ -475,7 +479,12 @@ def main():
         sessions = load_eval_sessions(config, ds_name, args.num_sessions)
         ds_results = {}
 
-        for method_name in args.methods:
+        _method_aliases = {
+            "single_lora_ewc_replay": "single_lora_ewc",
+            "retrieval_augmented": "retrieval",
+        }
+        for raw_method_name in args.methods:
+            method_name = _method_aliases.get(raw_method_name, raw_method_name)
             logger.info("\n>>> Method: %s on %s", method_name, ds_name)
 
             tokenizer = AutoTokenizer.from_pretrained(base_model_name)
@@ -488,7 +497,7 @@ def main():
             for attn_impl in ["sdpa", "eager"]:
                 try:
                     base_model = AutoModelForCausalLM.from_pretrained(
-                        base_model_name, dtype=torch.bfloat16,
+                        base_model_name, torch_dtype=torch.bfloat16,
                         attn_implementation=attn_impl,
                         device_map={"": device_idx},
                     )
