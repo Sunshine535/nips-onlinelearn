@@ -42,6 +42,11 @@ def compute_perplexity(model, tokenizer, texts: list, max_length: int = 1024) ->
 
 
 def compute_bleu(predictions: list, references: list) -> float:
+    """Compute corpus-level BLEU-4 with brevity penalty.
+
+    Proxy metric: this is a simplified single-reference BLEU without smoothing.
+    For publication results, consider sacrebleu or nltk.translate.bleu_score
+    with proper smoothing and multi-reference support."""
     def ngrams(tokens, n):
         return [tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
 
@@ -65,7 +70,11 @@ def compute_bleu(predictions: list, references: list) -> float:
 
 
 def _rouge_l_f1(reference: str, hypothesis: str) -> float:
-    """ROUGE-L F1 between two strings (LCS-based)."""
+    """ROUGE-L F1 between two strings (LCS-based).
+
+    Proxy metric: the paper describes NLI-based semantic retention, but this
+    implementation uses ROUGE-L (longest common subsequence) as a lighter proxy.
+    For publication-grade results, replace with an NLI entailment classifier."""
     ref_tok = reference.lower().split()
     hyp_tok = hypothesis.lower().split()
     if not ref_tok or not hyp_tok:
@@ -89,7 +98,12 @@ def _rouge_l_f1(reference: str, hypothesis: str) -> float:
 def semantic_persona_retention(
     model, tokenizer, persona_facts: list, probe_questions: list, device,
 ) -> float:
-    """Measure persona retention via ROUGE-L F1 between response and persona fact."""
+    """Measure persona retention via ROUGE-L F1 between response and persona fact.
+
+    Proxy metric: uses ROUGE-L instead of NLI-based retention scoring.
+    The paper's 'Semantic Retention F1' targets NLI entailment between the
+    generated response and the ground-truth persona fact; this implementation
+    approximates it with token-level ROUGE-L F1 for faster evaluation."""
     model.eval()
     prev_cache = getattr(model.config, "use_cache", True)
     model.config.use_cache = True
@@ -355,20 +369,25 @@ def load_eval_sessions(config: dict, dataset_name: str, max_sessions: int = 50):
     if dataset_name == "personachat":
         try:
             ds = load_dataset("bavard/personachat_truecased", split="validation", trust_remote_code=True)
-            current = []
+            persona_groups: dict[str, list] = {}
             for ex in ds:
                 history = ex.get("history", [])
                 candidates = ex.get("candidates", [])
                 personality = ex.get("personality", [])
                 reply = candidates[-1] if candidates else ""
                 if history and reply:
-                    current.append({
+                    persona_key = " ".join(sorted(personality)) if personality else "_no_persona_"
+                    persona_groups.setdefault(persona_key, []).append({
                         "user": history[-1], "assistant": reply,
                         "persona": " ".join(personality) if personality else "",
                     })
-                if len(current) >= session_len:
-                    sessions.append(current)
-                    current = []
+            for _pkey, turns in persona_groups.items():
+                for i in range(0, len(turns), session_len):
+                    chunk = turns[i : i + session_len]
+                    if chunk:
+                        sessions.append(chunk)
+                    if len(sessions) >= max_sessions:
+                        break
                 if len(sessions) >= max_sessions:
                     break
         except Exception as e:
@@ -379,10 +398,13 @@ def load_eval_sessions(config: dict, dataset_name: str, max_sessions: int = 50):
             ds = load_dataset("light_dialog", split="test")
             for ex in ds:
                 dialog = ex.get("dialog", [])
+                character = ex.get("character", "") or ex.get("setting", {}).get("character", "")
+                persona_desc = str(character) if character else ""
                 if len(dialog) >= 4:
                     turns = []
                     for k in range(0, len(dialog) - 1, 2):
-                        turns.append({"user": str(dialog[k]), "assistant": str(dialog[k + 1]), "persona": ""})
+                        turns.append({"user": str(dialog[k]), "assistant": str(dialog[k + 1]),
+                                      "persona": persona_desc})
                     if turns:
                         sessions.append(turns[:session_len])
                 if len(sessions) >= max_sessions:

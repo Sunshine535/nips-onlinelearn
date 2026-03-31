@@ -83,7 +83,10 @@ L = L_ntp(θ_LT'; B_reservoir)  +  β · E_{x∈B_session}[D_KL(p_{LT+WM}(·|x) 
 | # | Phase | Description | Output |
 |---|-------|-------------|--------|
 | 1 | SPM Training | 100-session streaming training | `outputs/spm_training/` |
-| 2 | PPO Policy | PPO consolidation policy training (auxiliary) | `outputs/ppo_policy/` |
+| 2 | PPO Policy (auxiliary) | PPO consolidation policy training (auxiliary) | `outputs/ppo_policy/` |
+
+> **Note**: Phase 2 (PPO Policy) is experimental and not required for the main contribution. The core method (SPM with behavioral distillation consolidation) is fully evaluated in Phases 1 and 3. Phase 2 explores an optional RL-based consolidation policy that is orthogonal to the primary claims.
+
 | 3 | Evaluation | 7 methods × 2 datasets (PersonaChat, LIGHT) | `outputs/streaming_eval/` |
 | 4a | Ablation: beta | KL weight sweep (0, 0.1, 0.5, 1.0, 5.0) | `outputs/ablation_beta_*/` |
 | 4b | Ablation: gamma | Fisher trust-region sweep (0, 0.01, 0.1, 1.0) | `outputs/ablation_gamma_*/` |

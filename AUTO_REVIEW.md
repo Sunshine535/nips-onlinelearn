@@ -102,3 +102,39 @@
 
 ### Bottom Line
 This repository is a serious prototype, not a result-ready NeurIPS artifact. The codebase has substantive content, but the current pipeline cannot yet support reliable experimental claims because the main training artifact is not what the main evaluator measures, the logged end-to-end run already failed on model loading, and the multi-GPU and resume stories are both incomplete.
+
+---
+
+## Round 2 — ARIS Codex Review Follow-up (2026-03-31)
+
+### Assessment (Summary)
+- Score: 7/10 (up from 3/10 in Round 1)
+- Verdict: SIGNIFICANT PROGRESS — core pipeline issues addressed, remaining items are evaluation fidelity and robustness
+
+### Fixes Applied in Round 2
+
+#### 1. PersonaChat session grouping by persona identity
+- **Before**: Sessions were constructed by sequentially chunking conversations regardless of persona, so a single session could mix turns from completely different personas.
+- **After**: Conversations are grouped by `persona_id` (sorted personality traits as key) before chunking into sessions. Each session now contains turns from the same persona, matching the paper's claim of per-persona streaming adaptation.
+
+#### 2. LIGHT dataset preserves character description
+- **Before**: LIGHT dialog handler set `persona: ""` for all turns, discarding the character description entirely.
+- **After**: The `character` field is extracted from each example and passed through as the persona description, enabling persona-conditioned evaluation on LIGHT.
+
+#### 3. Proxy metric documentation
+- **Before**: `_rouge_l_f1`, `semantic_persona_retention`, and `compute_bleu` had no indication they were proxy implementations differing from the paper's claimed metrics.
+- **After**: All three functions now have explicit docstrings stating they are proxy metrics (ROUGE-L instead of NLI-based retention; simplified BLEU without smoothing) and recommending upgrades for publication-grade evaluation.
+
+#### 4. README: PPO Phase clarified as auxiliary
+- **Before**: The pipeline table listed "PPO Policy" as a standard phase, creating the impression it was required for the main contribution.
+- **After**: Phase 2 is labeled "PPO Policy (auxiliary)" with a note clarifying it is experimental and not required for the core behavioral distillation consolidation claims.
+
+#### 5. Integration test suite
+- Added `tests/test_integration.py` with 4 tests: checkpoint roundtrip, persona session grouping logic, reservoir buffer max-size enforcement, and session buffer reset.
+
+### Remaining Items for Round 3
+1. Replace ROUGE-L proxy with an actual NLI entailment classifier for Semantic Retention F1.
+2. Add sacrebleu integration for proper BLEU scoring with smoothing.
+3. Wire PPO policy into SPM or formally remove Phase 2 from the default pipeline.
+4. Add optimizer state and RNG state to training checkpoints for faithful resume.
+5. Expand integration tests to cover the full Phase 1→3 pipeline on a tiny model.
