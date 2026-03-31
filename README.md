@@ -83,12 +83,13 @@ L = L_ntp(θ_LT'; B_reservoir)  +  β · E_{x∈B_session}[D_KL(p_{LT+WM}(·|x) 
 | # | Phase | Description | Output |
 |---|-------|-------------|--------|
 | 1 | SPM Training | 100-session streaming training | `outputs/spm_training/` |
-| 2 | Evaluation | 7 methods × 2 datasets (PersonaChat, LIGHT) | `outputs/streaming_eval/` |
-| 3a | Ablation: beta | KL weight sweep (0, 0.1, 0.5, 1.0, 5.0) | `outputs/ablation_beta_*/` |
-| 3b | Ablation: gamma | Fisher trust-region sweep (0, 0.01, 0.1, 1.0) | `outputs/ablation_gamma_*/` |
-| 3c | Ablation: WM rank | LoRA rank sweep (4, 8, 16, 32) | `outputs/ablation_rank_*/` |
-| 3d | Ablation: reservoir | Buffer size sweep (500, 2k, 5k, 10k) | `outputs/ablation_reservoir_*/` |
-| 4 | Aggregation | Collect all results | `outputs/streaming_eval/all_results_aggregated.json` |
+| 2 | PPO Policy | PPO consolidation policy training (auxiliary) | `outputs/ppo_policy/` |
+| 3 | Evaluation | 7 methods × 2 datasets (PersonaChat, LIGHT) | `outputs/streaming_eval/` |
+| 4a | Ablation: beta | KL weight sweep (0, 0.1, 0.5, 1.0, 5.0) | `outputs/ablation_beta_*/` |
+| 4b | Ablation: gamma | Fisher trust-region sweep (0, 0.01, 0.1, 1.0) | `outputs/ablation_gamma_*/` |
+| 4c | Ablation: WM rank | LoRA rank sweep (4, 8, 16, 32) | `outputs/ablation_rank_*/` |
+| 4d | Ablation: reservoir | Buffer size sweep (500, 2k, 5k, 10k) | `outputs/ablation_reservoir_*/` |
+| 5 | Aggregation | Collect all results | `outputs/streaming_eval/all_results_aggregated.json` |
 
 ### Baselines (7 methods)
 

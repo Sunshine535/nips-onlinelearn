@@ -13,8 +13,7 @@ if [ -f "$PROJ_DIR_ROOT/.venv/bin/activate" ]; then
     source "$PROJ_DIR_ROOT/.venv/bin/activate"
 fi
 export PATH="$HOME/.local/bin:$PATH"
-
-TORCHRUN=$(get_torchrun_cmd)
+# Single-GPU per phase; torchrun not used (each phase picks GPUs via gpu_at_index).
 
 if ! python3 -c "import torch, transformers, peft" 2>/dev/null; then
     echo "[ERROR] Missing dependencies. Run: bash setup.sh"
@@ -63,7 +62,8 @@ if ! is_phase_done 1; then
 fi
 
 # ========================
-# Phase 2: PPO Consolidation Policy
+# Phase 2: PPO Consolidation Policy (auxiliary experiment — output is logged but
+#   not consumed by Phase 3 evaluation; kept for standalone analysis in Phase 5)
 # ========================
 if ! is_phase_done 2; then
     echo ">>> Phase 2: PPO Consolidation Policy Training"
@@ -81,6 +81,15 @@ fi
 # ========================
 if ! is_phase_done 3; then
     echo ">>> Phase 3: Streaming evaluation (all methods × PersonaChat + LIGHT)"
+
+    # Verify Phase 1 training products exist
+    if [ ! -d "$SPM_DIR/final" ] && [ ! -f "$SPM_DIR/training_log.json" ]; then
+        echo "[WARN] Phase 1 SPM training output not found at $SPM_DIR/final."
+        echo "       Phase 3 SPM method will run without pre-trained adapters."
+    else
+        echo "  Phase 1 products found: $SPM_DIR/final"
+    fi
+
     METHODS=(frozen single_lora single_lora_ewc param_matched retrieval dual_lora_ewc spm)
     DATASETS="personachat light"
     GPU_IDX=0; PIDS=(); LABELS=()
@@ -94,7 +103,8 @@ if ! is_phase_done 3; then
                 --config "${CONFIG}" --output_dir "$METH_DIR" \
                 --num_sessions 50 \
                 --methods "$method" \
-                --datasets $DATASETS
+                --datasets $DATASETS \
+                --checkpoint_dir "$SPM_DIR"
         ) > "${LOG_DIR}/phase3_eval_${method}.log" 2>&1 &
         PIDS+=($!); LABELS+=("eval_${method}"); GPU_IDX=$((GPU_IDX + 1))
     done

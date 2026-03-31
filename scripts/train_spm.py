@@ -25,7 +25,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.streaming_memory import StreamingParameterMemory
 
 
-def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
+def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200,
+                              allow_synthetic: bool = False):
     """Load PersonaChat as multi-turn conversation sessions grouped by persona."""
     session_len = config["streaming"]["session_length"]
     sessions = []
@@ -71,6 +72,11 @@ def load_personachat_sessions(config: dict, tokenizer, max_sessions: int = 200):
         logger.warning("Failed to load PersonaChat: %s. Using synthetic data.", e)
 
     if len(sessions) < 10:
+        if not allow_synthetic:
+            raise RuntimeError(
+                f"Only {len(sessions)} real sessions loaded (need >=10). "
+                "Pass --allow-synthetic to use synthetic data instead."
+            )
         logger.info("Generating synthetic conversation sessions...")
         for s in range(max_sessions):
             persona = f"I like topic {s % 20}. My name is person_{s}."
@@ -140,6 +146,8 @@ def main():
     parser.add_argument("--gamma", type=float, default=None, help="Fisher trust-region weight")
     parser.add_argument("--local_rank", type=int, default=-1)
     parser.add_argument("--resume_from_checkpoint", type=str, default=None)
+    parser.add_argument("--allow-synthetic", action="store_true", default=False,
+                        help="Allow synthetic data fallback if real data unavailable")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -164,7 +172,7 @@ def main():
     logger.info("Sessions: %d, Turns/session: %d", num_sessions, config["streaming"]["session_length"])
     logger.info("β (KL weight): %.2f, γ (Fisher trust-region): %.2f", beta, gamma)
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -175,6 +183,7 @@ def main():
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
                 torch_dtype=torch.bfloat16,
+                trust_remote_code=True,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
@@ -195,7 +204,8 @@ def main():
         gamma=gamma,
     )
 
-    sessions = load_personachat_sessions(config, tokenizer, num_sessions)
+    sessions = load_personachat_sessions(config, tokenizer, num_sessions,
+                                         allow_synthetic=args.allow_synthetic)
     device = next(spm.model.parameters()).device
 
     probe_facts = []
@@ -234,13 +244,15 @@ def main():
                 logger.info("Restored reservoir (%d items)", len(spm.reservoir))
             adapter_dir = os.path.join(os.path.dirname(ckpt_search), "adapters")
             if os.path.isdir(adapter_dir):
-                try:
-                    from peft import PeftModel
-                    spm.model.load_adapter(adapter_dir, adapter_name="longterm")
-                    logger.info("Restored LT adapter from %s", adapter_dir)
-                except Exception as e:
-                    logger.warning("Could not restore adapters: %s", e)
-            spm.session_id = start_session - 1
+                for adapter_name in ["longterm", "working"]:
+                    adapter_path = os.path.join(adapter_dir, adapter_name)
+                    if os.path.isdir(adapter_path):
+                        try:
+                            spm.model.load_adapter(adapter_path, adapter_name=adapter_name)
+                            logger.info("Restored %s adapter from %s", adapter_name, adapter_path)
+                        except Exception as e:
+                            logger.warning("Could not restore %s adapter: %s", adapter_name, e)
+            spm.session_id = state.get("session_id", start_session - 1)
             spm.total_turns = state.get("total_turns", 0)
             logger.info("Resuming from session %d (total_turns=%d)", start_session, spm.total_turns)
 
@@ -329,10 +341,13 @@ def main():
             ckpt_meta_path = os.path.join(ckpt_dir, f"checkpoint_session{session_idx + 1}.pt")
             torch.save({
                 "session_idx": session_idx,
+                "session_id": spm.session_id,
                 "training_log": training_log,
                 "forgetting_curve": forgetting_curve,
                 "probe_facts": probe_facts,
                 "total_turns": spm.total_turns,
+                "beta": spm.beta,
+                "gamma": spm.gamma,
             }, ckpt_meta_path)
             logger.info("Saved checkpoint at session %d -> %s", session_idx + 1, ckpt_dir)
 

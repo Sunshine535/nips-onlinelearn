@@ -128,6 +128,8 @@ class WorkingMemoryLoRA:
         )
         self.update_count = 0
         self.max_turns = config.get("max_turns_before_consolidation", 10)
+        self._optimizer: Optional[torch.optim.AdamW] = None
+        self._cached_params: Optional[List[torch.nn.Parameter]] = None
 
     def needs_consolidation(self) -> bool:
         return self.update_count >= self.max_turns
@@ -138,6 +140,8 @@ class WorkingMemoryLoRA:
             if "working" in name and "lora" in name:
                 param.data.zero_()
         self.update_count = 0
+        self._optimizer = None
+        self._cached_params = None
 
     def online_update(
         self, model: PeftModel, input_ids: torch.Tensor, labels: torch.Tensor,
@@ -145,19 +149,21 @@ class WorkingMemoryLoRA:
     ) -> float:
         """Per-turn NTP gradient steps on WM-LoRA only."""
         model.train()
-        wm_params = [p for n, p in model.named_parameters() if p.requires_grad and "working" in n and "lora" in n]
-        if not wm_params:
-            wm_params = [p for n, p in model.named_parameters() if p.requires_grad and "lora" in n]
-        optimizer = torch.optim.AdamW(wm_params, lr=lr)
+        if self._optimizer is None:
+            wm_params = [p for n, p in model.named_parameters() if p.requires_grad and "working" in n and "lora" in n]
+            if not wm_params:
+                wm_params = [p for n, p in model.named_parameters() if p.requires_grad and "lora" in n]
+            self._cached_params = wm_params
+            self._optimizer = torch.optim.AdamW(wm_params, lr=lr)
 
         total_loss = 0.0
         for _ in range(steps):
             outputs = model(input_ids=input_ids, labels=labels)
             loss = outputs.loss
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(wm_params, 1.0)
-            optimizer.step()
-            optimizer.zero_grad()
+            torch.nn.utils.clip_grad_norm_(self._cached_params, 1.0)
+            self._optimizer.step()
+            self._optimizer.zero_grad()
             total_loss += loss.item()
 
         self.update_count += 1
@@ -165,6 +171,8 @@ class WorkingMemoryLoRA:
 
     def reset(self):
         self.update_count = 0
+        self._optimizer = None
+        self._cached_params = None
 
 
 class LongTermMemoryLoRA:
@@ -479,17 +487,17 @@ class StreamingParameterMemory:
 
         os.makedirs(output_dir, exist_ok=True)
         adapter_dir = os.path.join(output_dir, "adapters")
-        try:
-            self.model.save_pretrained(adapter_dir)
-        except Exception as e:
-            logger.warning("save_pretrained failed (%s), saving adapters individually", e)
-            for name in ["working", "longterm"]:
-                try:
-                    self.model.set_adapter(name)
-                    self.model.save_pretrained(os.path.join(adapter_dir, name))
-                except Exception:
-                    pass
-            self.model.set_adapter("working")
+        os.makedirs(adapter_dir, exist_ok=True)
+
+        for name in ["working", "longterm"]:
+            dest = os.path.join(adapter_dir, name)
+            try:
+                self.model.set_adapter(name)
+                self.model.save_pretrained(dest)
+                logger.info("Saved %s adapter to %s", name, dest)
+            except Exception as e:
+                logger.warning("Failed to save %s adapter: %s", name, e)
+        self.model.set_adapter("working")
 
         with open(os.path.join(output_dir, "reservoir.pkl"), "wb") as f:
             pickle.dump(self.reservoir, f)

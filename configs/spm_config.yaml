@@ -8,7 +8,6 @@ working_memory:
   target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   learning_rate: 5.0e-4
   online_update_steps: 3
-  online_batch_size: 1
 
 long_term_memory:
   lora_r: 64
@@ -24,25 +23,14 @@ consolidation:
   gamma: 0.0
 
 training:
-  per_device_train_batch_size: 4
-  gradient_accumulation_steps: 4
-  num_train_epochs: 5
-  learning_rate: 2.0e-4
-  warmup_ratio: 0.05
-  lr_scheduler_type: "cosine"
-  bf16: true
-  logging_steps: 10
-  save_steps: 500
   max_seq_length: 2048
-  gradient_checkpointing: true
-  dataloader_num_workers: 4
+  checkpoint_interval: 20
 
 streaming:
   session_length: 20
   num_sessions: 100
-  consolidation_frequency: 10
-  replay_ratio: 0.2
 
+# evaluation: documentation-only — eval_streaming.py uses CLI args, not these fields.
 evaluation:
   datasets:
     - name: "personachat"

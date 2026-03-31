@@ -64,27 +64,47 @@ def compute_bleu(predictions: list, references: list) -> float:
     return total / max(len(predictions), 1)
 
 
+def _rouge_l_f1(reference: str, hypothesis: str) -> float:
+    """ROUGE-L F1 between two strings (LCS-based)."""
+    ref_tok = reference.lower().split()
+    hyp_tok = hypothesis.lower().split()
+    if not ref_tok or not hyp_tok:
+        return 0.0
+    m, n = len(ref_tok), len(hyp_tok)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if ref_tok[i - 1] == hyp_tok[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    lcs = dp[m][n]
+    if lcs == 0:
+        return 0.0
+    prec = lcs / n
+    rec = lcs / m
+    return 2 * prec * rec / (prec + rec)
+
+
 def semantic_persona_retention(
     model, tokenizer, persona_facts: list, probe_questions: list, device,
 ) -> float:
-    """NLI-based semantic persona retention: checks if responses entail persona facts."""
+    """Measure persona retention via ROUGE-L F1 between response and persona fact."""
     model.eval()
     prev_cache = getattr(model.config, "use_cache", True)
     model.config.use_cache = True
-    correct = 0
+    scores = []
     try:
         for fact, question in zip(persona_facts, probe_questions):
             prompt = f"<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
             ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
             with torch.no_grad():
                 out = model.generate(input_ids=ids, max_new_tokens=100, do_sample=False)
-            resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-            fact_keywords = fact.lower().split()[:5]
-            if sum(1 for kw in fact_keywords if kw in resp) >= max(1, len(fact_keywords) // 2):
-                correct += 1
+            resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
+            scores.append(_rouge_l_f1(fact, resp))
     finally:
         model.config.use_cache = prev_cache
-    return correct / max(len(persona_facts), 1)
+    return sum(scores) / max(len(scores), 1)
 
 
 def format_turn(user_msg: str, assistant_msg: str, persona: str = "") -> str:
@@ -272,7 +292,7 @@ class DualLoRAEWC:
 class SPMMethod:
     """Our method: Two-Timescale Residual LoRA + KL Distillation Consolidation."""
 
-    def __init__(self, model, tokenizer, config):
+    def __init__(self, model, tokenizer, config, checkpoint_dir=None):
         self.tokenizer = tokenizer
         beta = config.get("consolidation", {}).get("beta", 1.0)
         gamma = config.get("consolidation", {}).get("gamma", 0.0)
@@ -285,6 +305,35 @@ class SPMMethod:
             gamma=gamma,
         )
         self.model = self.spm.model
+
+        if checkpoint_dir:
+            self._load_checkpoint(checkpoint_dir)
+
+    def _load_checkpoint(self, checkpoint_dir):
+        import pickle
+
+        final_dir = os.path.join(checkpoint_dir, "final")
+        if not os.path.isdir(final_dir):
+            final_dir = checkpoint_dir
+
+        adapter_dir = os.path.join(final_dir, "adapters")
+        if os.path.isdir(adapter_dir):
+            for name in ["longterm"]:
+                path = os.path.join(adapter_dir, name)
+                if os.path.isdir(path):
+                    try:
+                        self.spm.model.load_adapter(path, adapter_name=name)
+                        logger.info("Loaded %s adapter from %s", name, path)
+                    except Exception as e:
+                        logger.warning("Failed to load %s adapter: %s", name, e)
+        else:
+            logger.warning("No adapter directory found at %s", adapter_dir)
+
+        reservoir_path = os.path.join(final_dir, "reservoir.pkl")
+        if os.path.isfile(reservoir_path):
+            with open(reservoir_path, "rb") as f:
+                self.spm.reservoir = pickle.load(f)
+            logger.info("Loaded reservoir (%d items)", len(self.spm.reservoir))
 
     def process_turn(self, input_ids, labels):
         return self.spm.process_turn(input_ids, labels)
@@ -361,6 +410,7 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
     session_retention = []
     taught_facts = []
     turn_latencies = []
+    session_adaptation_speeds = []
 
     for sess_idx, session in enumerate(sessions):
         method.start_session()
@@ -382,6 +432,10 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
         if hasattr(method, "end_session"):
             method.end_session()
 
+        if len(sess_losses) >= 2 and sess_losses[0] > 0:
+            speed = (sess_losses[0] - sess_losses[-1]) / sess_losses[0]
+            session_adaptation_speeds.append(max(0.0, speed))
+
         all_losses.extend(sess_losses)
 
         for turn in session[-3:]:
@@ -397,19 +451,17 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
             references.append(turn["assistant"])
 
         if taught_facts and sess_idx % 5 == 0:
-            correct = 0
+            rouge_scores = []
             for fact in taught_facts[-10:]:
                 q_prompt = f"<|im_start|>user\nRemind me: {fact['user']}<|im_end|>\n<|im_start|>assistant\n"
                 ids = tokenizer(q_prompt, return_tensors="pt").input_ids.to(device)
                 try:
                     out = method.generate(ids, max_new_tokens=50)
-                    resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True).lower()
-                    keywords = fact["assistant"].lower().split()[:3]
-                    if any(w in resp for w in keywords):
-                        correct += 1
+                    resp = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
+                    rouge_scores.append(_rouge_l_f1(fact["assistant"], resp))
                 except Exception:
-                    pass
-            retention = correct / max(len(taught_facts[-10:]), 1)
+                    rouge_scores.append(0.0)
+            retention = sum(rouge_scores) / max(len(rouge_scores), 1)
             session_retention.append({"session": sess_idx, "retention": retention})
 
         if sess_idx % 10 == 0:
@@ -425,11 +477,17 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
     if len(retention_scores) >= 2:
         forgetting_rate = max(0, retention_scores[0] - retention_scores[-1]) / max(len(retention_scores) - 1, 1)
 
+    adaptation_speed = (
+        sum(session_adaptation_speeds) / len(session_adaptation_speeds)
+        if session_adaptation_speeds else 0.0
+    )
+
     results = {
         "perplexity": ppl,
         "bleu": bleu,
         "avg_loss": sum(all_losses) / max(len(all_losses), 1) if all_losses else 0.0,
         "semantic_retention_f1": retention_scores[-1] if retention_scores else 0.0,
+        "adaptation_speed": adaptation_speed,
         "forgetting_rate": forgetting_rate,
         "retention_curve": session_retention,
         "num_sessions": len(sessions),
@@ -437,9 +495,9 @@ def evaluate_method(method, method_name: str, tokenizer, sessions: list, device)
     }
 
     logger.info(
-        "    Results: PPL=%.2f BLEU=%.4f Retention=%.4f ForgettingRate=%.4f Latency=%.1fms",
+        "    Results: PPL=%.2f BLEU=%.4f Retention=%.4f AdaptSpeed=%.4f Forget=%.4f Latency=%.1fms",
         results["perplexity"], results["bleu"], results["semantic_retention_f1"],
-        results["forgetting_rate"], results["avg_turn_latency_ms"],
+        results["adaptation_speed"], results["forgetting_rate"], results["avg_turn_latency_ms"],
     )
     return results
 
@@ -459,6 +517,8 @@ def main():
                                  "retrieval", "dual_lora_ewc", "spm"],
                         choices=_all_methods)
     parser.add_argument("--datasets", nargs="+", default=["personachat", "light"])
+    parser.add_argument("--checkpoint_dir", type=str, default=None,
+                        help="Phase 1 SPM training output dir (loads trained adapters for spm method)")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -487,23 +547,23 @@ def main():
             method_name = _method_aliases.get(raw_method_name, raw_method_name)
             logger.info("\n>>> Method: %s on %s", method_name, ds_name)
 
-            tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+            tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
-            device_idx = int(os.environ.get("LOCAL_RANK",
-                             os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0]))
+            device_idx = int(os.environ.get("LOCAL_RANK", 0))
             base_model = None
             for attn_impl in ["sdpa", "eager"]:
                 try:
                     base_model = AutoModelForCausalLM.from_pretrained(
                         base_model_name, torch_dtype=torch.bfloat16,
+                        trust_remote_code=True,
                         attn_implementation=attn_impl,
                         device_map={"": device_idx},
                     )
                     break
-                except (ImportError, ValueError):
-                    pass
+                except (ImportError, ValueError, RuntimeError) as e:
+                    logger.warning("attn_implementation=%s failed: %s", attn_impl, e)
             if base_model is None:
                 raise RuntimeError(f"Cannot load model {base_model_name}")
             base_model.config.use_cache = False
@@ -521,7 +581,8 @@ def main():
             elif method_name == "dual_lora_ewc":
                 method = DualLoRAEWC(base_model, tokenizer, config, ewc_lambda=5000.0)
             elif method_name == "spm":
-                method = SPMMethod(base_model, tokenizer, config)
+                method = SPMMethod(base_model, tokenizer, config,
+                                   checkpoint_dir=args.checkpoint_dir)
             else:
                 continue
 

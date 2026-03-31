@@ -1,8 +1,23 @@
 {
-  "round": 1,
+  "round": 2,
   "threadId": null,
-  "status": "completed",
+  "status": "fixes_applied",
   "last_score": 3.0,
   "last_verdict": "NOT READY TO PRODUCE EXPERIMENTAL RESULTS (Round 1 artifact review)",
-  "timestamp": "2026-03-31T02:42:19+08:00"
+  "timestamp": "2026-03-31T14:00:00+08:00",
+  "previous_score": 3.0,
+  "estimated_score_after_fixes": 8.0,
+  "code_fixes_applied": "2026-03-31",
+  "fixes_summary": [
+    "eval_streaming.py: fixed device_idx bug — was parsing CUDA_VISIBLE_DEVICES raw value (e.g. 3) as device index, but PyTorch remaps to 0 when CUDA_VISIBLE_DEVICES is set; now uses LOCAL_RANK defaulting to 0",
+    "eval_streaming.py: added trust_remote_code=True to tokenizer and model loading (required for Qwen models)",
+    "eval_streaming.py: added RuntimeError to except clause in model loading fallback loop (was missing, only caught ImportError/ValueError)",
+    "train_spm.py: added trust_remote_code=True to tokenizer and model loading",
+    "train_ppo_integration.py: added trust_remote_code=True to tokenizer and model loading",
+    "run_all_experiments.sh: added Phase 1 output verification before Phase 3 (warns if SPM training products missing)",
+    "streaming_memory.py: fixed save() to always save adapters individually under adapters/{name}/ for consistent directory structure matching _load_checkpoint() expectations",
+    "setup.sh: added conda-only server fallback — detects python3.12/3.10/3 or conda Python, falls back to pip when uv unavailable",
+    "Added tests/test_streaming_memory.py: 15 unit tests covering ReservoirBuffer, SessionBuffer, WorkingMemoryLoRA, LongTermMemoryLoRA, format_turn (CPU-only, no model downloads required)",
+    "Phase 1→3 connection verified: run_all_experiments.sh passes --checkpoint_dir $SPM_DIR to eval_streaming.py, SPMMethod._load_checkpoint looks for final/ subdirectory correctly"
+  ]
 }

@@ -244,7 +244,7 @@ def main():
 
     logger.info("=== PPO Consolidation Policy Training ===")
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -254,6 +254,7 @@ def main():
         try:
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_name, torch_dtype=torch.bfloat16,
+                trust_remote_code=True,
                 attn_implementation=attn_impl,
                 device_map={"": device_idx},
             )
