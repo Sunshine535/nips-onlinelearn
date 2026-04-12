@@ -15,8 +15,36 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from peft import LoraConfig, PeftModel, TaskType, get_peft_model
+from peft.tuners.tuners_utils import BaseTunerLayer
 
 logger = logging.getLogger(__name__)
+
+
+def _set_adapters_layerwise(model: nn.Module, adapter_names, trainable_adapters=None):
+    """Enable one or more adapters at the LoRA-layer level.
+
+    ``PeftModel.set_adapter`` in PEFT <=0.18 only accepts a single string.
+    The underlying ``BaseTunerLayer.set_adapter`` already handles lists, so
+    we bypass the model-level method and call each layer directly.
+
+    Args:
+        model: A PeftModel (or any ``nn.Module`` containing ``BaseTunerLayer``).
+        adapter_names: ``str`` or ``list[str]`` of adapters to activate.
+        trainable_adapters: Optional ``set`` of adapter names whose params
+            should remain ``requires_grad=True``.  All other adapters are
+            frozen.  If ``None``, the default PEFT behavior applies (all
+            active adapters trainable).
+    """
+    if isinstance(adapter_names, str):
+        adapter_names = [adapter_names]
+    for module in model.modules():
+        if isinstance(module, BaseTunerLayer):
+            module.set_adapter(adapter_names)
+    if trainable_adapters is not None:
+        for name, param in model.named_parameters():
+            if "lora" not in name:
+                continue
+            param.requires_grad = any(ta in name for ta in trainable_adapters)
 
 
 @dataclass
@@ -135,9 +163,14 @@ class WorkingMemoryLoRA:
         return self.update_count >= self.max_turns
 
     def zero_init(self, model: PeftModel):
-        """Zero-initialize WM-LoRA for new session (residual design)."""
+        """Zero-initialize WM-LoRA B for new session (residual design).
+
+        Only LoRA B is zeroed so the adapter output starts at zero (residual).
+        LoRA A keeps its random initialization to provide gradient flow:
+        dL/dB = (dL/dy) * (A @ x)^T requires A != 0.
+        """
         for name, param in model.named_parameters():
-            if "working" in name and "lora" in name:
+            if "working" in name and "lora_B" in name:
                 param.data.zero_()
         self.update_count = 0
         self._optimizer = None
@@ -146,8 +179,16 @@ class WorkingMemoryLoRA:
     def online_update(
         self, model: PeftModel, input_ids: torch.Tensor, labels: torch.Tensor,
         lr: float = 5e-4, steps: int = 3,
+        grad_callback=None,
     ) -> float:
-        """Per-turn NTP gradient steps on WM-LoRA only."""
+        """Per-turn NTP gradient steps on WM-LoRA only.
+
+        Args:
+            grad_callback: Optional ``(model, loss) -> None`` called after
+                the last backward, before gradients are zeroed.  Lets
+                StreamingMirrorLoRA capture Fisher / invariant snapshots
+                from actual training gradients without a second forward pass.
+        """
         model.train()
         if self._optimizer is None:
             wm_params = [p for n, p in model.named_parameters() if p.requires_grad and "working" in n and "lora" in n]
@@ -157,11 +198,16 @@ class WorkingMemoryLoRA:
             self._optimizer = torch.optim.AdamW(wm_params, lr=lr)
 
         total_loss = 0.0
-        for _ in range(steps):
+        for step_i in range(steps):
             outputs = model(input_ids=input_ids, labels=labels)
             loss = outputs.loss
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self._cached_params, 1.0)
+
+            # Capture gradients from the last training step before zeroing.
+            if grad_callback is not None and step_i == steps - 1:
+                grad_callback(model, loss)
+
             self._optimizer.step()
             self._optimizer.zero_grad()
             total_loss += loss.item()
@@ -274,8 +320,9 @@ class LongTermMemoryLoRA:
                     student_logits = student_out.logits
 
                     min_len = min(student_logits.shape[1], teacher_log.shape[1])
-                    s_logits = student_logits[:, :min_len, :]
-                    t_logits = teacher_log[:, :min_len, :]
+                    # Compute KL in float32 to avoid fp16 log_softmax NaN.
+                    s_logits = student_logits[:, :min_len, :].float()
+                    t_logits = teacher_log[:, :min_len, :].float()
 
                     kl_loss = F.kl_div(
                         F.log_softmax(s_logits, dim=-1),
@@ -302,10 +349,7 @@ class LongTermMemoryLoRA:
             return cache
 
         model.eval()
-        try:
-            model.set_adapter(["working", "longterm"])
-        except (TypeError, ValueError):
-            model.set_adapter("working")
+        _set_adapters_layerwise(model, ["working", "longterm"])
 
         inputs, labels = session_buffer.get_all()
         for inp, lab in zip(inputs, labels):
@@ -394,18 +438,27 @@ class StreamingParameterMemory:
         self.model.add_adapter("longterm", self.longterm.lora_config)
         self.model.set_adapter("working")
 
-    def process_turn(self, input_ids: torch.Tensor, labels: torch.Tensor) -> dict:
+        # LoRA adapters must be in fp32 for gradient flow even when the base
+        # model is in fp16/bf16.  Zero-initialized LoRA B causes fp16 gradients
+        # to underflow to exactly zero, preventing any learning.
+        for name, param in self.model.named_parameters():
+            if "lora" in name:
+                param.data = param.data.float()
+
+    def process_turn(self, input_ids: torch.Tensor, labels: torch.Tensor,
+                     grad_callback=None) -> dict:
         """Process one conversation turn: update WM, store in session buffer."""
-        self.model.set_adapter("working")
-        try:
-            self.model.set_adapter(["working", "longterm"])
-        except (TypeError, ValueError):
-            self.model.set_adapter("working")
+        # Activate both adapters (WM trainable, LT frozen) so the forward
+        # pass sees base + LT + WM.  Uses layer-level API to work around
+        # PeftModel.set_adapter not accepting lists in PEFT <=0.18.
+        _set_adapters_layerwise(self.model, ["working", "longterm"],
+                                trainable_adapters={"working"})
 
         loss = self.working.online_update(
             self.model, input_ids, labels,
             lr=self.working.config.get("learning_rate", 5e-4),
             steps=self.working.config.get("online_update_steps", 3),
+            grad_callback=grad_callback,
         )
 
         self.session_buffer.add(input_ids, labels)
@@ -442,7 +495,9 @@ class StreamingParameterMemory:
         self.reservoir.merge_session(self.session_buffer)
         self.session_buffer.clear()
 
-        self.model.set_adapter("working")
+        # Restore dual-adapter mode for next session's training.
+        _set_adapters_layerwise(self.model, ["working", "longterm"],
+                                trainable_adapters={"working"})
         logger.info("Consolidation complete (loss=%.4f)", loss)
         return loss
 
@@ -451,10 +506,8 @@ class StreamingParameterMemory:
         self.session_id += 1
         self.session_buffer.clear()
         self.working.zero_init(self.model)
-        try:
-            self.model.set_adapter(["working", "longterm"])
-        except (TypeError, ValueError):
-            self.model.set_adapter("working")
+        _set_adapters_layerwise(self.model, ["working", "longterm"],
+                                trainable_adapters={"working"})
         logger.info("Started session %d (residual WM zero-init)", self.session_id)
 
     @torch.no_grad()
@@ -464,10 +517,7 @@ class StreamingParameterMemory:
         """Generate with combined WM + LT adapters."""
         self.model.eval()
         if use_longterm:
-            try:
-                self.model.set_adapter(["working", "longterm"])
-            except (TypeError, ValueError):
-                self.model.set_adapter("longterm")
+            _set_adapters_layerwise(self.model, ["working", "longterm"])
         else:
             self.model.set_adapter("working")
 

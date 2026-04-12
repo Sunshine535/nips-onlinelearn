@@ -1,0 +1,240 @@
+{
+  "sqrt_jump_T1000": {
+    "single_timescale": 5847.839851726102,
+    "dual_timescale": 805.3071566380409,
+    "ema": 7984.238156325357,
+    "periodic_avg": 6331.051169604954,
+    "K_T": 31
+  },
+  "sqrt_jump_T5000": {
+    "single_timescale": 28039.453883230475,
+    "dual_timescale": 1883.1757687198597,
+    "ema": 31617.10291658272,
+    "periodic_avg": 29358.077656609436,
+    "K_T": 70
+  },
+  "sqrt_jump_T10000": {
+    "single_timescale": 413210.7712269854,
+    "dual_timescale": 2625.8709821035727,
+    "ema": 296809.5561347995,
+    "periodic_avg": 450146.828953884,
+    "K_T": 100
+  },
+  "sqrt_jump_T20000": {
+    "single_timescale": 1611828.692623262,
+    "dual_timescale": 3708.0725941528244,
+    "ema": 1202670.5120685177,
+    "periodic_avg": 2010654.0184296889,
+    "K_T": 141
+  },
+  "separated_drift_T1000": {
+    "single_timescale": 12812.739579533252,
+    "dual_timescale": 3438.1222160053844,
+    "ema": 15043.096535729637,
+    "periodic_avg": 13611.422542288994
+  },
+  "separated_drift_T5000": {
+    "single_timescale": 187958.39946845418,
+    "dual_timescale": 135398.54685556763,
+    "ema": 165942.59289265546,
+    "periodic_avg": 146855.3678110665
+  },
+  "separated_drift_T10000": {
+    "single_timescale": 1719092.5653408791,
+    "dual_timescale": 1377256.6225884145,
+    "ema": 1495427.0184253992,
+    "periodic_avg": 1459123.0654222523
+  },
+  "sweep_rhos0.0_ji10": {
+    "single": 1385440.2813993413,
+    "dual": 12850.277168603754,
+    "ratio": 107.81403881188628,
+    "rho_s": 0.0,
+    "jump_interval": 10,
+    "separation": 0.0
+  },
+  "sweep_rhos0.0_ji20": {
+    "single": 192660.15831080885,
+    "dual": 6195.945655717356,
+    "ratio": 31.094552634274677,
+    "rho_s": 0.0,
+    "jump_interval": 20,
+    "separation": 0.0
+  },
+  "sweep_rhos0.0_ji50": {
+    "single": 685126.0071976115,
+    "dual": 2480.4135588884737,
+    "ratio": 276.2144259139718,
+    "rho_s": 0.0,
+    "jump_interval": 50,
+    "separation": 0.0
+  },
+  "sweep_rhos0.0_ji100": {
+    "single": 150739.83909542943,
+    "dual": 1281.0106274697837,
+    "ratio": 117.6725905804283,
+    "rho_s": 0.0,
+    "jump_interval": 100,
+    "separation": 0.0
+  },
+  "sweep_rhos0.0001_ji10": {
+    "single": 1412032.109980854,
+    "dual": 18357.647709029377,
+    "ratio": 76.9179217491102,
+    "rho_s": 0.0001,
+    "jump_interval": 10,
+    "separation": 0.001
+  },
+  "sweep_rhos0.0001_ji20": {
+    "single": 165765.8676123085,
+    "dual": 7869.302023627598,
+    "ratio": 21.06487552702846,
+    "rho_s": 0.0001,
+    "jump_interval": 20,
+    "separation": 0.002
+  },
+  "sweep_rhos0.0001_ji50": {
+    "single": 671304.8792598614,
+    "dual": 6991.06824294045,
+    "ratio": 96.02321933243066,
+    "rho_s": 0.0001,
+    "jump_interval": 50,
+    "separation": 0.005
+  },
+  "sweep_rhos0.0001_ji100": {
+    "single": 138756.4411061938,
+    "dual": 2407.2967786332215,
+    "ratio": 57.639939677472924,
+    "rho_s": 0.0001,
+    "jump_interval": 100,
+    "separation": 0.01
+  },
+  "sweep_rhos0.001_ji10": {
+    "single": 1330211.9993256135,
+    "dual": 486005.3704550753,
+    "ratio": 2.737031481936214,
+    "rho_s": 0.001,
+    "jump_interval": 10,
+    "separation": 0.01
+  },
+  "sweep_rhos0.001_ji20": {
+    "single": 187958.39946845418,
+    "dual": 135398.54685556763,
+    "ratio": 1.3881862385787138,
+    "rho_s": 0.001,
+    "jump_interval": 20,
+    "separation": 0.02
+  },
+  "sweep_rhos0.001_ji50": {
+    "single": 692385.874019665,
+    "dual": 388905.98474937765,
+    "ratio": 1.78034255365306,
+    "rho_s": 0.001,
+    "jump_interval": 50,
+    "separation": 0.05
+  },
+  "sweep_rhos0.001_ji100": {
+    "single": 149133.99956441481,
+    "dual": 93344.33895027432,
+    "ratio": 1.5976758873814547,
+    "rho_s": 0.001,
+    "jump_interval": 100,
+    "separation": 0.1
+  },
+  "sweep_rhos0.005_ji10": {
+    "single": 1359382.7325422883,
+    "dual": 1966426.1511576707,
+    "ratio": 0.691296101682738,
+    "rho_s": 0.005,
+    "jump_interval": 10,
+    "separation": 0.05
+  },
+  "sweep_rhos0.005_ji20": {
+    "single": 282314.1905324664,
+    "dual": 497560.65435609076,
+    "ratio": 0.5673965335900972,
+    "rho_s": 0.005,
+    "jump_interval": 20,
+    "separation": 0.1
+  },
+  "sweep_rhos0.005_ji50": {
+    "single": 894441.5938386671,
+    "dual": 1315016.148146673,
+    "ratio": 0.6801753690243686,
+    "rho_s": 0.005,
+    "jump_interval": 50,
+    "separation": 0.25
+  },
+  "sweep_rhos0.005_ji100": {
+    "single": 177150.27583183642,
+    "dual": 324757.5791005826,
+    "ratio": 0.5454846544996881,
+    "rho_s": 0.005,
+    "jump_interval": 100,
+    "separation": 0.5
+  },
+  "sweep_rhos0.01_ji10": {
+    "single": 1458816.0428246104,
+    "dual": 2048006.3307550824,
+    "ratio": 0.7123103190246279,
+    "rho_s": 0.01,
+    "jump_interval": 10,
+    "separation": 0.1
+  },
+  "sweep_rhos0.01_ji20": {
+    "single": 379700.07081362145,
+    "dual": 507590.53975982865,
+    "ratio": 0.7480440257875575,
+    "rho_s": 0.01,
+    "jump_interval": 20,
+    "separation": 0.2
+  },
+  "sweep_rhos0.01_ji50": {
+    "single": 953652.1993870509,
+    "dual": 1365452.8105711967,
+    "ratio": 0.6984146152865721,
+    "rho_s": 0.01,
+    "jump_interval": 50,
+    "separation": 0.5
+  },
+  "sweep_rhos0.01_ji100": {
+    "single": 243466.3583678156,
+    "dual": 322413.0500300596,
+    "ratio": 0.7551380390623658,
+    "rho_s": 0.01,
+    "jump_interval": 100,
+    "separation": 1.0
+  },
+  "sweep_rhos0.05_ji10": {
+    "single": 1546426.6453728992,
+    "dual": 2134685.3088168437,
+    "ratio": 0.7244283918504181,
+    "rho_s": 0.05,
+    "jump_interval": 10,
+    "separation": 0.5
+  },
+  "sweep_rhos0.05_ji20": {
+    "single": 411001.3169764037,
+    "dual": 551380.8259606283,
+    "ratio": 0.7454037166786636,
+    "rho_s": 0.05,
+    "jump_interval": 20,
+    "separation": 1.0
+  },
+  "sweep_rhos0.05_ji50": {
+    "single": 1018724.3685184589,
+    "dual": 1364157.1471456906,
+    "ratio": 0.746779335980461,
+    "rho_s": 0.05,
+    "jump_interval": 50,
+    "separation": 2.5
+  },
+  "sweep_rhos0.05_ji100": {
+    "single": 257606.18999072842,
+    "dual": 358200.93737090885,
+    "ratio": 0.7191667109569373,
+    "rho_s": 0.05,
+    "jump_interval": 100,
+    "separation": 5.0
+  }
+}

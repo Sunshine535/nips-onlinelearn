@@ -1,29 +1,17 @@
 {
-  "round": 2,
-  "threadId": null,
-  "status": "completed",
-  "last_score": 9.0,
-  "last_verdict": "READY",
-  "timestamp": "2026-03-31T14:00:00+08:00",
-  "previous_score": 3.0,
-  "estimated_score_after_fixes": 9.0,
-  "code_fixes_applied": "2026-03-31",
-  "fixes_summary": [
-    "eval_streaming.py: fixed device_idx bug — was parsing CUDA_VISIBLE_DEVICES raw value (e.g. 3) as device index, but PyTorch remaps to 0 when CUDA_VISIBLE_DEVICES is set; now uses LOCAL_RANK defaulting to 0",
-    "eval_streaming.py: added trust_remote_code=True to tokenizer and model loading (required for Qwen models)",
-    "eval_streaming.py: added RuntimeError to except clause in model loading fallback loop (was missing, only caught ImportError/ValueError)",
-    "train_spm.py: added trust_remote_code=True to tokenizer and model loading",
-    "train_ppo_integration.py: added trust_remote_code=True to tokenizer and model loading",
-    "run_all_experiments.sh: added Phase 1 output verification before Phase 3 (warns if SPM training products missing)",
-    "streaming_memory.py: fixed save() to always save adapters individually under adapters/{name}/ for consistent directory structure matching _load_checkpoint() expectations",
-    "setup.sh: added conda-only server fallback — detects python3.12/3.10/3 or conda Python, falls back to pip when uv unavailable",
-    "Added tests/test_streaming_memory.py: 15 unit tests covering ReservoirBuffer, SessionBuffer, WorkingMemoryLoRA, LongTermMemoryLoRA, format_turn (CPU-only, no model downloads required)",
-    "Phase 1→3 connection verified: run_all_experiments.sh passes --checkpoint_dir $SPM_DIR to eval_streaming.py, SPMMethod._load_checkpoint looks for final/ subdirectory correctly",
-    "eval_streaming.py: PersonaChat sessions now grouped by persona_id instead of sequential chunking — ensures each session maintains consistent persona identity",
-    "eval_streaming.py: LIGHT dataset handler preserves character description as persona instead of setting empty string",
-    "eval_streaming.py: added proxy-metric docstrings to _rouge_l_f1, semantic_persona_retention, compute_bleu clarifying they are ROUGE-L/simplified-BLEU proxies for NLI-based retention",
-    "README.md: PPO Policy phase marked as (auxiliary); added note that Phase 2 is experimental and not required for main contribution",
-    "Added tests/test_integration.py: checkpoint roundtrip, persona session grouping, reservoir buffer, session buffer reset"
-  ],
-  "score": 9
+  "round": 1,
+  "threadId": "019d72eb-ca8b-7400-bbd1-7b3991625471",
+  "status": "in_progress",
+  "difficulty": "nightmare",
+  "last_score": 2.0,
+  "last_verdict": "NOT READY",
+  "timestamp": "2026-04-09T18:00:00+08:00",
+  "pending_experiments": ["synthetic_v2", "llm_smoke_test"],
+  "fixes_applied": [
+    "Fixed invariant detector gradient capture bug (gradients now captured before zero_grad)",
+    "Added K_T=O(sqrt(T)) decreasing-jump stream",
+    "Added properly separated timescale full-drift stream (rho_s=0.001, ji=20)",
+    "Added timescale separation sweep experiment",
+    "GPU venv setup complete: torch 2.10.0+cu128, 4x H100"
+  ]
 }

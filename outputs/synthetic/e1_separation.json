@@ -1,0 +1,65 @@
+{
+  "coeff_only_T500": {
+    "single_timescale": 2702.114154789102,
+    "dual_timescale": 267.4614513191498,
+    "ema": 4251.198493048617,
+    "periodic_avg": 2952.238972177894,
+    "subspace_tracking": 8325.5356888529
+  },
+  "coeff_only_T1000": {
+    "single_timescale": 8683.66656371005,
+    "dual_timescale": 513.5921943161816,
+    "ema": 11367.19650396222,
+    "periodic_avg": 10871.174589343398,
+    "subspace_tracking": 31938.245408237206
+  },
+  "coeff_only_T2000": {
+    "single_timescale": 88686.28326834644,
+    "dual_timescale": 1001.4284401018164,
+    "ema": 74980.49522864015,
+    "periodic_avg": 96386.31179974775,
+    "subspace_tracking": 149325.54015202474
+  },
+  "coeff_only_T5000": {
+    "single_timescale": 685126.0071976115,
+    "dual_timescale": 2480.4112272318425,
+    "ema": 554414.2488862319,
+    "periodic_avg": 683953.3946281971,
+    "subspace_tracking": 1007415.5591138431
+  },
+  "coeff_only_T10000": {
+    "single_timescale": 2614349.4935099613,
+    "dual_timescale": 4984.357770209805,
+    "ema": 2128247.1310539832,
+    "periodic_avg": 2529754.3959500627,
+    "subspace_tracking": 3684066.0399808297
+  },
+  "coeff_only_T20000": {
+    "single_timescale": 10421385.573751332,
+    "dual_timescale": 10051.532580471834,
+    "ema": 8818227.245176354,
+    "periodic_avg": 10001567.574403109,
+    "subspace_tracking": 13050074.836775394
+  },
+  "full_drift_T1000": {
+    "single_timescale": 25029.5937701473,
+    "dual_timescale": 40893.213829906905,
+    "ema": 27680.138158841524,
+    "periodic_avg": 25821.101861512918,
+    "subspace_tracking": 31576.910710954835
+  },
+  "full_drift_T5000": {
+    "single_timescale": 953652.1993870509,
+    "dual_timescale": 1363734.0706528174,
+    "ema": 1005403.616793643,
+    "periodic_avg": 953388.6667548694,
+    "subspace_tracking": 1050491.8984877556
+  },
+  "full_drift_T10000": {
+    "single_timescale": 3489721.418933189,
+    "dual_timescale": 4943940.118437695,
+    "ema": 3602401.7471137755,
+    "periodic_avg": 3515371.253667853,
+    "subspace_tracking": 3762542.5843561846
+  }
+}
