@@ -9,12 +9,12 @@
 # =============================================================================
 set -euo pipefail
 
-PROJECT_DIR=/data/szs/250010072/nwh/nips-onlinelearn
-DATA_DIR=/data/szs/share/onlinelearn
-MODEL_PATH=/data/szs/share/Qwen3.5-9B
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DATA_DIR="${DATA_DIR:-$PROJECT_DIR}"
+MODEL_PATH="${MODEL_PATH:-Qwen/Qwen3.5-9B}"
 
-export HF_HOME="${DATA_DIR}/.cache/huggingface"
-export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
+# HF_HOME is auto-set by the caller (e.g., run.sh); only fallback if unset
+export HF_HOME="${HF_HOME:-$PROJECT_DIR/.cache/huggingface}"
 export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=8
 export NCCL_P2P_DISABLE="${NCCL_P2P_DISABLE:-0}"
@@ -23,14 +23,11 @@ export CUDA_DEVICE_ORDER=PCI_BUS_ID
 
 cd "$PROJECT_DIR"
 
-# ---- Symlink persistent output directories ----
-setup_symlinks() {
-    mkdir -p "${DATA_DIR}/results" "${DATA_DIR}/logs"
-    ln -sfn "${DATA_DIR}/results" "$PROJECT_DIR/results"
-    ln -sfn "${DATA_DIR}/logs"    "$PROJECT_DIR/logs"
-    mkdir -p "$HF_HOME"
-    echo "[symlinks] results -> ${DATA_DIR}/results"
-    echo "[symlinks] logs    -> ${DATA_DIR}/logs"
+# ---- Create output directories (all within project) ----
+setup_dirs() {
+    mkdir -p "$PROJECT_DIR/results" "$PROJECT_DIR/logs"
+    echo "[dirs] results: $PROJECT_DIR/results"
+    echo "[dirs] logs:    $PROJECT_DIR/logs"
 }
 
 # ---- Install dependencies ----
@@ -40,17 +37,13 @@ setup_deps() {
     echo "============================================"
 
     PYTORCH_INDEX="https://download.pytorch.org/whl/cu128"
-    PIP_MIRROR="https://pypi.org/simple/"
 
     pip install "torch==2.10.0" "torchvision" "torchaudio" \
-        --index-url "$PYTORCH_INDEX" \
-        --extra-index-url "$PIP_MIRROR"
+        --index-url "$PYTORCH_INDEX"
 
-    pip install -r "$PROJECT_DIR/requirements.txt" \
-        -i "$PIP_MIRROR"
+    pip install -r "$PROJECT_DIR/requirements.txt"
 
-    pip install deepspeed accelerate trl peft \
-        -i "$PIP_MIRROR"
+    pip install deepspeed accelerate trl peft
 
     pip install flash-attn --no-build-isolation 2>/dev/null \
         || echo "[WARN] flash-attn install failed, continuing without it"
@@ -107,23 +100,23 @@ run_pipeline() {
     echo " Time    : $(date)"
     echo "============================================"
 
-    bash scripts/run_all_experiments.sh 2>&1 | tee "${DATA_DIR}/logs/run_acp_$(date +%Y%m%d_%H%M%S).log"
+    bash scripts/run_all_experiments.sh 2>&1 | tee "${PROJECT_DIR}/logs/run_acp_$(date +%Y%m%d_%H%M%S).log"
 }
 
 # ---- Main ----
 MODE="${1:-all}"
 case "$MODE" in
     setup)
-        setup_symlinks
+        setup_dirs
         setup_deps
         gpu_check
         ;;
     run)
-        setup_symlinks
+        setup_dirs
         run_pipeline
         ;;
     all|*)
-        setup_symlinks
+        setup_dirs
         setup_deps
         run_pipeline
         ;;
