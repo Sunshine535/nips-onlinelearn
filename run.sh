@@ -16,6 +16,11 @@ set -euo pipefail
 PROJ_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJ_DIR"
 
+# --- HF cache: shared across projects in parent dir ---
+export HF_HOME="${HF_HOME:-$(dirname "$PROJ_DIR")/.cache/hf}"
+export TOKENIZERS_PARALLELISM=false
+mkdir -p "$HF_HOME"
+
 # ── Defaults ──
 MODEL="${MODEL:-Qwen/Qwen3.5-9B}"
 MODEL_SMALL="${MODEL_SMALL:-Qwen/Qwen3.5-0.8B}"

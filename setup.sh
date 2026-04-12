@@ -3,114 +3,117 @@ set -e
 PROJ_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "============================================"
-echo " Environment Setup (uv + PyTorch 2.10 + CUDA 12.8)"
+echo " onlinelearn: Environment Setup"
+echo " $(date)"
 echo "============================================"
 
-PIP_MIRROR="https://pypi.org/simple/"
-PYTORCH_INDEX="https://download.pytorch.org/whl/cu128"
-
-# --- Detect available Python (conda, system, or uv-managed) ---
-find_python() {
-    for candidate in python3.12 python3.10 python3; do
-        if command -v "$candidate" &>/dev/null; then
-            echo "$candidate"
-            return 0
+# --- Find Python >= 3.10 ---
+PYTHON_CMD=""
+for cmd in python3.11 python3.12 python3.10 python3; do
+    if command -v "$cmd" &>/dev/null; then
+        ver="$("$cmd" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "0.0")"
+        major="${ver%%.*}"; minor="${ver##*.}"
+        if [ "$major" -ge 3 ] && [ "$minor" -ge 10 ]; then
+            PYTHON_CMD="$cmd"; break
         fi
-    done
-    if [ -n "${CONDA_PREFIX:-}" ]; then
-        local conda_py="${CONDA_PREFIX}/bin/python"
-        if [ -x "$conda_py" ]; then echo "$conda_py"; return 0; fi
     fi
-    echo ""
-    return 1
-}
-
-# --- Install uv if missing ---
-UV_AVAILABLE=1
-if ! command -v uv &>/dev/null; then
-    echo "[1/5] Installing uv ..."
-    if curl -LsSf https://astral.sh/uv/install.sh | sh 2>/dev/null; then
-        export PATH="$HOME/.local/bin:$PATH"
-    else
-        echo "  uv install failed — falling back to pip"
-        UV_AVAILABLE=0
-    fi
-else
-    echo "[1/5] uv already installed: $(uv --version)"
+done
+if [ -z "$PYTHON_CMD" ]; then
+    echo "ERROR: Python >= 3.10 not found."; exit 1
 fi
+echo "[1/3] Python: $PYTHON_CMD ($($PYTHON_CMD --version 2>&1))"
+echo ""
 
 # --- Create venv ---
 VENV_DIR="$PROJ_DIR/.venv"
+if [ -d "$VENV_DIR" ] && { [ ! -f "$VENV_DIR/bin/activate" ] || [ ! -x "$VENV_DIR/bin/python" ]; }; then
+    echo "[2/3] Removing incomplete .venv..."
+    rm -rf "$VENV_DIR"
+fi
 if [ ! -d "$VENV_DIR" ]; then
-    echo "[2/5] Creating Python venv ..."
-    if [ "$UV_AVAILABLE" -eq 1 ]; then
-        uv venv "$VENV_DIR" --python 3.12 2>/dev/null \
-            || uv venv "$VENV_DIR" --python 3.10 2>/dev/null \
-            || uv venv "$VENV_DIR" 2>/dev/null
-    fi
-    if [ ! -d "$VENV_DIR" ]; then
-        PYTHON_BIN=$(find_python)
-        if [ -z "$PYTHON_BIN" ]; then
-            echo "[ERROR] No Python found. Install Python 3.10+ or conda."
-            exit 1
-        fi
-        echo "  Using $PYTHON_BIN to create venv"
-        "$PYTHON_BIN" -m venv "$VENV_DIR" || {
-            echo "[ERROR] Failed to create venv with $PYTHON_BIN"
-            exit 1
-        }
-    fi
+    echo "[2/3] Creating venv at $VENV_DIR ..."
+    "$PYTHON_CMD" -m venv "$VENV_DIR"
+    echo "  Done."
 else
-    echo "[2/5] Venv exists: $VENV_DIR"
+    echo "[2/3] Venv already exists: $VENV_DIR"
 fi
 source "$VENV_DIR/bin/activate"
+echo "  Activated: $(which python)"
+echo ""
 
-# --- Install PyTorch CUDA + project dependencies ---
-echo "[3/5] Installing PyTorch 2.10.0 + CUDA 12.8 + project deps ..."
-if [ "$UV_AVAILABLE" -eq 1 ]; then
-    uv pip install "torch==2.10.0" "torchvision" "torchaudio" \
-        -r "$PROJ_DIR/requirements.txt" \
-        --index-url "$PYTORCH_INDEX" \
-        --extra-index-url "$PIP_MIRROR" \
-        --index-strategy unsafe-best-match
-else
-    pip install --upgrade pip
-    pip install "torch==2.10.0" "torchvision" "torchaudio" \
-        --index-url "$PYTORCH_INDEX"
-    pip install -r "$PROJ_DIR/requirements.txt"
-fi
-
-# --- Optional: flash-attention (skip if already attempted) ---
-_FA_MARKER="$VENV_DIR/.flash_attn_attempted"
-if [ ! -f "$_FA_MARKER" ]; then
-    echo "[5/5] Installing flash-attn + flash-linear-attention (optional, first time only) ..."
-    if [ "$UV_AVAILABLE" -eq 1 ]; then
-        uv pip install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped"
-        uv pip install flash-linear-attention causal-conv1d --no-build-isolation 2>/dev/null \
-            || echo "  flash-linear-attention skipped"
+# --- Detect CUDA version and pick PyTorch index ---
+echo "[3/3] Detecting CUDA version..."
+TORCH_INDEX="https://download.pytorch.org/whl/cu121"
+if command -v nvidia-smi &>/dev/null; then
+    CUDA_VER=$(nvidia-smi 2>/dev/null | grep -oP "CUDA Version: \K[0-9]+\.[0-9]+" || echo "")
+    if [ -n "$CUDA_VER" ]; then
+        CUDA_MAJOR=$(echo "$CUDA_VER" | cut -d. -f1)
+        CUDA_MINOR=$(echo "$CUDA_VER" | cut -d. -f2)
+        echo "  System CUDA: $CUDA_VER"
+        if [ "$CUDA_MAJOR" -ge 13 ] || { [ "$CUDA_MAJOR" -eq 12 ] && [ "$CUDA_MINOR" -ge 8 ]; }; then
+            TORCH_INDEX="https://download.pytorch.org/whl/cu128"
+            echo "  -> Using PyTorch cu128"
+        elif [ "$CUDA_MAJOR" -eq 12 ] && [ "$CUDA_MINOR" -ge 4 ]; then
+            TORCH_INDEX="https://download.pytorch.org/whl/cu124"
+            echo "  -> Using PyTorch cu124"
+        else
+            echo "  -> Using PyTorch cu121"
+        fi
     else
-        pip install flash-attn --no-build-isolation 2>/dev/null || echo "  flash-attn skipped"
-        pip install flash-linear-attention causal-conv1d --no-build-isolation 2>/dev/null \
-            || echo "  flash-linear-attention skipped"
+        echo "  CUDA version not detected, defaulting to cu121"
     fi
-    touch "$_FA_MARKER"
 else
-    echo "[5/5] Flash-attn already attempted (skip rebuild)"
+    TORCH_INDEX="https://download.pytorch.org/whl/cpu"
+    echo "  No NVIDIA GPU detected, using CPU PyTorch"
 fi
+echo ""
+
+pip install wheel
+
+echo ">>> $(date) - Installing torch, torchvision, torchaudio from $TORCH_INDEX ..."
+pip install "torch>=2.4.0" "torchvision" "torchaudio" \
+    --index-url "$TORCH_INDEX"
+echo ""
+
+# Pin torch version so requirements.txt doesn't overwrite it from corporate mirror
+TORCH_PIN="torch==$(pip show torch | grep '^Version:' | awk '{print $2}')"
+TV_PIN="torchvision==$(pip show torchvision | grep '^Version:' | awk '{print $2}')"
+TA_PIN="torchaudio==$(pip show torchaudio | grep '^Version:' | awk '{print $2}')"
+CONSTRAINT_FILE=$(mktemp)
+echo "$TORCH_PIN" > "$CONSTRAINT_FILE"
+echo "$TV_PIN" >> "$CONSTRAINT_FILE"
+echo "$TA_PIN" >> "$CONSTRAINT_FILE"
+echo "  Pinned: $TORCH_PIN, $TV_PIN, $TA_PIN"
+echo ""
+
+echo ">>> $(date) - Installing requirements.txt (torch version pinned)..."
+pip install -r "$PROJ_DIR/requirements.txt" -c "$CONSTRAINT_FILE"
+rm -f "$CONSTRAINT_FILE"
+echo ""
+
+echo ">>> $(date) - Installing flash-attn (optional, may take a few minutes)..."
+pip install flash-attn --no-build-isolation || echo "  flash-attn install failed (optional, skipping)"
+pip install flash-linear-attention causal-conv1d --no-build-isolation || echo "  flash-linear-attention skipped (optional)"
+echo ""
 
 # --- Verify ---
-echo ""
+echo "============================================"
+echo " Verification  $(date)"
 echo "============================================"
 python -c "
-import torch
-print(f'  PyTorch  : {torch.__version__}')
-print(f'  CUDA     : {torch.version.cuda}')
-print(f'  GPUs     : {torch.cuda.device_count()}')
+import torch, transformers, trl, peft, accelerate
+print(f'  PyTorch       : {torch.__version__}')
+print(f'  CUDA (torch)  : {torch.version.cuda}')
+print(f'  GPUs          : {torch.cuda.device_count()}')
 for i in range(torch.cuda.device_count()):
     print(f'    GPU {i}: {torch.cuda.get_device_name(i)}')
+print(f'  transformers  : {transformers.__version__}')
+print(f'  trl           : {trl.__version__}')
+print(f'  peft          : {peft.__version__}')
+print(f'  accelerate    : {accelerate.__version__}')
 "
 echo "============================================"
 echo ""
-echo "Setup complete!"
-echo "  Activate:  source $VENV_DIR/bin/activate"
-echo "  Run:       bash scripts/run_all_experiments.sh"
+echo "Setup complete!  $(date)"
+echo "  Activate:  source .venv/bin/activate"
+echo "  Run:       bash run.sh"
