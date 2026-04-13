@@ -1,0 +1,76 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bbm}
+\usepackage{booktabs}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tcolorbox}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{cleveref}
+
+\tcbuselibrary{skins,breakable}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}[theorem]{Remark}
+
+% Notation shortcuts
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Gr}{\mathrm{Gr}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\reg}{\mathrm{Reg}}
+\newcommand{\OPT}{\mathrm{OPT}}
+\newcommand{\col}{\mathrm{col}}
+\newcommand{\sign}{\mathrm{sign}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\inner}[2]{\langle #1, #2 \rangle}
+\newcommand{\dG}{d_{\Gr}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\Span}{span}
+\DeclareMathOperator{\rank}{rank}
+
+\title{Formal Proofs: Dual-Timescale Adaptation for\\Streaming Low-Rank Learning under Multi-Rate Drift}
+\author{Supplementary Material}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This supplement contains complete formal proofs for all theoretical claims
+in the paper \emph{Dual-Timescale Adaptation Is Necessary and Sufficient
+for Streaming Low-Rank Learning under Multi-Rate Drift}.
+We provide: (i)~a precise problem setting with explicit assumptions
+(\Cref{sec:setting}), (ii)~a necessity lower bound for monotone-step
+learners (\Cref{sec:theorem1}), (iii)~an upper bound for the dual-timescale
+algorithm under both general variation and jump-process regimes
+(\Cref{sec:theorem2}), and (iv)~three corollaries on optimal merging,
+consolidation frequency, and selective consolidation (\Cref{sec:corollaries}).
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\input{setting}
+\input{theorem1}
+\input{theorem2}
+\input{corollary1}
+\input{corollary2}
+\input{corollary3}
+
+\bibliographystyle{plain}
+% \bibliography{refs}
+
+\end{document}

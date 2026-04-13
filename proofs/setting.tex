@@ -1,0 +1,263 @@
+%% setting.tex — Problem setting, assumptions, definitions
+%% Fixes Issues: #1 (no proofs), #2 (strong convexity), #3/#4 (gauge),
+%%               #12 (regret definition), #13 (probability mode)
+\section{Problem Setting and Assumptions}
+\label{sec:setting}
+
+%% ======================================================================
+\subsection{Streaming Low-Rank Learning}
+%% ======================================================================
+
+We consider a learner receiving a stream of data $(x_t, y_t)_{t=1}^T$
+drawn i.i.d.\ from a time-varying distribution $\mathcal{D}_t$. The
+learner maintains a parameter $\theta_t \in \R^d$ and suffers per-round
+loss $\ell_t(\theta) \coloneqq \ell(\theta; x_t, y_t)$.
+
+\begin{definition}[Population loss]
+\label{def:population-loss}
+The \emph{population loss} at time $t$ is
+\[
+  L_t(\theta) \coloneqq \E_{(x,y) \sim \mathcal{D}_t}\bigl[\ell(\theta; x, y)\bigr].
+\]
+\end{definition}
+
+\begin{definition}[Ground-truth optimum]
+\label{def:optimum}
+The time-varying optimum is $\theta^*_t \coloneqq \argmin_{\theta \in \R^d} L_t(\theta)$,
+assumed to exist and be unique (ensured by strong convexity below).
+\end{definition}
+
+%% ======================================================================
+\subsection{Two-Rate Structural Decomposition}
+%% ======================================================================
+
+\begin{assumption}[Low-rank decomposition]
+\label{ass:decomposition}
+There exist a slowly varying subspace $\mathcal{U}_t = \col(U_t)$ where
+$U_t \in \R^{d \times r}$ has orthonormal columns ($U_t^\top U_t = I_r$,
+so $U_t$ represents a point on the Grassmannian $\Gr(d,r)$), a fast-varying
+coefficient vector $a_t \in \R^r$, and a residual $\rho_t \in \R^d$
+such that
+\[
+  \theta^*_t = U_t\, a_t + \rho_t,
+  \qquad
+  \norm{\rho_t} \leq \rho_{\max},
+  \qquad
+  1 \leq r < d.
+\]
+The residual $\rho_t$ captures the approximation error of projecting
+$\theta^*_t$ onto the rank-$r$ subspace.
+\end{assumption}
+
+%% ======================================================================
+\subsection{Gauge-Invariant Subspace Distance}
+%% ======================================================================
+
+\begin{remark}[Gauge invariance --- fixes Issues \#3, \#4]
+\label{rem:gauge}
+The Frobenius distance $\norm{U_t - U_{t'}}_F$ is \emph{not}
+gauge-invariant: for any orthogonal $R \in \mathcal{O}(r)$,
+$U_t' = U_t R$ represents the \emph{same} subspace but can have
+$\norm{U_t - U_t'}_F$ up to $\sqrt{2r}$.
+We therefore use the \emph{principal-angle (geodesic) distance}
+on $\Gr(d,r)$.
+\end{remark}
+
+\begin{definition}[Grassmann distance]
+\label{def:grassmann-dist}
+Let $U, U' \in \R^{d \times r}$ have orthonormal columns. Let
+$\sigma_1 \geq \cdots \geq \sigma_r$ be the singular values of
+$U^\top U'$. The \emph{principal angles} are
+$\theta_i = \arccos(\min(\sigma_i, 1))$ for $i = 1, \ldots, r$.
+The Grassmann distance is
+\[
+  \dG(\col(U),\, \col(U'))
+  \coloneqq \norm{\sin \Theta}_F
+  = \Bigl(\sum_{i=1}^r \sin^2\theta_i\Bigr)^{1/2}.
+\]
+Equivalently, $\dG^2 = r - \norm{U^\top U'}_F^2$ when both have
+orthonormal columns.
+\end{definition}
+
+\begin{lemma}[Grassmann distance properties]
+\label{lem:grassmann-props}
+$\dG$ is a metric on $\Gr(d,r)$ satisfying:
+\begin{enumerate}[nosep]
+  \item $0 \leq \dG \leq \sqrt{r}$;
+  \item $\dG(\col(U), \col(UR)) = 0$ for all $R \in \mathcal{O}(r)$
+        \textup{(gauge invariance)};
+  \item $\dG \leq \norm{U - U'}_F \leq \sqrt{2}\, \dG$ when both
+        $U, U'$ are orthonormal \textup{(Frobenius sandwich)}.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) follows from $\sin^2\theta_i \in [0,1]$.
+(2): $U$ and $UR$ have the same column space, so
+$\sigma_i(U^\top(UR)) = \sigma_i(R) = 1$ for all $i$, giving
+$\theta_i = 0$.
+(3): Using $\norm{U - U'}_F^2 = 2r - 2\tr(U^\top U')$ and the
+relation between trace and singular values:
+$\tr(U^\top U') \leq \sum_i \sigma_i = \sum_i \cos\theta_i$,
+so $\norm{U-U'}_F^2 = 2\sum_i(1-\cos\theta_i) \leq
+2\sum_i \sin^2\theta_i / (1+\cos\theta_i) \cdot 2 \leq
+2\sum_i \sin^2\theta_i = 2\dG^2$ using $1-\cos\theta \leq
+\sin^2\theta$ for $\theta \in [0,\pi/2]$.
+The lower bound: $\norm{U-U'}_F^2 \geq 2\sum_i(1-\cos\theta_i)
+\geq \sum_i \sin^2\theta_i = \dG^2$ using $1-\cos\theta \geq
+\sin^2\theta/2$.
+\end{proof}
+
+%% ======================================================================
+\subsection{Drift Variation Budgets}
+%% ======================================================================
+
+\begin{definition}[Slow variation]
+\label{def:slow-variation}
+The \emph{slow (subspace) variation} over horizon $T$ is
+\[
+  V_s(T) \coloneqq \sum_{t=1}^{T-1} \dG\bigl(\col(U_t),\, \col(U_{t+1})\bigr).
+\]
+\end{definition}
+
+\begin{definition}[Fast variation --- jump process]
+\label{def:fast-variation}
+The fast (coefficient) variation is modeled as a \emph{piecewise-constant
+jump process}: there exist times $0 = \tau_0 < \tau_1 < \cdots < \tau_{K_T} \leq T$
+such that $a_t = a_{\tau_k}$ for $t \in [\tau_k, \tau_{k+1})$. We write
+$K_T$ for the number of jumps and define
+\[
+  V_f(T) \coloneqq \sum_{k=1}^{K_T} \norm{a_{\tau_k} - a_{\tau_{k-1}}}.
+\]
+\end{definition}
+
+\begin{assumption}[Bounded variation]
+\label{ass:bounded-variation}
+$V_s(T)$ and $V_f(T)$ are finite for all $T$. We also assume
+minimum jump size $\Delta_0 > 0$:
+\[
+  \norm{a_{\tau_k} - a_{\tau_{k-1}}} \geq \Delta_0
+  \quad \text{for all } k = 1, \ldots, K_T.
+\]
+\end{assumption}
+
+\begin{assumption}[Bounded coefficients]
+\label{ass:bounded-coeff}
+$\norm{a_t} \leq A_{\max}$ for all $t$. This ensures the jump magnitudes
+are bounded: $\norm{a_{\tau_k} - a_{\tau_{k-1}}} \leq 2A_{\max}$.
+\end{assumption}
+
+%% ======================================================================
+\subsection{Loss Assumptions (on Population Loss)}
+%% ======================================================================
+
+The following assumptions apply to the \emph{population loss} $L_t$,
+\textbf{not} the per-sample loss $\ell_t$. This is a critical distinction
+(cf.\ Issue~\#2): the per-sample squared loss
+$\ell_t(\theta) = \frac{1}{2}(\theta^\top x_t - y_t)^2$ has rank-1
+Hessian $x_t x_t^\top$ for $d > 1$, which is \emph{not} strongly convex.
+But the population loss $L_t(\theta) = \frac{1}{2}\E[(\theta^\top x - y)^2]$
+has Hessian $\Sigma_t = \E[x_t x_t^\top]$, which is $\mu$-strongly convex
+when $\lambda_{\min}(\Sigma_t) \geq \mu > 0$.
+
+\begin{assumption}[Strong convexity of population loss]
+\label{ass:strong-convexity}
+For all $t \in [T]$, the population loss $L_t$ is $\mu$-strongly convex:
+\[
+  L_t(\theta') \geq L_t(\theta) + \inner{\nabla L_t(\theta)}{\theta'-\theta}
+  + \frac{\mu}{2}\norm{\theta'-\theta}^2,
+  \qquad \forall\, \theta, \theta' \in \R^d,
+\]
+where $\mu = \inf_{t \in [T]} \lambda_{\min}\bigl(\nabla^2 L_t(\theta^*_t)\bigr) > 0$.
+\end{assumption}
+
+\begin{assumption}[$L$-smoothness of population loss]
+\label{ass:smoothness}
+For all $t \in [T]$, $L_t$ is $L$-smooth:
+\[
+  \norm{\nabla L_t(\theta) - \nabla L_t(\theta')} \leq L\norm{\theta - \theta'},
+  \qquad \forall\, \theta, \theta' \in \R^d.
+\]
+The condition number is $\kappa \coloneqq L/\mu \geq 1$.
+\end{assumption}
+
+\begin{assumption}[Bounded noise]
+\label{ass:noise}
+The stochastic gradient $g_t(\theta) = \nabla \ell_t(\theta)$ is an
+unbiased estimator of $\nabla L_t(\theta)$ with bounded variance:
+\[
+  \E\bigl[\norm{g_t(\theta) - \nabla L_t(\theta)}^2 \bigm| \theta\bigr]
+  \leq \sigma^2, \qquad \forall\, \theta \in \R^d.
+\]
+\end{assumption}
+
+%% ======================================================================
+\subsection{Regret Definition}
+%% ======================================================================
+
+\begin{definition}[Expected dynamic regret --- fixes Issue~\#12]
+\label{def:regret}
+The \emph{expected dynamic regret} of an algorithm producing
+$\theta_1, \ldots, \theta_T$ (where $\theta_t$ is $\mathcal{F}_{t-1}$-measurable,
+$\mathcal{F}_t = \sigma(x_1,y_1,\ldots,x_t,y_t)$) is
+\[
+  \reg_T \coloneqq \E\Biggl[\sum_{t=1}^T
+    \bigl(L_t(\theta_t) - L_t(\theta^*_t)\bigr)\Biggr],
+\]
+where the expectation is over the randomness in $(x_t, y_t)_{t=1}^T$
+and any internal randomness of the algorithm.
+\end{definition}
+
+\begin{remark}[Probability mode --- fixes Issue~\#13]
+\label{rem:prob-mode}
+All bounds in this supplement are stated \emph{in expectation}.
+By Markov's inequality, an expected regret bound of $\E[\reg_T] \leq R$
+implies a high-probability bound $\Pr[\reg_T > R/\delta] \leq \delta$.
+Sharper high-probability bounds (e.g., via Azuma--Hoeffding for bounded
+differences) are possible but beyond the scope of these proofs.
+\end{remark}
+
+%% ======================================================================
+\subsection{Applicability to LLM Fine-Tuning}
+%% ======================================================================
+
+\begin{remark}[Theory--practice scope]
+\label{rem:scope}
+\Cref{ass:strong-convexity,ass:smoothness} hold for quadratic / linear
+regression with well-conditioned covariance. They do \emph{not} hold
+for LLM next-token prediction loss, which is non-convex in the full
+parameter space and only approximately locally convex in the LoRA subspace
+near a pre-trained minimum.
+
+The theorems below therefore provide \emph{motivating theory} for the
+dual-timescale principle. The Mirror-LoRA algorithm applied to LLMs is
+a \emph{theory-inspired heuristic}, not a formally justified instantiation
+of the theoretical framework. The empirical evaluation (Section~5 of
+the main paper) demonstrates that the dual-timescale principle yields
+strong performance on real LLMs despite the gap between theory and practice.
+\end{remark}
+
+%% ======================================================================
+\subsection{Assumption Summary}
+%% ======================================================================
+
+\begin{center}
+\begin{tabular}{clcc}
+\toprule
+\textbf{ID} & \textbf{Assumption} & \textbf{Used by} & \textbf{Status} \\
+\midrule
+A1 & $L_t$ is $\mu$-strongly convex (\Cref{ass:strong-convexity})
+   & Thm~1,2 & Holds for linear-Gaussian \\
+A2 & $L_t$ is $L$-smooth (\Cref{ass:smoothness})
+   & Thm~1,2 & Holds for linear-Gaussian \\
+A3 & Low-rank decomposition (\Cref{ass:decomposition})
+   & Thm~1,2 & By construction (synthetic) \\
+A4 & Bounded variation (\Cref{ass:bounded-variation})
+   & Thm~1,2 & Finite horizon \\
+A5 & Bounded coefficients (\Cref{ass:bounded-coeff})
+   & Thm~1 & Replacement jumps \\
+A6 & Bounded noise (\Cref{ass:noise})
+   & Thm~2 & Bounded loss \\
+\bottomrule
+\end{tabular}
+\end{center}

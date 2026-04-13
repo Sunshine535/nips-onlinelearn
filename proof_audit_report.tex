@@ -1,0 +1,330 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tcolorbox}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{beforebox}{colback=red!5,colframe=red!75!black,title=BEFORE (Original Claim),fonttitle=\bfseries,breakable}
+\newtcolorbox{afterbox}{colback=green!5,colframe=green!50!black,title=AFTER (Salvageable Version),fonttitle=\bfseries,breakable}
+\newtcolorbox{whywrongbox}{colback=orange!5,colframe=orange!75!black,title=WHY WRONG,fonttitle=\bfseries,breakable}
+\newtcolorbox{insightbox}{colback=blue!5,colframe=blue!50!black,title=KEY INSIGHT,fonttitle=\bfseries,breakable}
+\newtcolorbox{warningbox}{colback=yellow!5,colframe=yellow!75!black,title=WARNING,fonttitle=\bfseries,breakable}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+
+\title{Proof Audit Report:\\Streaming Mirror-LoRA Theoretical Claims}
+\author{Cross-Model Adversarial Review\\GPT-5.4 (xhigh) + Claude Opus 4}
+\date{April 14, 2026 --- Round 1}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents the rigorous verification of five theoretical claims
+(3~theorems + 3~corollaries) in the paper
+\emph{Dual-Timescale Adaptation Is Necessary and Sufficient for Streaming
+Low-Rank Learning under Multi-Rate Drift}.
+Cross-model adversarial review identified \textbf{30 issues} including
+\textbf{8~FATAL}, \textbf{10~CRITICAL}, \textbf{7~MAJOR}, and
+\textbf{5~MINOR} problems.
+The acceptance gate is \textbf{NOT MET}.
+This report details each issue with before/after analysis and salvage recommendations.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%% ======================================================================
+\section{Overview}
+%% ======================================================================
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Severity} & \textbf{Count} & \textbf{Fixed} & \textbf{Open} & \textbf{Gate Req.} \\
+\midrule
+FATAL    & 8  & 0 & 8  & 0 required \\
+CRITICAL & 10 & 0 & 10 & 0 required \\
+MAJOR    & 7  & 0 & 7  & --- \\
+MINOR    & 5  & 0 & 5  & --- \\
+\midrule
+\textbf{Total} & \textbf{30} & \textbf{0} & \textbf{30} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{warningbox}
+\textbf{No formal proofs exist anywhere in the repository.}
+All theoretical claims are one-line assertions in proposal documents.
+The synthetic benchmark provides empirical illustrations, not proofs.
+\end{warningbox}
+
+%% ======================================================================
+\section{FATAL Issue \#2: Strong Convexity Assumption}
+%% ======================================================================
+
+\begin{beforebox}
+\textbf{Claim (FINAL\_PROPOSAL.md:33):}
+``Streaming prediction with loss $\ell_t(\theta)$ that is $\mu$-strongly convex
+and $L$-smooth in adapted low-rank parameters.''
+
+Used by: Theorem~1 (Necessity), Theorem~2 (Sufficiency), all corollaries.
+\end{beforebox}
+
+\begin{whywrongbox}
+\textbf{Counterexample (verified):}
+The per-sample squared loss
+$\ell_t(\theta) = \tfrac{1}{2}(\theta^\top x_t - y_t)^2$
+has Hessian $H_t = x_t x_t^\top$, which is rank-1 for $d > 1$.
+This is \emph{not} strongly convex. Even the project's own synthetic
+benchmark (\texttt{synthetic\_benchmark.py:129}) uses this loss.
+
+For LLM NTP loss, the landscape is highly non-convex even restricted
+to the LoRA subspace. Strong convexity is indefensible without heavy
+additional assumptions (e.g., batch loss with well-conditioned features).
+\end{whywrongbox}
+
+\begin{afterbox}
+\textbf{Salvageable version:}
+\begin{itemize}[nosep]
+\item Use the \emph{expected} (batch) loss $L(\theta) = \mathbb{E}[\ell_t(\theta)]$,
+      which for Gaussian $x_t \sim \mathcal{N}(0, \Sigma)$ gives
+      $\nabla^2 L = \Sigma$, PD if $\Sigma \succ 0$.
+\item Explicitly state: ``Under the population loss with well-conditioned
+      feature covariance $\Sigma \succeq \mu I$\ldots''
+\item For LLM claims: drop strong convexity entirely; present as
+      ``theory-inspired heuristic.''
+\end{itemize}
+\end{afterbox}
+
+%% ======================================================================
+\section{FATAL Issue \#6: Quantifier Error in Theorem 1}
+%% ======================================================================
+
+\begin{beforebox}
+\textbf{Theorem 1 (Necessity):}
+``\emph{Any} single-timescale algorithm achieving $O(\sqrt{T})$ on stationary
+streams suffers $\Omega(T)$ on valid two-scale drift sequences.''
+\end{beforebox}
+
+\begin{whywrongbox}
+``Single-timescale'' is undefined. The proof sketch only analyzes decaying-LR
+SGD with $\eta_t = c/\sqrt{t}$. This excludes:
+\begin{itemize}[nosep]
+\item Adam/AdaGrad (adaptive preconditioner may enable fast recovery)
+\item Restarted OGD / change-point detection algorithms
+\item Expert mixtures / strongly adaptive algorithms
+\item Constant-LR SGD with periodic averaging (which IS single-model)
+\end{itemize}
+The quantifier ``any'' is indefensible without a universal information-theoretic
+argument.
+
+\textbf{Candidate counterexample}: Adam with constant LR.
+After a coefficient jump, the adaptive second-moment estimate is small in the
+jump direction, giving an effectively large step size for recovery.
+\end{whywrongbox}
+
+\begin{afterbox}
+\textbf{Salvageable version:}
+\begin{proposition}[Narrow Necessity]
+For any algorithm in the class of \emph{single-recursion learners} with
+monotonically decaying step size $\eta_t = c \cdot t^{-\alpha}$,
+$\alpha \in (0,1]$, on strongly convex batch loss:
+if the algorithm achieves $O(\sqrt{T})$ stationary regret,
+then there exists a two-rate drift sequence with $K_T = \Theta(\sqrt{T})$
+jumps of size $\Delta \geq \Delta_0 > 0$ such that expected dynamic regret
+is $\Omega(T)$.
+\end{proposition}
+\end{afterbox}
+
+%% ======================================================================
+\section{FATAL Issue \#15: Regret Bound Mismatch}
+%% ======================================================================
+
+\begin{beforebox}
+\textbf{Claim (IDEA\_REPORT.md:11, FINAL\_PROPOSAL.md:37):}
+``Dual-timescale achieves $O(\sqrt{T})$ regret.''
+
+\textbf{Theorem 2 bound:}
+$\mathrm{Reg}_T \leq C_1\sqrt{T(V_f+1)} + C_2\sqrt{T(V_s+1)} + C_3$
+\end{beforebox}
+
+\begin{whywrongbox}
+Under the claimed regime $K_T = \Theta(\sqrt{T})$ with constant jump size
+$\Delta$:
+\[
+V_f = K_T \cdot \Delta = \Theta(\sqrt{T})
+\]
+Substituting into Theorem~2:
+\[
+\mathrm{Reg}_T \leq C_1\sqrt{T \cdot \Theta(\sqrt{T})} + \cdots
+= C_1 \cdot \Theta(T^{3/4}) + \cdots
+\]
+The bound gives $O(T^{3/4})$, \textbf{not} $O(\sqrt{T})$.
+The ``$O(\sqrt{T})$'' claim in executive summaries is \textbf{false}
+under the theorem's own parameter regime.
+\end{whywrongbox}
+
+\begin{afterbox}
+\textbf{Options:}
+\begin{enumerate}[nosep]
+\item Correct the claim to $O(T^{3/4})$ (honest but less impressive)
+\item Prove a sharper theorem for jump processes that exploits window-OLS
+      exact recovery (would give $O(\sqrt{T} + K_T \cdot w)$ where $w$ is
+      window size, which IS $O(\sqrt{T})$ for constant $w$)
+\item State the bound for the constant-$V_f$ regime where $O(\sqrt{T})$
+      actually holds
+\end{enumerate}
+\end{afterbox}
+
+%% ======================================================================
+\section{FATAL Issues \#18--19: Corollary 1 Failures}
+%% ======================================================================
+
+\begin{beforebox}
+\textbf{Corollary 1:}
+``Fisher-precision averaging $\theta_{\text{merge}} = (\sum F_i)^{-1}(\sum F_i \theta_i)$
+decomposes into distillation on recent data + replay on past data.''
+\end{beforebox}
+
+\begin{whywrongbox}
+\textbf{Two independent fatal problems:}
+\begin{enumerate}
+\item \textbf{Shape mismatch}: WM-LoRA has rank 16, LT-LoRA has rank 64.
+      Direct parameter averaging $\theta_{\text{merge}} = \ldots$ is
+      \emph{not even defined}. The code itself states: ``direct parameter
+      merge is not possible'' (streaming\_mirror\_lora.py:699).
+
+\item \textbf{No derivation}: The claimed decomposition
+      ``Fisher merge = distillation + replay'' has no formal derivation
+      anywhere. The code implements iterative KL divergence minimization +
+      NTP replay SGD, which is a multi-step optimization procedure, not a
+      closed-form precision-weighted average.
+\end{enumerate}
+
+\textbf{Empirical contradiction}: Saved E5 results show Fisher-weighted
+merge performs \emph{worse} than uniform averaging and EMA.
+\end{whywrongbox}
+
+\begin{afterbox}
+\begin{remark}[Heuristic Analogy]
+Under a Laplace approximation to the posterior over shared-space parameters,
+the optimal merge of two Gaussian posteriors
+$\mathcal{N}(\theta_i, F_i^{-1})$ is the precision-weighted mean.
+In the dual-LoRA architecture with mismatched ranks, this motivates
+(but does not formally justify) the KL distillation + replay procedure
+as an approximate behavioral merge.
+\end{remark}
+\end{afterbox}
+
+%% ======================================================================
+\section{Counterexample Summary}
+%% ======================================================================
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{CE} & \textbf{Target} & \textbf{Status} & \textbf{Description} \\
+\midrule
+1 & A1 (strong convexity)      & Verified   & rank-1 Hessian for $d>1$ \\
+2 & V\_s gauge invariance       & Verified   & rotation $U \to UR$ changes distance \\
+3 & ``Any single-timescale''   & Candidate  & Adam may recover fast from jumps \\
+4 & $\Omega(T)$ lower bound    & Verified   & $\Delta_T = T^{-2} \to$ regret $\to 0$ \\
+5 & Thm2 sufficiency           & Verified   & E1 saved: dual worse in full drift \\
+6 & Cor3 selectivity           & Verified   & E4 saved: selective worse \\
+7 & Cor1 Fisher merge          & Verified   & E5 saved: Fisher worse than uniform \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%% ======================================================================
+\section{Proof-Obligation Diff}
+%% ======================================================================
+
+\subsection{Before (Current State)}
+
+\begin{itemize}[nosep]
+\item 3 theorems claimed --- \textcolor{red}{0 proved}
+\item 3 corollaries claimed --- \textcolor{red}{0 derived}
+\item 8 assumptions listed --- \textcolor{red}{0 verified for LLM setting}
+\item 7 micro-claims identified --- \textcolor{red}{2 with verified counterexamples}
+\end{itemize}
+
+\subsection{After (If Option A Salvage Applied)}
+
+\begin{itemize}[nosep]
+\item 2 propositions (narrowed) --- provable in linear-Gaussian setting
+\item 1 remark (Fisher analogy) --- standard Laplace approximation
+\item 1 heuristic ($B^*$) --- from stylized cost model
+\item Corollary~3 --- dropped or labeled conjecture
+\item LLM claims --- ``theory-inspired,'' not ``theory-derived''
+\end{itemize}
+
+%% ======================================================================
+\section{Recommended Path Forward}
+%% ======================================================================
+
+\begin{insightbox}
+\textbf{Recommended: Option A --- Narrow theorem + strong empirical story}
+
+\begin{enumerate}
+\item \textbf{Write 2 narrow propositions} for the linear-Gaussian
+      setting with expected loss, decaying-step OGD, known subspace.
+      Estimated: 2--3 pages of LaTeX proofs.
+\item \textbf{Label as ``motivating theory''} (Section 3, 1--2 pages).
+      Explicitly state modeling assumptions and note that LLM loss
+      violates them.
+\item \textbf{Focus the paper on empirical contribution}:
+      Mirror-LoRA with Fisher trust-region works well on real LLMs.
+      13 methods compared, comprehensive ablations.
+\item \textbf{Wire or remove dead code}: Fisher-precision merge,
+      invariant detector, and optimal-$B^*$ are never called.
+      Either integrate them into the consolidation path or remove
+      the corresponding claims.
+\item \textbf{Fix synthetic benchmark}: Use $K_T = \Theta(\sqrt{T})$
+      for Thm1 validation; fix gauge-dependent metrics; use expected loss.
+\end{enumerate}
+\end{insightbox}
+
+\begin{warningbox}
+\textbf{Do NOT submit with current theorem claims.}
+Multiple verified counterexamples from the project's own experiments
+directly contradict Corollaries 1--3. Submitting these as formal
+results would likely result in desk rejection or strong negative reviews.
+\end{warningbox}
+
+%% ======================================================================
+\section{Summary: Now Proven / Still Assumed / Open}
+%% ======================================================================
+
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Category} & \textbf{Items} \\
+\midrule
+\textcolor{green!60!black}{\textbf{Proven}} &
+  (nothing --- no formal proofs exist) \\
+\midrule
+\textcolor{orange!80!black}{\textbf{Assumed}} &
+  Strong convexity (false for LLMs); two-rate decomposition (unverified
+  for LLMs); bounded drift; low-rank structure \\
+\midrule
+\textcolor{red!70!black}{\textbf{Open / Blocked}} &
+  Formal proofs for Thm1-2; Fisher merge = distillation derivation;
+  invariant coordinate definition; optimal $B^*$ derivation from regret
+  bound; extension beyond linear-Gaussian setting \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

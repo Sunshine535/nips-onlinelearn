@@ -18,7 +18,10 @@ Why dual wins: after a coefficient jump at time tau, the single-timescale
 learner must wait O(1/eta_tau) = O(sqrt(tau)) steps to recover because its
 step size has decayed.  The dual learner's window OLS recovers in exactly
 window_size steps regardless of tau.  With K_T jumps spread across [0,T],
-single pays sum_k sqrt(k*J) while dual pays K_T * window_size."""
+single pays sum_k sqrt(k*J) while dual pays K_T * window_size.
+
+Theoretical reference: see proofs/theorem1.tex (Necessity) and
+proofs/theorem2.tex (Sufficiency) for formal statements and proofs."""
 
 import math
 from typing import Dict, List, Tuple
@@ -119,7 +122,52 @@ class TwoRateDriftStream:
         if (self.t + 1) % self.jump_interval == 0:
             direction = torch.randn(self.r, generator=self._rng)
             direction = direction / direction.norm()
-            self.a = self.a + self.jump_size * direction
+            # Replacement jump: new coefficient, bounded by A_max (fixes Issue #29)
+            self.a = self.jump_size * direction
+
+
+class DecreasingJumpStream(TwoRateDriftStream):
+    """Canonical Theorem 1 test stream with K_T = Theta(sqrt(T)) jumps.
+
+    Jumps are placed at quadratically-spaced times tau_k = k^2 to match
+    the adversarial construction in Theorem 1 (proofs/theorem1.tex).
+    This ensures non-overlapping recovery periods and maximizes the
+    cumulative regret gap between single-timescale and dual-timescale.
+
+    Fixes Issue #10: original stream used fixed jump_interval giving
+    K_T = Theta(T), not the K_T = Theta(sqrt(T)) required by Theorem 1.
+    """
+
+    def __init__(
+        self,
+        d: int = 100,
+        r: int = 8,
+        rho_s: float = 0.0,
+        jump_size: float = 1.0,
+        noise_std: float = 0.1,
+        seed: int = 42,
+    ):
+        super().__init__(
+            d=d, r=r, rho_s=rho_s, rho_f=0.0,
+            jump_interval=999999999,
+            jump_size=jump_size, noise_std=noise_std, seed=seed,
+        )
+        self._jump_times: List[int] = []  # populated on first use
+
+    def _compute_jump_times(self, T: int) -> List[int]:
+        """Quadratic spacing: tau_k = k^2 for k = 1, ..., floor(sqrt(T))."""
+        K_T = int(math.sqrt(T))
+        return [k * k for k in range(1, K_T + 1) if k * k <= T]
+
+    def set_horizon(self, T: int):
+        """Pre-compute jump schedule for horizon T."""
+        self._jump_times = self._compute_jump_times(T)
+
+    def _evolve_coefficients(self):
+        if (self.t + 1) in self._jump_times:
+            direction = torch.randn(self.r, generator=self._rng)
+            direction = direction / direction.norm()
+            self.a = self.jump_size * direction
 
 
 # ---------------------------------------------------------------------------
@@ -247,6 +295,10 @@ class DualTimescaleLearner:
         self._U_grad_accum = torch.zeros(d, r)
         self._consolidation_count = 0
 
+        # Gradient-sign history for selective consolidation (Cor3)
+        self._grad_sign_history: List[torch.Tensor] = []
+        self._grad_sign_window = 5
+
         self._regret: List[float] = []
         self._cum = 0.0
         self._t = 0
@@ -296,15 +348,30 @@ class DualTimescaleLearner:
             return
         avg_grad = self._U_grad_accum / self._consolidation_count
 
+        # Record gradient sign for selective consolidation (Cor3)
+        col_sign = torch.sign(avg_grad.mean(dim=0))  # (r,)
+        self._grad_sign_history.append(col_sign)
+        if len(self._grad_sign_history) > self._grad_sign_window:
+            self._grad_sign_history.pop(0)
+
         if self.fisher_weighted and self._t > 0:
-            cov = self._cov_proj / self._t
-            for j in range(self.r):
-                scale = abs(self.a_hat[j]) * math.sqrt(cov[j, j].item() + 1e-8) + 1e-8
-                avg_grad[:, j] = avg_grad[:, j] / scale
+            # Fisher-precision weighting: scale each column of U gradient
+            # by inverse of its importance (fixes Issue #25).
+            # Importance ~ ||grad_U[:,j]||^2 as proxy for diagonal Fisher.
+            col_norms = avg_grad.norm(dim=0) + 1e-8  # (r,)
+            # Normalize to trust-region style: high-norm cols get less update
+            scale = col_norms / col_norms.mean()
+            avg_grad = avg_grad / scale.unsqueeze(0)
 
         if self.selective:
-            cov_diag = torch.diag(self._cov_proj) / max(self._t, 1)
-            mask = (cov_diag > cov_diag.median()).float()
+            # Gradient-sign stability: consolidate only coordinates with
+            # consistent gradient direction (fixes Issue #24, matches Cor3).
+            if hasattr(self, '_grad_sign_history') and len(self._grad_sign_history) >= 2:
+                signs = torch.stack(self._grad_sign_history)  # (W, r)
+                stability = signs.mean(dim=0).abs()  # s_j in [0,1]
+                mask = (stability >= 0.5).float()  # tau_s = 0.5
+            else:
+                mask = torch.ones(self.r)
             avg_grad = avg_grad * mask.unsqueeze(0)
 
         eta = self.lr_slow / math.sqrt(max(self._t, 1))
@@ -615,6 +682,25 @@ if __name__ == "__main__":
         res = run_experiment(stream, {"single": single, "dual": dual}, T=T)
         s, dv = res["single"][-1], res["dual"][-1]
         print(f"  {T:>6d} {s:>10.1f} {dv:>10.1f} {s/max(dv,1e-10):>7.2f}")
+
+    # -----------------------------------------------------------------------
+    # Theorem 1 canonical test: DecreasingJumpStream (K_T = sqrt(T))
+    # -----------------------------------------------------------------------
+    print("\n=== Theorem 1 canonical: DecreasingJumpStream (K_T=sqrt(T)) ===")
+    print(f"  {'T':>6s} {'K_T':>5s} {'single':>10s} {'dual':>10s} {'ratio':>7s}")
+    for T in [500, 1000, 2000, 5000, 10000]:
+        stream = DecreasingJumpStream(d=50, r=4, rho_s=0.0,
+                                       jump_size=2.0, noise_std=0.1, seed=42)
+        stream.set_horizon(T)
+        U_true = stream.get_optimal_subspace()
+        single = OnlineLowRankLearner(50, 4, lr=1.0, U_init=U_true.clone())
+        dual = DualTimescaleLearner(50, 4, lr_slow=0.0,
+                                    consolidation_period=100000,
+                                    U_init=U_true.clone(), window_size=30)
+        res = run_experiment(stream, {"single": single, "dual": dual}, T=T)
+        K_T = int(math.sqrt(T))
+        s, dv = res["single"][-1], res["dual"][-1]
+        print(f"  {T:>6d} {K_T:>5d} {s:>10.1f} {dv:>10.1f} {s/max(dv,1e-10):>7.2f}")
 
     # -----------------------------------------------------------------------
     # Full two-rate experiment with both subspace drift and coefficient jumps

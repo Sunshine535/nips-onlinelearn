@@ -1,0 +1,250 @@
+%% theorem2.tex — Sufficiency: Upper bound for dual-timescale algorithm
+%% Fixes Issues: #14 (hidden constants), #15 (O(sqrt(T)) vs O(T^{3/4}))
+\section{Theorem 2: Sufficiency of Dual-Timescale Adaptation}
+\label{sec:theorem2}
+
+%% ======================================================================
+\subsection{Dual-Timescale Algorithm}
+%% ======================================================================
+
+\begin{definition}[Dual-timescale learner]
+\label{def:dual-timescale}
+Given a subspace estimate $\hat{U}_t \in \R^{d \times r}$ (orthonormal
+columns) and a consolidation period $B \in \N$, the dual-timescale
+learner maintains:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Fast track (coefficient estimation):} A sliding-window
+    OLS estimator with window size $w$:
+    \[
+      \hat{a}_t = \argmin_{a \in \R^r}
+      \sum_{s=\max(1,t-w+1)}^{t} \ell_s(\hat{U}_t\, a).
+    \]
+    For the linear model $\ell_s(U a) = \frac{1}{2}(a^\top U^\top x_s - y_s)^2$,
+    this has closed form:
+    \[
+      \hat{a}_t = \Bigl(\sum_{s \in W_t} z_s z_s^\top\Bigr)^{-1}
+      \sum_{s \in W_t} z_s y_s,
+      \qquad z_s = \hat{U}_t^\top x_s,
+    \]
+    where $W_t = \{t-w+1, \ldots, t\}$.
+
+  \item \textbf{Slow track (subspace update):} Every $B$ steps, update
+    $\hat{U}_t$ via projected gradient descent on the Grassmannian:
+    \[
+      \hat{U}_{(m+1)B} = \mathrm{Proj}_{\Gr(d,r)}\!\left(
+        \hat{U}_{mB} - \eta_s \nabla_U \hat{L}_{mB}
+      \right),
+    \]
+    where $\hat{L}_{mB}$ is an empirical loss over a recent batch and
+    $\eta_s$ is the slow step size. Between consolidations,
+    $\hat{U}_t = \hat{U}_{mB}$ for $t \in [mB, (m+1)B)$.
+\end{enumerate}
+The full parameter estimate is $\hat{\theta}_t = \hat{U}_t\, \hat{a}_t$.
+\end{definition}
+
+%% ======================================================================
+\subsection{Version A: General Variation Bound}
+%% ======================================================================
+
+\begin{theorem}[Sufficiency --- general variation, honest bound]
+\label{thm:sufficiency-A}
+Under \Cref{ass:strong-convexity,ass:smoothness,ass:noise,%
+ass:decomposition,ass:bounded-variation}, the dual-timescale learner
+(\Cref{def:dual-timescale}) with window size $w$ and consolidation
+period $B$ achieves:
+\[
+  \E[\reg_T] \leq
+  \underbrace{\frac{L\sigma^2 r w}{2\mu}}_{\text{noise floor}} \cdot \frac{T}{w}
+  + \underbrace{\frac{L}{2}\, V_f(T) \cdot w}_{\text{fast tracking lag}}
+  + \underbrace{\frac{L}{\mu}\sqrt{T\, V_s(T)}}_{\text{slow tracking}}
+  + \underbrace{L\rho_{\max}^2 T}_{\text{residual}}.
+\]
+With explicit dependence on all parameters:
+\begin{align}
+  \E[\reg_T] &\leq
+    \frac{L\sigma^2 r\, T}{2\mu}
+    + \frac{Lw\, V_f(T)}{2}
+    + \frac{L}{\mu}\sqrt{T\, V_s(T)}
+    + L\rho_{\max}^2 T.
+  \label{eq:thm2-versionA}
+\end{align}
+Under the standard drift regime $V_f(T) = \Theta(\sqrt{T})$,
+$V_s(T) = O(T^{1/2-\epsilon})$, with $w = O(1)$:
+\[
+  \E[\reg_T] = O(T) + O(\sqrt{T}) + O(T^{1/2}) + O(T)
+  = O(T).
+\]
+This does \textbf{not} give sub-linear regret in general. For
+sub-linear bounds, we need the jump-process structure.
+\end{theorem}
+
+\begin{proof}
+Decompose the instantaneous regret:
+\begin{align*}
+  L_t(\hat{\theta}_t) - L_t(\theta^*_t)
+  &\leq \frac{L}{2}\norm{\hat{\theta}_t - \theta^*_t}^2 \\
+  &= \frac{L}{2}\norm{\hat{U}_t \hat{a}_t - U_t a_t - \rho_t}^2 \\
+  &\leq L\bigl(\norm{\hat{U}_t \hat{a}_t - U_t a_t}^2 + \rho_{\max}^2\bigr) \\
+  &\leq L\bigl(\norm{(\hat{U}_t - U_t)\hat{a}_t}^2
+    + \norm{U_t(\hat{a}_t - a_t)}^2
+    + 2\norm{(\hat{U}_t-U_t)\hat{a}_t}\norm{U_t(\hat{a}_t-a_t)}
+    + \rho_{\max}^2\bigr).
+\end{align*}
+
+\textbf{Fast-track error.}
+Within window $W_t$, if $a_s = a_t$ for all $s \in W_t$ (no jump within
+the window), the OLS estimator satisfies (by standard regression theory):
+\[
+  \E[\norm{\hat{a}_t - a_t}^2 \mid \hat{U}_t]
+  \leq \frac{\sigma^2 r}{\mu w}
+  + \frac{L^2}{\mu^2}\dG^2(\col(\hat{U}_t), \col(U_t)).
+\]
+If a jump occurs within $W_t$, the window contains inconsistent data.
+The worst-case additional error is bounded by $w \cdot \Delta_{\max}^2$
+where $\Delta_{\max} = 2A_{\max}$.
+
+\textbf{Slow-track error.}
+Online projected gradient descent on the Grassmannian with step size
+$\eta_s$ achieves (by standard OGD on strongly convex losses projected
+onto a convex body):
+\[
+  \sum_{m=0}^{T/B-1} \dG^2(\col(\hat{U}_{mB}), \col(U_{mB}))
+  \leq \frac{1}{\mu\eta_s}\bigl(\dG^2(\hat{U}_0, U_0) + \eta_s V_s(T)\bigr)
+  + \eta_s T \sigma_s^2 / B,
+\]
+where $\sigma_s^2$ is the variance of the subspace gradient estimator.
+Optimizing $\eta_s$:
+\[
+  \sum_{m=0}^{T/B-1} \dG^2(\hat{U}_{mB}, U_{mB})
+  \leq \frac{2}{\mu}\sqrt{T V_s(T) / B} + C_0.
+\]
+
+\textbf{Combining.}
+Summing over $t = 1, \ldots, T$ and taking expectations gives
+\eqref{eq:thm2-versionA}.
+\end{proof}
+
+%% ======================================================================
+\subsection{Version B: Jump-Process Bound}
+%% ======================================================================
+
+\begin{theorem}[Sufficiency --- jump process, $O(\sqrt{T})$ achievable]
+\label{thm:sufficiency-B}
+Under \Cref{ass:strong-convexity,ass:smoothness,ass:noise,%
+ass:decomposition,ass:bounded-variation,ass:bounded-coeff},
+suppose the fast variation follows the jump process of
+\Cref{def:fast-variation} with $K_T$ jumps of size at most
+$\Delta_{\max} = 2A_{\max}$, and inter-jump gaps
+$J_k = \tau_{k+1} - \tau_k \geq w$ for all $k$.
+
+Then the dual-timescale learner with window $w \geq 2r/\mu$ achieves:
+\begin{align}
+  \E[\reg_T] &\leq
+    \underbrace{\frac{L\sigma^2 r\, T}{2\mu w}}_{\text{noise (I)}}
+    + \underbrace{L\Delta_{\max}^2\, K_T\, w}_{\text{jump disruption (II)}}
+    + \underbrace{\frac{L}{\mu}\sqrt{T\, V_s(T)}}_{\text{slow tracking (III)}}
+    + \underbrace{L\rho_{\max}^2\, T}_{\text{residual (IV)}}.
+  \label{eq:thm2-versionB}
+\end{align}
+With explicit constants: $C_1 = L\sigma^2 r/(2\mu)$,
+$C_2 = L\Delta_{\max}^2$, $C_3 = L/\mu$, $C_4 = L\rho_{\max}^2$.
+\end{theorem}
+
+\begin{proof}
+The key improvement over Version~A comes from exploiting the piecewise-constant
+structure of $a_t$.
+
+\textbf{Between jumps:} For $t$ in a jump-free interval $[\tau_k, \tau_{k+1})$,
+the coefficient $a_s = a_{\tau_k}$ is constant for all $s$ in the window
+$W_t = [t-w+1, t]$ (provided $t - \tau_k \geq w$, i.e., after an
+initial transient of $w$ steps). The OLS estimator achieves:
+\[
+  \E[\norm{\hat{a}_t - a_t}^2 \mid \hat{U}_t]
+  \leq \frac{\sigma^2 r}{\mu w}
+  + \frac{L^2}{\mu^2}\dG^2(\col(\hat{U}_t), \col(U_t)).
+\]
+
+\textbf{Jump transient:} For $t \in [\tau_k, \tau_k + w)$, the window
+contains data from both the old and new coefficient values. The OLS
+error is bounded by $\Delta_{\max}^2$ (the jump size squared). There
+are at most $K_T \cdot w$ such transient steps.
+
+\textbf{Summing:}
+\begin{align*}
+  \E[\reg_T]
+  &= \sum_{t=1}^T \E[L_t(\hat{\theta}_t) - L_t(\theta^*_t)] \\
+  &\leq \underbrace{\sum_{\substack{t:\, \text{jump-free} \\ \text{and } t - \tau_k \geq w}}
+    \frac{L\sigma^2 r}{2\mu w}}_{\leq C_1 T/w}
+  + \underbrace{\sum_{\substack{t:\, \text{in transient}}}
+    L\Delta_{\max}^2}_{\leq C_2 K_T w}
+  + \underbrace{\sum_{t=1}^T
+    \frac{L^2}{\mu}\dG^2(\hat{U}_t, U_t)}_{\leq C_3\sqrt{TV_s}}
+  + C_4 T.
+\end{align*}
+
+\textbf{Substituting the claimed regime:}
+\begin{itemize}[nosep]
+  \item $K_T = \Theta(\sqrt{T})$, $w = O(1)$, $\rho_{\max} = 0$:
+    \[
+      \E[\reg_T] \leq C_1 T + C_2 \sqrt{T} + C_3\sqrt{TV_s} + 0.
+    \]
+    Term~I is $O(T)$ --- but this is the \emph{noise floor} from
+    finite window, which can be made $O(\sqrt{T})$ by choosing
+    $w = \Theta(\sqrt{T})$. However, then Term~II becomes
+    $C_2 K_T \sqrt{T} = O(T)$.
+
+  \item \textbf{Optimal trade-off:} Choose $w = \sqrt{T/K_T}
+    = T^{1/4}$. Then:
+    \[
+      \text{I} = O(T^{3/4}), \quad
+      \text{II} = O(T^{3/4}), \quad
+      \text{III} = O(T^{1/2}).
+    \]
+    Total: $O(T^{3/4})$.
+
+  \item \textbf{$O(\sqrt{T})$ regime:} Achievable when $K_T = O(1)$
+    (bounded number of jumps) and $V_s = O(1)$ with $w = \sqrt{T}$:
+    \[
+      \text{I} = O(\sqrt{T}), \quad
+      \text{II} = O(\sqrt{T}), \quad
+      \text{III} = O(\sqrt{T}).
+    \]
+\end{itemize}
+This completes the proof.
+\end{proof}
+
+\begin{remark}[Honest rate comparison --- fixes Issue~\#15]
+\label{rem:honest-rate}
+Under the regime $K_T = \Theta(\sqrt{T})$ claimed in the paper's
+executive summary, the achievable rate is $O(T^{3/4})$, \textbf{not}
+$O(\sqrt{T})$. The $O(\sqrt{T})$ rate holds only when the number of
+jumps $K_T$ is bounded as $T$ grows, or when the jumps are infrequent
+enough that $K_T \cdot w = O(\sqrt{T})$.
+
+\medskip
+\noindent\textbf{Separation from Theorem~1:}
+For the $\alpha=1/2$ monotone-step learner with $K_T = \Theta(\sqrt{T})$
+quadratically-spaced jumps, \Cref{thm:necessity} gives $\Omega(T)$
+regret. The dual-timescale achieves $O(T^{3/4})$
+(\Cref{thm:sufficiency-B} with optimal $w$). The separation ratio is
+$T / T^{3/4} = T^{1/4} \to \infty$, confirming that dual-timescale
+is \emph{strictly better} even at the honest $O(T^{3/4})$ rate.
+\end{remark}
+
+%% ======================================================================
+\subsection{Explicit Constant Table --- fixes Issue~\#14}
+%% ======================================================================
+
+\begin{center}
+\begin{tabular}{cll}
+\toprule
+\textbf{Constant} & \textbf{Expression} & \textbf{Depends on} \\
+\midrule
+$C_1$ & $\dfrac{L\sigma^2 r}{2\mu}$ & $d$ (via $r \leq d$), $\sigma$, $L/\mu$ \\[8pt]
+$C_2$ & $L\Delta_{\max}^2 = 4LA_{\max}^2$ & $L$, $A_{\max}$ \\[4pt]
+$C_3$ & $\dfrac{L}{\mu}$ & $\kappa = L/\mu$ \\[8pt]
+$C_4$ & $L\rho_{\max}^2$ & $L$, approximation quality \\
+\bottomrule
+\end{tabular}
+\end{center}

@@ -296,6 +296,11 @@ class StreamingMirrorLoRA:
 
         self.use_grassmann: bool = use_grassmann
 
+        # Feature flags for wired code (Issue #20: wire dead code)
+        self.use_fisher_precision_merge: bool = False
+        self.use_invariant_mask: bool = False
+        self.use_optimal_interval: bool = False
+
         # Bookkeeping.
         self._consolidation_count: int = 0
         self._turn_count: int = 0
@@ -429,6 +434,12 @@ class StreamingMirrorLoRA:
             ``True`` if consolidation should happen now.
         """
         if not self.adaptive_frequency:
+            # Optimal-interval mode (Cor2): use B* = sqrt(C_merge / rho_drift)
+            if self.use_optimal_interval and self.fisher_slow:
+                drift_rate = self._estimate_drift_rate()
+                merge_cost = self._estimate_merge_cost()
+                B_star = self.compute_optimal_interval(merge_cost, drift_rate)
+                return self._turn_count >= max(1, int(B_star))
             return self.working.needs_consolidation()
 
         # Need both fast and slow Fisher to compare.
@@ -469,11 +480,26 @@ class StreamingMirrorLoRA:
         # 1. Standard consolidation (KL distillation + replay).
         consol_loss = self._spm.consolidate_session()
 
-        # 2. Fisher trust-region: pull high-Fisher params back toward
-        #    pre-consolidation values.  This prevents the KL distillation
-        #    from overwriting important knowledge in LT.
+        # 2. Post-consolidation modulation.
         fast_fisher = self.fisher_fast.get_fisher()
-        if self.fisher_slow:
+
+        if self.use_fisher_precision_merge and fast_fisher:
+            # Fisher-precision merge (Cor1): modulate consolidation update
+            # using Fisher importance + invariant mask.
+            invariant_mask = {}
+            if self.use_invariant_mask:
+                invariant_mask = self.invariant_detector.get_mask()
+            wm_snapshot: Dict[str, torch.Tensor] = {}
+            for name, param in self.model.named_parameters():
+                if "lora" in name and "working" in name:
+                    wm_snapshot[name] = param.data.clone()
+            self._apply_fisher_precision_merge(
+                lt_params_before, wm_snapshot, fast_fisher, invariant_mask
+            )
+            logger.info("Applied Fisher-precision merge with invariant_mask=%s",
+                        self.use_invariant_mask)
+        elif self.fisher_slow:
+            # Default: Fisher trust-region (pull high-Fisher params back).
             self._apply_fisher_trust_region(lt_params_before, fast_fisher)
 
         # 3. Update slow Fisher: merge fast into slow via EMA.
@@ -780,6 +806,29 @@ class StreamingMirrorLoRA:
             merge_count,
             skip_count,
         )
+
+    def _estimate_drift_rate(self) -> float:
+        """Estimate subspace drift rate from Fisher change magnitude."""
+        if not self.fisher_slow:
+            return 1e-4
+        fast = self.fisher_fast.get_fisher()
+        if not fast:
+            return 1e-4
+        total_change = 0.0
+        count = 0
+        for name in fast:
+            lt_name = name.replace("working", "longterm") if "working" in name else name
+            if lt_name in self.fisher_slow:
+                diff = (fast[name] - self.fisher_slow[lt_name].to(fast[name].device)).abs().mean().item()
+                total_change += diff
+                count += 1
+        return total_change / max(count, 1)
+
+    def _estimate_merge_cost(self) -> float:
+        """Estimate consolidation cost as number of parameters updated."""
+        count = sum(1 for n, p in self.model.named_parameters()
+                    if "lora" in n and "longterm" in n and p.requires_grad)
+        return float(max(count, 1))
 
     def _update_slow_fisher(self, fast_fisher: Dict[str, torch.Tensor]) -> None:
         """Merge fast Fisher into the slow (long-term) Fisher via EMA.

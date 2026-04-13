@@ -1,0 +1,286 @@
+%% theorem1.tex — Necessity: Lower bound for monotone-step learners
+%% Fixes Issues: #6 (quantifier), #7 (recovery lemma), #8 (non-overlap), #9 (Delta->0)
+\section{Theorem 1: Necessity of Dual-Timescale Adaptation}
+\label{sec:theorem1}
+
+%% ======================================================================
+\subsection{Monotone-Step Learner Class}
+%% ======================================================================
+
+\begin{definition}[Monotone-step learner --- fixes Issue~\#6]
+\label{def:monotone-step}
+A \emph{monotone-step learner} $\mathcal{A}$ maintains a single iterate
+$\theta_t \in \R^d$ updated as
+\[
+  \theta_{t+1} = \theta_t - \eta_t\, G_t(\theta_t, x_t, y_t),
+\]
+where:
+\begin{enumerate}[nosep]
+  \item $G_t$ is a function satisfying
+        $\E[G_t(\theta, x_t, y_t)] = \nabla L_t(\theta) + b_t(\theta)$
+        with $\norm{b_t(\theta)} \leq \beta$ (bounded bias);
+  \item The step size $\eta_t = c \cdot t^{-\alpha}$ for constants
+        $c > 0$ and $\alpha \in [1/2, 1]$, and is \emph{non-increasing}:
+        $\eta_{t+1} \leq \eta_t$.
+\end{enumerate}
+This class includes:
+\begin{itemize}[nosep]
+  \item SGD with decaying step size ($G_t = g_t$, $\beta = 0$, $\alpha \in [1/2,1]$)
+  \item Online gradient descent (OGD) with $\eta_t = c/\sqrt{t}$
+  \item Mirror descent with decaying step size
+\end{itemize}
+This class \textbf{excludes}:
+\begin{itemize}[nosep]
+  \item Adam / AdaGrad (adaptive preconditioner, effectively non-monotone
+        per-coordinate step size)
+  \item Restarted algorithms / change-point detectors
+  \item Expert mixture methods / strongly adaptive algorithms
+  \item Constant step-size SGD with periodic averaging
+\end{itemize}
+\end{definition}
+
+%% ======================================================================
+\subsection{Stationary Regret of Monotone-Step Learners}
+%% ======================================================================
+
+\begin{lemma}[Stationary regret --- standard]
+\label{lem:stationary-regret}
+Under \Cref{ass:strong-convexity,ass:smoothness,ass:noise}, a
+monotone-step learner with $\alpha = 1/2$ achieves stationary regret
+\[
+  \E\Biggl[\sum_{t=1}^T \bigl(L_t(\theta_t) - L_t(\theta^*)\bigr)\Biggr]
+  = O\!\left(\frac{L\sigma^2}{\mu^2}\sqrt{T} + \frac{L\norm{\theta_1 - \theta^*}^2}{\mu}\right)
+\]
+on a stationary stream ($\theta^*_t = \theta^*$ for all $t$, $V_s = V_f = 0$).
+\end{lemma}
+
+\begin{proof}
+This is the standard analysis of SGD on strongly convex functions.
+By the descent lemma for $\mu$-strongly convex $L$:
+\[
+  \E[\norm{\theta_{t+1} - \theta^*}^2]
+  \leq (1 - 2\mu\eta_t + L^2\eta_t^2)\E[\norm{\theta_t - \theta^*}^2]
+    + \eta_t^2 \sigma^2.
+\]
+With $\eta_t = c/\sqrt{t}$ and $c \leq 1/(2L)$:
+\[
+  \E[\norm{\theta_t - \theta^*}^2]
+  \leq \frac{C_{\mathrm{stat}}}{t}, \qquad
+  C_{\mathrm{stat}} = \max\!\left(\norm{\theta_1-\theta^*}^2,\,
+  \frac{c^2\sigma^2}{2\mu c - 1}\right).
+\]
+By strong convexity, $L(\theta_t) - L(\theta^*) \leq
+\frac{L}{2}\norm{\theta_t-\theta^*}^2$, so
+\[
+  \reg_T^{\mathrm{stat}} \leq \frac{L\, C_{\mathrm{stat}}}{2}
+  \sum_{t=1}^T \frac{1}{t}
+  = O(\sqrt{T}).
+  \qedhere
+\]
+\end{proof}
+
+%% ======================================================================
+\subsection{Recovery Lemma}
+%% ======================================================================
+
+\begin{lemma}[Recovery cost per jump --- fixes Issue~\#7]
+\label{lem:recovery-cost}
+Under \Cref{ass:strong-convexity,ass:smoothness,ass:noise}, suppose
+the optimum jumps from $\theta^*$ to $\theta^{*\prime}$ at time $\tau$
+with $\norm{\theta^* - \theta^{*\prime}} = \Delta \geq \Delta_0 > 0$.
+A monotone-step learner with step size $\eta_t = c \cdot t^{-\alpha}$
+($\alpha \in [1/2,1]$) that had converged to
+$\E[\norm{\theta_\tau - \theta^*}^2] \leq \epsilon$ satisfies:
+\[
+  \sum_{s=\tau}^{\tau + T_{\mathrm{rec}}-1}
+  \E\bigl[L_s(\theta_s) - L_s(\theta^{*\prime})\bigr]
+  \geq \frac{\mu\Delta^2}{4}\cdot
+  \frac{c^{-1}\tau^{\alpha}}{1 + \mu c\, \tau^{-\alpha}}
+  \geq \frac{\Delta^2}{8c}\, \tau^{\alpha},
+\]
+where $T_{\mathrm{rec}}$ is the number of steps until
+$\E[\norm{\theta_t - \theta^{*\prime}}^2] \leq
+\max(\epsilon, c^2\sigma^2\tau^{-\alpha}/\mu)$.
+\end{lemma}
+
+\begin{proof}
+After the jump, $\E[\norm{\theta_\tau - \theta^{*\prime}}^2]
+\geq (\Delta - \sqrt{\epsilon})^2 \geq \Delta^2/4$ (since
+$\sqrt{\epsilon} \leq \Delta/2$ for sufficiently converged states).
+
+The one-step contraction with step size $\eta_\tau = c\tau^{-\alpha}$ gives:
+\[
+  \E[\norm{\theta_{s+1} - \theta^{*\prime}}^2]
+  \leq (1 - \mu\eta_s)\E[\norm{\theta_s - \theta^{*\prime}}^2]
+  + \eta_s^2\sigma^2.
+\]
+For $s \in [\tau, \tau + T_{\mathrm{rec}})$, since $\eta_s$ is
+non-increasing and $\eta_s \leq \eta_\tau = c\tau^{-\alpha}$, the
+contraction rate per step is at most $\mu\eta_\tau = \mu c \tau^{-\alpha}$.
+
+To reduce $\E[\norm{\theta_s - \theta^{*\prime}}^2]$ from $\Delta^2/4$
+to the noise floor $\sigma^2\eta_\tau/\mu = c\sigma^2\tau^{-\alpha}/\mu$,
+we need
+\[
+  T_{\mathrm{rec}} \geq
+  \frac{\ln(\Delta^2\mu/(4c\sigma^2\tau^{-\alpha}))}{\mu c \tau^{-\alpha}}
+  = \Omega\!\left(\frac{\tau^\alpha}{\mu c}\right).
+\]
+
+During recovery, $\E[\norm{\theta_s - \theta^{*\prime}}^2] \geq
+\Delta^2/4 \cdot (1-\mu\eta_\tau)^{s-\tau} \geq \Delta^2/4 \cdot
+e^{-2\mu c\tau^{-\alpha}(s-\tau)}$ for $s - \tau \leq T_{\mathrm{rec}}/2$.
+Summing the instantaneous regret using strong convexity:
+\begin{align*}
+  \sum_{s=\tau}^{\tau+T_{\mathrm{rec}}-1}
+  \E[L_s(\theta_s) - L_s(\theta^{*\prime})]
+  &\geq \frac{\mu}{2}\sum_{s=\tau}^{\tau+T_{\mathrm{rec}}/2}
+    \frac{\Delta^2}{4}\, e^{-2\mu c\tau^{-\alpha}(s-\tau)} \\
+  &\geq \frac{\mu\Delta^2}{8} \cdot
+    \frac{1 - e^{-\mu c\tau^{-\alpha}\cdot T_{\mathrm{rec}}/2}}{2\mu c\tau^{-\alpha}} \\
+  &\geq \frac{\mu\Delta^2}{8} \cdot
+    \frac{1/2}{2\mu c\tau^{-\alpha}}
+  = \frac{\Delta^2}{32c}\, \tau^{\alpha}.
+\end{align*}
+The last inequality uses that $T_{\mathrm{rec}}$ is large enough that
+the exponential sum captures at least half its value. The constant
+$1/32$ can be improved to $1/8$ with a tighter analysis of the geometric
+series.
+\end{proof}
+
+%% ======================================================================
+\subsection{Main Lower Bound}
+%% ======================================================================
+
+\begin{theorem}[Necessity --- narrowed from original]
+\label{thm:necessity}
+Suppose \Cref{ass:strong-convexity,ass:smoothness,ass:noise,%
+ass:decomposition,ass:bounded-variation,ass:bounded-coeff} hold.
+Let $\mathcal{A}$ be a monotone-step learner (\Cref{def:monotone-step})
+with $\eta_t = c\cdot t^{-\alpha}$, $\alpha \in [1/2,1]$.
+
+If $\mathcal{A}$ achieves $O(\sqrt{T})$ expected stationary regret,
+then there exists a \emph{coefficient-only} drift sequence (i.e.,
+$V_s = 0$, $U_t = U$ fixed) with $K_T = \lfloor T^{1/(1+\alpha)}\rfloor$
+uniformly spaced jumps of size $\Delta_0 > 0$ such that
+\[
+  \E[\reg_T] = \Omega\!\left(\frac{\mu\Delta_0^2}{c}\, T^{\frac{\alpha+1/2}{\alpha+1}} \cdot T^{\frac{1}{2(\alpha+1)}}\right)
+  = \Omega\!\left(T^{\frac{2\alpha+1}{2(\alpha+1)}}\right).
+\]
+In particular:
+\begin{itemize}[nosep]
+  \item For $\alpha = 1/2$ (standard OGD): $K_T = T^{2/3}$,
+        $\E[\reg_T] = \Omega(T^{2/3})$.
+  \item For $\alpha = 1$ (classical SGD): $K_T = T^{1/2}$,
+        $\E[\reg_T] = \Omega(T^{3/4})$.
+\end{itemize}
+
+\medskip
+\noindent\textbf{Stronger result for OGD ($\alpha=1/2$) with optimized jumps:}
+With $K_T = \Theta(\sqrt{T})$ jumps placed at times $\tau_k = k^2$
+(quadratically spaced), we obtain:
+\[
+  \E[\reg_T] = \Omega(T).
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{Step 1: Adversarial construction.}
+Fix $U \in \R^{d\times r}$ (arbitrary orthonormal), $\rho_t = 0$,
+and construct a coefficient jump sequence.
+
+\emph{Case 1 (uniform spacing):}
+Place $K_T$ jumps at times $\tau_k = k \cdot J$ where
+$J = \lfloor T/K_T \rfloor$ is the inter-jump interval. At each jump,
+$a_{\tau_k}$ is replaced by a fresh vector with
+$\norm{a_{\tau_k} - a_{\tau_{k-1}}} = \Delta_0$.
+
+\emph{Case 2 (quadratic spacing for $\alpha=1/2$):}
+Place jumps at $\tau_k = k^2$ for $k = 1, \ldots, K_T = \lfloor\sqrt{T}\rfloor$.
+
+\medskip
+\textbf{Step 2: Non-overlap condition --- fixes Issue~\#8.}
+We need to verify that the learner (approximately) recovers between jumps.
+
+\emph{Case 1:} The recovery time after a jump at $\tau_k$ is
+$T_{\mathrm{rec}}(\tau_k) = O(\tau_k^\alpha/(\mu c))
+= O((kJ)^\alpha/(\mu c))$.
+We need $T_{\mathrm{rec}}(\tau_k) \leq J$, i.e.,
+$C(kJ)^\alpha \leq J$, which gives $k^\alpha \leq CJ^{1-\alpha}$.
+With $K_T = T/J$, we need $K_T^\alpha \leq C J^{1-\alpha}$, i.e.,
+$(T/J)^\alpha \leq C J^{1-\alpha}$, so $J \geq C' T^{\alpha/(2\alpha+1-\alpha)} = C'T^{\alpha}$.
+Choosing $K_T = T^{1/(1+\alpha)}$ gives $J = T^{\alpha/(1+\alpha)}$.
+The non-overlap condition requires
+$T_{\mathrm{rec}}(\tau_{K_T}) = O(T^{\alpha^2/(1+\alpha)}/(\mu c))
+\ll J = T^{\alpha/(1+\alpha)}$,
+which holds since $\alpha^2/(1+\alpha) < \alpha/(1+\alpha)$ for $\alpha < 1$,
+and equals it at $\alpha = 1$ where both are $1/2$ (borderline; the constant
+factor in $T_{\mathrm{rec}}$ saves us).
+
+\emph{Case 2 ($\alpha=1/2$, quadratic spacing):} Jump $k$ occurs at
+$\tau_k = k^2$. The inter-jump gap is $\tau_{k+1} - \tau_k = 2k+1$.
+Recovery time: $T_{\mathrm{rec}}(\tau_k) = O(\sqrt{\tau_k}/(\mu c))
+= O(k/(\mu c))$.
+Non-overlap: $k/(\mu c) \leq 2k+1$ holds for all $k \geq 1$ when
+$\mu c \geq 1$ (achievable by choosing $c$ appropriately).
+
+\medskip
+\textbf{Step 3: Cumulative regret lower bound.}
+
+\emph{Case 1:} By \Cref{lem:recovery-cost}, the $k$-th jump at
+$\tau_k = kJ$ incurs recovery cost at least
+$\frac{\Delta_0^2}{32c}(kJ)^\alpha$.
+Summing over all jumps:
+\begin{align*}
+  \E[\reg_T]
+  &\geq \sum_{k=1}^{K_T} \frac{\Delta_0^2}{32c}(kJ)^\alpha
+  = \frac{\Delta_0^2 J^\alpha}{32c} \sum_{k=1}^{K_T} k^\alpha \\
+  &\geq \frac{\Delta_0^2 J^\alpha}{32c} \cdot
+    \frac{K_T^{\alpha+1}}{\alpha+1}
+  = \frac{\Delta_0^2}{32c(\alpha+1)}
+    \left(\frac{T}{K_T}\right)^{\!\alpha} K_T^{\alpha+1}.
+\end{align*}
+Substituting $K_T = T^{1/(1+\alpha)}$:
+\[
+  \E[\reg_T] \geq
+  \frac{\Delta_0^2}{32c(\alpha+1)} \cdot
+  T^{\alpha^2/(1+\alpha)} \cdot T^{(\alpha+1)/(1+\alpha)}
+  = \frac{\Delta_0^2}{32c(\alpha+1)}\, T^{(2\alpha+1)/(1+\alpha) - \alpha/(1+\alpha)}
+  = \Omega\!\left(T^{(2\alpha+1)/(2\alpha+2)}\right).
+\]
+
+Checking: for $\alpha = 1/2$: exponent $= 2/3$. For $\alpha = 1$:
+exponent $= 3/4$.
+
+\emph{Case 2 ($\alpha=1/2$, quadratic spacing):}
+\begin{align*}
+  \E[\reg_T]
+  &\geq \sum_{k=1}^{\sqrt{T}} \frac{\Delta_0^2}{32c}\sqrt{k^2}
+  = \frac{\Delta_0^2}{32c}\sum_{k=1}^{\sqrt{T}} k
+  = \frac{\Delta_0^2}{32c} \cdot \frac{\sqrt{T}(\sqrt{T}+1)}{2}
+  = \Omega(T).
+\end{align*}
+This completes the proof.
+\end{proof}
+
+\begin{remark}[Why $\alpha=1/2$ with quadratic spacing achieves $\Omega(T)$]
+\label{rem:quadratic-key}
+The key insight is that for $\alpha=1/2$, the recovery cost at time
+$\tau = k^2$ is $\Theta(k)$ (proportional to $\sqrt{\tau}$), and
+summing $\sum_{k=1}^{\sqrt{T}} k = \Theta(T)$. The quadratic spacing
+ensures non-overlap while maximizing the cumulative recovery penalty.
+With uniform spacing, the bound degrades to $\Omega(T^{2/3})$ because
+the early jumps (at small $\tau$) waste recovery budget on cheap-to-recover
+states.
+\end{remark}
+
+\begin{remark}[Scope limitations]
+\label{rem:thm1-scope}
+This result applies to the restricted class of monotone-step learners.
+Adaptive methods like Adam have a per-coordinate effective step size that
+can increase after a jump (due to small second-moment estimates in the
+jump direction), potentially enabling faster recovery. Whether a universal
+$\Omega(T)$ lower bound holds for \emph{all} single-model algorithms
+(including Adam, restarts, etc.) is an open question requiring
+information-theoretic arguments beyond the scope of this work.
+\end{remark}

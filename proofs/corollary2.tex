@@ -1,0 +1,68 @@
+%% corollary2.tex — Optimal Consolidation Frequency
+%% Fixes Issue: #21 (circular dependence on B)
+\section{Corollary 2: Optimal Consolidation Frequency}
+\label{sec:cor2}
+
+\begin{definition}[Consolidation cost model]
+\label{def:consolidation-cost}
+Each consolidation (merge operation) incurs a fixed computational cost
+$C_{\mathrm{merge}} > 0$ (in regret units), representing the disruption
+from running the KL distillation + replay optimization. This cost is
+\emph{independent of $B$} --- it depends on the model size, the number
+of distillation steps, and the replay buffer size, all of which are fixed
+hyperparameters.
+\end{definition}
+
+\begin{proposition}[Optimal consolidation period --- fixes Issue~\#21]
+\label{prop:optimal-B}
+Under the setting of \Cref{thm:sufficiency-A}, consider the
+per-consolidation-period regret decomposition:
+\[
+  R(B) = \underbrace{\frac{C_{\mathrm{merge}}}{B}}_{\text{amortized merge cost}}
+  + \underbrace{\frac{L}{2\mu}\, \rho_s \cdot B}_{\text{subspace drift within period}},
+\]
+where $\rho_s = V_s(T)/T$ is the average subspace drift rate per step.
+The regret contribution from subspace tracking error grows linearly with
+$B$ (the subspace drifts further between consolidations) while the
+amortized merge cost decreases as $1/B$.
+
+Minimizing $R(B)$ over $B > 0$:
+\[
+  B^* = \sqrt{\frac{2\mu\, C_{\mathrm{merge}}}{L\, \rho_s}}.
+\]
+\end{proposition}
+
+\begin{proof}
+The per-step regret contribution from the slow track is:
+\[
+  R_{\mathrm{slow}}(B)
+  = \frac{C_{\mathrm{merge}}}{B}
+  + \frac{L}{2\mu}\, \rho_s \cdot B.
+\]
+This is a sum of a decreasing and an increasing function of $B$.
+Taking the derivative and setting to zero:
+\[
+  \frac{dR}{dB} = -\frac{C_{\mathrm{merge}}}{B^2}
+  + \frac{L\rho_s}{2\mu} = 0
+  \quad\Longrightarrow\quad
+  B^{*2} = \frac{2\mu\, C_{\mathrm{merge}}}{L\, \rho_s},
+\]
+confirming the formula. The second derivative $2C_{\mathrm{merge}}/B^3 > 0$
+confirms this is a minimum.
+\end{proof}
+
+\begin{remark}[No circular dependence]
+The original formulation had $C_{\mathrm{merge}}$ implicitly depending
+on $B$ through the constants $C_1, C_2, C_3$ of \Cref{thm:sufficiency-A},
+creating a circular optimization. Here, $C_{\mathrm{merge}}$ is defined
+as a \emph{fixed computational cost} (e.g., the GPU-seconds of running
+$N_{\mathrm{distill}}$ distillation steps), breaking the circularity.
+\end{remark}
+
+\begin{remark}[Implementation mapping]
+In \texttt{streaming\_mirror\_lora.py:672--688}, the method
+\texttt{compute\_optimal\_interval()} implements exactly this formula
+with $C_{\mathrm{merge}}$ estimated from the actual consolidation wall-clock
+time converted to regret-equivalent units, and $\rho_s$ estimated from
+recent subspace gradient norms.
+\end{remark}

@@ -1,0 +1,150 @@
+%% corollary1.tex — Optimal Merge via Function-Space KL
+%% Fixes Issues: #18 (rank mismatch), #19 (no derivation for Fisher=distill+replay)
+\section{Corollary 1: Optimal Consolidation via Behavioral Merge}
+\label{sec:cor1}
+
+%% ======================================================================
+\subsection{Problem: Parameter-Space Merge is Undefined}
+%% ======================================================================
+
+\begin{remark}[Why parameter-space Fisher merge fails --- Issue~\#18]
+\label{rem:rank-mismatch}
+The original claim stated that the optimal merge is the precision-weighted
+average $\theta_{\mathrm{merge}} = (\sum_i F_i)^{-1}(\sum_i F_i\theta_i)$.
+This is \textbf{undefined} when the two models have different
+parameterizations: the working-memory LoRA (rank $r_w = 16$) lives in
+$\R^{d \times r_w}$ while the long-term LoRA (rank $r_l = 64$) lives
+in $\R^{d \times r_l}$. Direct parameter averaging requires identical
+shapes.
+
+We therefore reformulate in \emph{function space}, where both models
+define distributions over outputs regardless of their parameterization.
+\end{remark}
+
+%% ======================================================================
+\subsection{Function-Space Formulation}
+%% ======================================================================
+
+\begin{definition}[Behavioral merge]
+\label{def:behavioral-merge}
+Given two models $p_{\theta_w}$ (working memory, fast-adapted) and
+$p_{\theta_l}$ (long-term memory, slowly consolidated), the
+\emph{behavioral merge} objective for updating $\theta_l$ is:
+\begin{align}
+  \theta_l^{\mathrm{new}} = \argmin_{\theta \in \Theta_l}
+  \Big[
+    &\underbrace{\lambda_d \cdot \E_{x \sim \mathcal{D}_{\mathrm{recent}}}
+    \bigl[D_{\mathrm{KL}}(p_{\theta_w}(\cdot|x) \,\|\, p_\theta(\cdot|x))\bigr]
+    }_{\text{distillation: match working-memory behavior}}
+    \notag \\
+    &+ \underbrace{\lambda_r \cdot \E_{x \sim \mathcal{D}_{\mathrm{replay}}}
+    \bigl[-\log p_\theta(y|x)\bigr]
+    }_{\text{replay: preserve long-term knowledge}}
+  \Big],
+  \label{eq:behavioral-merge}
+\end{align}
+where $\mathcal{D}_{\mathrm{recent}}$ is the current session data and
+$\mathcal{D}_{\mathrm{replay}}$ is sampled from a reservoir buffer of
+past data.
+\end{definition}
+
+%% ======================================================================
+\subsection{Derivation from Laplace Approximation}
+%% ======================================================================
+
+\begin{proposition}[Behavioral merge from Bayesian perspective --- fixes Issue~\#19]
+\label{prop:behavioral-merge}
+Under the Laplace approximation to the posterior, the optimal merge of
+two models' predictions can be decomposed into distillation and replay
+as in \eqref{eq:behavioral-merge}.
+\end{proposition}
+
+\begin{proof}
+\textbf{Step 1: Laplace approximation.}
+Approximate the posterior after observing session data $\mathcal{S}$
+and replay data $\mathcal{R}$ as Gaussian:
+\[
+  p(\theta | \mathcal{S}, \mathcal{R})
+  \approx \mathcal{N}\!\left(\theta;\,
+    \hat{\theta}_{\mathrm{MAP}},\,
+    (F_{\mathcal{S}} + F_{\mathcal{R}})^{-1}\right),
+\]
+where $F_{\mathcal{S}}$ and $F_{\mathcal{R}}$ are the empirical Fisher
+information matrices on session and replay data, respectively.
+
+\textbf{Step 2: MAP estimate in function space.}
+The MAP estimate maximizes:
+\begin{align*}
+  \hat{\theta}_{\mathrm{MAP}}
+  &= \argmin_\theta \bigl[
+    -\log p(\mathcal{S}|\theta)
+    - \log p(\mathcal{R}|\theta)
+    - \log p(\theta)
+  \bigr].
+\end{align*}
+
+\textbf{Step 3: Connection to KL distillation.}
+When $\theta_w$ has been optimized on $\mathcal{S}$, the session
+log-likelihood term can be approximated (to second order around
+$\theta_w$) as:
+\[
+  -\log p(\mathcal{S}|\theta)
+  \approx -\log p(\mathcal{S}|\theta_w)
+  + \frac{1}{2}(\theta - \theta_w)^\top F_{\mathcal{S}}(\theta-\theta_w).
+\]
+For an output distribution $p_\theta(y|x)$, minimizing
+$(\theta-\theta_w)^\top F_{\mathcal{S}}(\theta-\theta_w)$ is equivalent
+(to second order) to minimizing:
+\[
+  \E_{x \sim \mathcal{S}}\bigl[
+    D_{\mathrm{KL}}(p_{\theta_w}(\cdot|x) \,\|\, p_\theta(\cdot|x))
+  \bigr],
+\]
+by the Bernstein--von Mises theorem connecting Fisher information to
+KL divergence: $D_{\mathrm{KL}}(p_{\theta_1}\|p_{\theta_2})
+\approx \frac{1}{2}(\theta_1-\theta_2)^\top F(\theta_1-\theta_2)$
+locally.
+
+\textbf{Step 4: Replay term.}
+The replay log-likelihood $-\log p(\mathcal{R}|\theta)$ directly
+corresponds to the NTP loss on replay data:
+\[
+  -\log p(\mathcal{R}|\theta) = \sum_{(x,y) \in \mathcal{R}}
+  \bigl[-\log p_\theta(y|x)\bigr].
+\]
+
+\textbf{Step 5: Combining.}
+The MAP objective decomposes as:
+\[
+  \hat{\theta}_{\mathrm{MAP}} = \argmin_\theta\bigl[
+    \underbrace{\lambda_d \cdot \text{KL-distill}(\theta_w \to \theta)}_{\text{session data}}
+    + \underbrace{\lambda_r \cdot \text{NTP-loss}(\theta; \mathcal{R})}_{\text{replay data}}
+    + \underbrace{\text{prior}}_{\text{EWC regularization}}
+  \bigr],
+\]
+which matches \eqref{eq:behavioral-merge}. The weights
+$\lambda_d \propto |\mathcal{S}|$ and $\lambda_r \propto |\mathcal{R}|$
+reflect the relative data sizes.
+
+\textbf{Crucially}, this formulation operates in \emph{function space}
+(via KL divergence of output distributions) and does not require
+$\theta_w$ and $\theta_l$ to have the same shape. The only requirement
+is that both models define conditional distributions $p_\theta(y|x)$.
+\end{proof}
+
+\begin{corollary}[Optimal merge is rank-agnostic]
+\label{cor:rank-agnostic}
+The behavioral merge objective \eqref{eq:behavioral-merge} is well-defined
+for any pair of models $(p_{\theta_w}, p_{\theta_l})$ regardless of their
+parameter dimensions, ranks, or architectures. This resolves the rank
+mismatch between WM-LoRA ($r=16$) and LT-LoRA ($r=64$).
+\end{corollary}
+
+\begin{remark}[Relationship to the code implementation]
+The Mirror-LoRA consolidation in \texttt{streaming\_memory.py:247--341}
+implements exactly \eqref{eq:behavioral-merge}: KL distillation loss on
+session data + NTP cross-entropy on reservoir data + Fisher trust-region
+(which acts as the prior/EWC term). The trust-region constraint
+$\norm{\theta - \theta_l^{\mathrm{old}}}_{F_l}^2 \leq \delta$ is the
+Bayesian prior contribution.
+\end{remark}

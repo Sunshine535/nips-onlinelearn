@@ -1,0 +1,150 @@
+%% corollary3.tex — Selective Consolidation
+%% Fixes Issue: #23 (definitional gap for "invariant coordinates")
+\section{Corollary 3: Selective Consolidation}
+\label{sec:cor3}
+
+%% ======================================================================
+\subsection{Formal Definition of Invariant Coordinates}
+%% ======================================================================
+
+\begin{definition}[Gradient-sign stability --- fixes Issue~\#23]
+\label{def:gradient-sign-stability}
+For parameter coordinate $j \in [d]$ and a window of $W$ consecutive
+consolidation gradients $\{g^{(m)}_j\}_{m=1}^W$, define the
+\emph{gradient-sign stability} as:
+\[
+  s_j \coloneqq \frac{1}{W}\left|\sum_{m=1}^W \sign(g^{(m)}_j)\right|
+  \in [0, 1].
+\]
+A coordinate $j$ is \emph{invariant} if $s_j \geq \tau_s$ for a
+threshold $\tau_s \in (0, 1]$, and \emph{transient} otherwise.
+
+Denote the invariant index set as
+$\mathcal{I} = \{j : s_j \geq \tau_s\}$ and the transient set as
+$\mathcal{T} = [d] \setminus \mathcal{I}$.
+\end{definition}
+
+\begin{remark}[Interpretation]
+A coordinate with $s_j \approx 1$ has gradient consistently pointing
+in one direction across consolidation rounds, indicating a persistent
+signal. A coordinate with $s_j \approx 0$ has gradient sign flipping
+randomly, indicating noise or transient effects.
+\end{remark}
+
+%% ======================================================================
+\subsection{Selective Consolidation Guarantee}
+%% ======================================================================
+
+\begin{definition}[Selective consolidation]
+\label{def:selective-consolidation}
+Given the partition $(\mathcal{I}, \mathcal{T})$, \emph{selective
+consolidation} applies the slow-track update only to invariant
+coordinates:
+\[
+  [\hat{U}^{\mathrm{new}}]_j =
+  \begin{cases}
+    [\hat{U}^{\mathrm{old}}]_j - \eta_s g_j & \text{if } j \in \mathcal{I}, \\
+    [\hat{U}^{\mathrm{old}}]_j & \text{if } j \in \mathcal{T}.
+  \end{cases}
+\]
+\emph{Indiscriminate consolidation} applies the update to all coordinates.
+\end{definition}
+
+\begin{proposition}[Selective consolidation bound]
+\label{prop:selective}
+Suppose the population gradient decomposes as:
+\[
+  \nabla_j L = \mu_j + \xi_j,
+\]
+where $\mu_j = \E[g_j]$ is the signal and $\xi_j$ is zero-mean noise
+with $\E[\xi_j^2] = \sigma_j^2$. Define the \emph{signal-to-noise
+ratio} $\mathrm{SNR}_j = |\mu_j|/\sigma_j$.
+
+Then for coordinates with $\mathrm{SNR}_j < 1$ (noise-dominated):
+\begin{enumerate}[nosep]
+  \item The expected gradient-sign stability satisfies
+        $\E[s_j] \leq \frac{|\mu_j|}{\sigma_j} + O(W^{-1/2})$.
+  \item Consolidating coordinate $j$ adds expected regret
+        $\eta_s^2 \sigma_j^2$ per round without reducing the subspace
+        tracking error (since $|\mu_j| < \sigma_j$).
+\end{enumerate}
+
+Conversely, for $\mathrm{SNR}_j \geq 1$ (signal-dominated):
+\begin{enumerate}[nosep]
+  \item $\E[s_j] \geq 1 - 2\exp(-W|\mu_j|^2/(2\sigma_j^2))$ (by Hoeffding).
+  \item Consolidating coordinate $j$ reduces subspace error by
+        $\Theta(\eta_s |\mu_j|)$ per round.
+\end{enumerate}
+
+Therefore, with threshold $\tau_s$ chosen such that
+$\mathcal{T} \subseteq \{j : \mathrm{SNR}_j < 1\}$:
+\[
+  \E[\reg_T^{\mathrm{selective}}]
+  \leq \E[\reg_T^{\mathrm{indiscriminate}}]
+  - \eta_s^2 |\mathcal{T}|\, \bar{\sigma}_{\mathcal{T}}^2 \cdot T/B
+  + \eta_s |\mathcal{T}|\, \bar{\mu}_{\mathcal{T}} \cdot T/B,
+\]
+where $\bar{\sigma}_{\mathcal{T}}^2 = \frac{1}{|\mathcal{T}|}
+\sum_{j \in \mathcal{T}} \sigma_j^2$ and
+$\bar{\mu}_{\mathcal{T}} = \frac{1}{|\mathcal{T}|}
+\sum_{j \in \mathcal{T}} |\mu_j|$.
+
+When $\bar{\mu}_{\mathcal{T}} \leq \eta_s \bar{\sigma}_{\mathcal{T}}^2$
+(i.e., transient coordinates are truly noise-dominated), selective
+consolidation has lower regret:
+\[
+  \E[\reg_T^{\mathrm{selective}}] \leq \E[\reg_T^{\mathrm{indiscriminate}}].
+\]
+\end{proposition}
+
+\begin{proof}
+\textbf{Step 1: Sign stability characterization.}
+For a noise-dominated coordinate ($|\mu_j| < \sigma_j$), the gradient
+$g_j = \mu_j + \xi_j$ has $\Pr(\sign(g_j) = \sign(\mu_j))
+= \Phi(|\mu_j|/\sigma_j)$ where $\Phi$ is the standard normal CDF
+(under Gaussian noise assumption). The sample sign average satisfies:
+\[
+  \E[s_j] = \left|2\Phi\!\left(\frac{|\mu_j|}{\sigma_j}\right) - 1\right|
+  \leq \frac{|\mu_j|}{\sigma_j} + O(W^{-1/2}).
+\]
+By Hoeffding's inequality applied to the $\pm 1$ signs:
+$\Pr(s_j \geq \tau_s) \leq \exp(-W(\tau_s - \E[s_j])^2/2)$.
+
+\textbf{Step 2: Regret decomposition per coordinate.}
+The subspace update for coordinate $j$ contributes to the next-period
+error as:
+\begin{align*}
+  \E[\norm{[\hat{U}^{\mathrm{new}}]_j - [U]_j}^2]
+  &= \E[\norm{[\hat{U}^{\mathrm{old}}]_j - \eta_s g_j - [U]_j}^2] \\
+  &= \underbrace{\norm{[\hat{U}^{\mathrm{old}}]_j - [U]_j}^2}_{e_j^2}
+    - 2\eta_s \mu_j \cdot (\hat{U}^{\mathrm{old}}_j - U_j)
+    + \eta_s^2(\mu_j^2 + \sigma_j^2).
+\end{align*}
+The expected improvement is $2\eta_s |\mu_j| e_j$ (when the gradient
+points toward the truth) minus the noise penalty $\eta_s^2 \sigma_j^2$.
+
+\textbf{Step 3: Selective vs.\ indiscriminate.}
+Selective consolidation skips all $j \in \mathcal{T}$. The difference
+in one-period regret is:
+\[
+  \Delta R = \sum_{j \in \mathcal{T}}
+  \bigl(-2\eta_s |\mu_j| e_j + \eta_s^2 \sigma_j^2\bigr).
+\]
+When $|\mu_j| e_j \leq \eta_s \sigma_j^2/2$ for noise-dominated
+coordinates (which holds for small $e_j$ or small $|\mu_j|$),
+$\Delta R \geq 0$, meaning selective is at least as good as
+indiscriminate.
+
+Summing over $T/B$ consolidation periods gives the claimed bound.
+\end{proof}
+
+\begin{remark}[When selective consolidation can fail]
+\label{rem:selective-fail}
+If the threshold $\tau_s$ is set too aggressively (too high), signal
+coordinates may be misclassified as transient, causing the learner to
+miss genuine subspace drift. The synthetic experiment E4 showed this
+failure mode with the previous covariance-threshold criterion, which
+was too sensitive to the noise distribution.
+The gradient-sign criterion is more robust because it directly measures
+the consistency of the optimization direction.
+\end{remark}
