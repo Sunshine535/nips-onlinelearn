@@ -1,0 +1,303 @@
+2026-04-14 03:11:53,916 [INFO] Task: dialogue
+2026-04-14 03:11:53,919 [INFO] Methods: ['mirror_lora']
+2026-04-14 03:11:53,919 [INFO] Model: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+2026-04-14 03:11:53,920 [INFO] Device: cuda:0
+2026-04-14 03:11:53,920 [INFO] Output: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct
+2026-04-14 03:11:53,925 [WARNING] PersonaChat load failed (Couldn't reach 'bavard/personachat_truecased' on the Hub (OfflineModeIsEnabled)); generating synthetic data
+2026-04-14 03:11:53,927 [INFO] Generated 50 synthetic dialogue sessions
+2026-04-14 03:11:53,927 [INFO] Loading base model: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<04:40,  1.03it/s]Loading weights:   9%|▉         | 27/290 [00:01<00:08, 31.06it/s]Loading weights:  14%|█▍        | 40/290 [00:01<00:05, 44.06it/s]Loading weights:  22%|██▏       | 63/290 [00:01<00:03, 70.58it/s]Loading weights:  28%|██▊       | 81/290 [00:01<00:02, 90.30it/s]Loading weights:  34%|███▍      | 99/290 [00:01<00:01, 105.43it/s]Loading weights:  39%|███▉      | 114/290 [00:01<00:01, 106.13it/s]Loading weights:  47%|████▋     | 135/290 [00:01<00:01, 126.27it/s]Loading weights:  55%|█████▌    | 160/290 [00:01<00:00, 155.84it/s]Loading weights:  62%|██████▏   | 179/290 [00:02<00:00, 161.70it/s]Loading weights:  71%|███████▏  | 207/290 [00:02<00:00, 192.57it/s]Loading weights:  84%|████████▍ | 243/290 [00:02<00:00, 221.79it/s]Loading weights:  92%|█████████▏| 267/290 [00:02<00:00, 209.54it/s]Loading weights: 100%|██████████| 290/290 [00:02<00:00, 115.52it/s]
+2026-04-14 03:11:57,475 [INFO] Base model loaded. Parameters: 494032768
+2026-04-14 03:11:57,476 [INFO] 
+2026-04-14 03:11:57,476 [INFO] ======================================================================
+2026-04-14 03:11:57,477 [INFO] METHOD: mirror_lora
+2026-04-14 03:11:57,477 [INFO] ======================================================================
+2026-04-14 03:11:58,063 [INFO]   [dialogue] Evaluating mirror_lora (50 sessions)
+2026-04-14 03:11:58,079 [INFO] Started session 1 (residual WM zero-init)
+2026-04-14 03:11:58,079 [INFO] Mirror-LoRA: started session 1
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+2026-04-14 03:12:04,715 [INFO] Consolidating session 1 (10 turns, reservoir 0)
+2026-04-14 03:12:09,327 [INFO] Consolidation complete (loss=21.4330)
+2026-04-14 03:12:09,333 [INFO] Mirror-LoRA consolidation #1 complete: loss=21.4330, elapsed=4.62s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:12:09,334 [INFO] Auto-consolidation #1 triggered at turn 0 (4.63s, loss=21.4330)
+2026-04-14 03:12:13,675 [INFO] Consolidating session 1 (5 turns, reservoir 10)
+2026-04-14 03:12:19,607 [INFO] Consolidation complete (loss=1.7996)
+2026-04-14 03:12:19,825 [INFO] Mirror-LoRA consolidation #2 complete: loss=1.7996, elapsed=6.16s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:12:24,004 [INFO]     Session 1/50 | loss=0.3828 | ret=0.5357
+2026-04-14 03:12:24,017 [INFO] Started session 2 (residual WM zero-init)
+2026-04-14 03:12:24,018 [INFO] Mirror-LoRA: started session 2
+2026-04-14 03:12:33,969 [INFO] Consolidating session 2 (15 turns, reservoir 15)
+2026-04-14 03:12:46,453 [INFO] Consolidation complete (loss=2.7003)
+2026-04-14 03:12:46,671 [INFO] Mirror-LoRA consolidation #3 complete: loss=2.7003, elapsed=12.71s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:12:50,430 [INFO] Started session 3 (residual WM zero-init)
+2026-04-14 03:12:50,432 [INFO] Mirror-LoRA: started session 3
+2026-04-14 03:13:00,922 [INFO] Consolidating session 3 (15 turns, reservoir 30)
+2026-04-14 03:13:19,023 [INFO] Consolidation complete (loss=1.0374)
+2026-04-14 03:13:19,227 [INFO] Mirror-LoRA consolidation #4 complete: loss=1.0374, elapsed=18.31s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:13:22,629 [INFO] Started session 4 (residual WM zero-init)
+2026-04-14 03:13:22,630 [INFO] Mirror-LoRA: started session 4
+2026-04-14 03:13:32,544 [INFO] Consolidating session 4 (15 turns, reservoir 45)
+2026-04-14 03:13:52,202 [INFO] Consolidation complete (loss=0.7909)
+2026-04-14 03:13:52,417 [INFO] Mirror-LoRA consolidation #5 complete: loss=0.7909, elapsed=19.88s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:13:56,766 [INFO] Started session 5 (residual WM zero-init)
+2026-04-14 03:13:56,767 [INFO] Mirror-LoRA: started session 5
+2026-04-14 03:14:06,201 [INFO] Consolidating session 5 (15 turns, reservoir 60)
+2026-04-14 03:14:27,601 [INFO] Consolidation complete (loss=0.8143)
+2026-04-14 03:14:27,773 [INFO] Mirror-LoRA consolidation #6 complete: loss=0.8143, elapsed=21.58s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:14:32,031 [INFO] Started session 6 (residual WM zero-init)
+2026-04-14 03:14:32,033 [INFO] Mirror-LoRA: started session 6
+2026-04-14 03:14:42,447 [INFO] Consolidating session 6 (15 turns, reservoir 75)
+2026-04-14 03:15:03,495 [INFO] Consolidation complete (loss=2.4786)
+2026-04-14 03:15:03,692 [INFO] Mirror-LoRA consolidation #7 complete: loss=2.4786, elapsed=21.25s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:15:07,464 [INFO] Started session 7 (residual WM zero-init)
+2026-04-14 03:15:07,468 [INFO] Mirror-LoRA: started session 7
+2026-04-14 03:15:18,061 [INFO] Consolidating session 7 (15 turns, reservoir 90)
+2026-04-14 03:15:38,574 [INFO] Consolidation complete (loss=0.8233)
+2026-04-14 03:15:38,627 [INFO] Mirror-LoRA consolidation #8 complete: loss=0.8233, elapsed=20.57s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:15:42,140 [INFO] Started session 8 (residual WM zero-init)
+2026-04-14 03:15:42,141 [INFO] Mirror-LoRA: started session 8
+2026-04-14 03:15:52,803 [INFO] Consolidating session 8 (15 turns, reservoir 105)
+2026-04-14 03:16:13,420 [INFO] Consolidation complete (loss=1.6192)
+2026-04-14 03:16:13,469 [INFO] Mirror-LoRA consolidation #9 complete: loss=1.6192, elapsed=20.67s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:16:17,309 [INFO] Started session 9 (residual WM zero-init)
+2026-04-14 03:16:17,311 [INFO] Mirror-LoRA: started session 9
+2026-04-14 03:16:27,885 [INFO] Consolidating session 9 (15 turns, reservoir 120)
+2026-04-14 03:16:48,684 [INFO] Consolidation complete (loss=1.3073)
+2026-04-14 03:16:48,735 [INFO] Mirror-LoRA consolidation #10 complete: loss=1.3073, elapsed=20.86s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:16:52,711 [INFO] Started session 10 (residual WM zero-init)
+2026-04-14 03:16:52,712 [INFO] Mirror-LoRA: started session 10
+2026-04-14 03:17:03,013 [INFO] Consolidating session 10 (15 turns, reservoir 135)
+2026-04-14 03:17:23,451 [INFO] Consolidation complete (loss=0.7989)
+2026-04-14 03:17:23,501 [INFO] Mirror-LoRA consolidation #11 complete: loss=0.7989, elapsed=20.49s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:17:27,471 [INFO]     Session 10/50 | loss=0.0707 | ret=0.5625
+2026-04-14 03:17:27,485 [INFO] Started session 11 (residual WM zero-init)
+2026-04-14 03:17:27,485 [INFO] Mirror-LoRA: started session 11
+2026-04-14 03:17:38,247 [INFO] Consolidating session 11 (15 turns, reservoir 150)
+2026-04-14 03:17:58,873 [INFO] Consolidation complete (loss=3.2902)
+2026-04-14 03:17:58,924 [INFO] Mirror-LoRA consolidation #12 complete: loss=3.2902, elapsed=20.68s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:18:02,928 [INFO] Started session 12 (residual WM zero-init)
+2026-04-14 03:18:02,929 [INFO] Mirror-LoRA: started session 12
+2026-04-14 03:18:14,333 [INFO] Consolidating session 12 (15 turns, reservoir 165)
+2026-04-14 03:18:35,135 [INFO] Consolidation complete (loss=1.1528)
+2026-04-14 03:18:35,185 [INFO] Mirror-LoRA consolidation #13 complete: loss=1.1528, elapsed=20.86s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:18:38,972 [INFO] Started session 13 (residual WM zero-init)
+2026-04-14 03:18:38,973 [INFO] Mirror-LoRA: started session 13
+2026-04-14 03:18:50,194 [INFO] Consolidating session 13 (15 turns, reservoir 180)
+2026-04-14 03:19:10,906 [INFO] Consolidation complete (loss=0.8924)
+2026-04-14 03:19:10,956 [INFO] Mirror-LoRA consolidation #14 complete: loss=0.8924, elapsed=20.77s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:19:15,479 [INFO] Started session 14 (residual WM zero-init)
+2026-04-14 03:19:15,481 [INFO] Mirror-LoRA: started session 14
+2026-04-14 03:19:26,676 [INFO] Consolidating session 14 (15 turns, reservoir 195)
+2026-04-14 03:19:47,462 [INFO] Consolidation complete (loss=0.9175)
+2026-04-14 03:19:47,515 [INFO] Mirror-LoRA consolidation #15 complete: loss=0.9175, elapsed=20.85s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:19:51,290 [INFO] Started session 15 (residual WM zero-init)
+2026-04-14 03:19:51,291 [INFO] Mirror-LoRA: started session 15
+2026-04-14 03:20:02,927 [INFO] Consolidating session 15 (15 turns, reservoir 210)
+2026-04-14 03:20:23,538 [INFO] Consolidation complete (loss=0.6597)
+2026-04-14 03:20:23,588 [INFO] Mirror-LoRA consolidation #16 complete: loss=0.6597, elapsed=20.67s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:20:27,349 [INFO] Started session 16 (residual WM zero-init)
+2026-04-14 03:20:27,350 [INFO] Mirror-LoRA: started session 16
+2026-04-14 03:20:38,466 [INFO] Consolidating session 16 (15 turns, reservoir 225)
+2026-04-14 03:20:59,153 [INFO] Consolidation complete (loss=0.7998)
+2026-04-14 03:20:59,204 [INFO] Mirror-LoRA consolidation #17 complete: loss=0.7998, elapsed=20.74s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:21:03,617 [INFO] Started session 17 (residual WM zero-init)
+2026-04-14 03:21:03,618 [INFO] Mirror-LoRA: started session 17
+2026-04-14 03:21:14,556 [INFO] Consolidating session 17 (15 turns, reservoir 240)
+2026-04-14 03:21:35,592 [INFO] Consolidation complete (loss=1.4024)
+2026-04-14 03:21:35,642 [INFO] Mirror-LoRA consolidation #18 complete: loss=1.4024, elapsed=21.09s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:21:39,057 [INFO] Started session 18 (residual WM zero-init)
+2026-04-14 03:21:39,059 [INFO] Mirror-LoRA: started session 18
+2026-04-14 03:21:50,714 [INFO] Consolidating session 18 (15 turns, reservoir 255)
+2026-04-14 03:22:11,368 [INFO] Consolidation complete (loss=1.0745)
+2026-04-14 03:22:11,417 [INFO] Mirror-LoRA consolidation #19 complete: loss=1.0745, elapsed=20.71s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:22:15,392 [INFO] Started session 19 (residual WM zero-init)
+2026-04-14 03:22:15,393 [INFO] Mirror-LoRA: started session 19
+2026-04-14 03:22:30,784 [INFO] Consolidating session 19 (15 turns, reservoir 270)
+2026-04-14 03:22:51,467 [INFO] Consolidation complete (loss=0.9523)
+2026-04-14 03:22:51,517 [INFO] Mirror-LoRA consolidation #20 complete: loss=0.9523, elapsed=20.74s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:22:55,638 [INFO] Started session 20 (residual WM zero-init)
+2026-04-14 03:22:55,639 [INFO] Mirror-LoRA: started session 20
+2026-04-14 03:23:06,441 [INFO] Consolidating session 20 (15 turns, reservoir 285)
+2026-04-14 03:23:27,034 [INFO] Consolidation complete (loss=0.6730)
+2026-04-14 03:23:27,086 [INFO] Mirror-LoRA consolidation #21 complete: loss=0.6730, elapsed=20.65s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:23:30,862 [INFO]     Session 20/50 | loss=0.0628 | ret=0.0000
+2026-04-14 03:23:30,878 [INFO] Started session 21 (residual WM zero-init)
+2026-04-14 03:23:30,879 [INFO] Mirror-LoRA: started session 21
+2026-04-14 03:23:42,226 [INFO] Consolidating session 21 (15 turns, reservoir 300)
+2026-04-14 03:24:02,843 [INFO] Consolidation complete (loss=1.1294)
+2026-04-14 03:24:02,893 [INFO] Mirror-LoRA consolidation #22 complete: loss=1.1294, elapsed=20.67s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:24:06,873 [INFO] Started session 22 (residual WM zero-init)
+2026-04-14 03:24:06,874 [INFO] Mirror-LoRA: started session 22
+2026-04-14 03:24:17,436 [INFO] Consolidating session 22 (15 turns, reservoir 315)
+2026-04-14 03:24:38,390 [INFO] Consolidation complete (loss=1.3778)
+2026-04-14 03:24:38,440 [INFO] Mirror-LoRA consolidation #23 complete: loss=1.3778, elapsed=21.01s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:24:42,123 [INFO] Started session 23 (residual WM zero-init)
+2026-04-14 03:24:42,123 [INFO] Mirror-LoRA: started session 23
+2026-04-14 03:24:52,909 [INFO] Consolidating session 23 (15 turns, reservoir 330)
+2026-04-14 03:25:13,745 [INFO] Consolidation complete (loss=0.9459)
+2026-04-14 03:25:13,798 [INFO] Mirror-LoRA consolidation #24 complete: loss=0.9459, elapsed=20.90s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:25:17,601 [INFO] Started session 24 (residual WM zero-init)
+2026-04-14 03:25:17,602 [INFO] Mirror-LoRA: started session 24
+2026-04-14 03:25:28,699 [INFO] Consolidating session 24 (15 turns, reservoir 345)
+2026-04-14 03:25:49,497 [INFO] Consolidation complete (loss=0.9043)
+2026-04-14 03:25:49,548 [INFO] Mirror-LoRA consolidation #25 complete: loss=0.9043, elapsed=20.86s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:25:53,600 [INFO] Started session 25 (residual WM zero-init)
+2026-04-14 03:25:53,601 [INFO] Mirror-LoRA: started session 25
+2026-04-14 03:26:05,255 [INFO] Consolidating session 25 (15 turns, reservoir 360)
+2026-04-14 03:26:26,413 [INFO] Consolidation complete (loss=1.0814)
+2026-04-14 03:26:26,466 [INFO] Mirror-LoRA consolidation #26 complete: loss=1.0814, elapsed=21.22s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:26:30,456 [INFO] Started session 26 (residual WM zero-init)
+2026-04-14 03:26:30,457 [INFO] Mirror-LoRA: started session 26
+2026-04-14 03:26:40,954 [INFO] Consolidating session 26 (15 turns, reservoir 375)
+2026-04-14 03:27:01,734 [INFO] Consolidation complete (loss=1.1584)
+2026-04-14 03:27:01,784 [INFO] Mirror-LoRA consolidation #27 complete: loss=1.1584, elapsed=20.84s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:27:06,244 [INFO] Started session 27 (residual WM zero-init)
+2026-04-14 03:27:06,245 [INFO] Mirror-LoRA: started session 27
+2026-04-14 03:27:18,020 [INFO] Consolidating session 27 (15 turns, reservoir 390)
+2026-04-14 03:27:38,802 [INFO] Consolidation complete (loss=0.9541)
+2026-04-14 03:27:38,855 [INFO] Mirror-LoRA consolidation #28 complete: loss=0.9541, elapsed=20.84s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:27:43,087 [INFO] Started session 28 (residual WM zero-init)
+2026-04-14 03:27:43,088 [INFO] Mirror-LoRA: started session 28
+2026-04-14 03:27:54,911 [INFO] Consolidating session 28 (15 turns, reservoir 405)
+2026-04-14 03:28:15,563 [INFO] Consolidation complete (loss=1.0286)
+2026-04-14 03:28:15,613 [INFO] Mirror-LoRA consolidation #29 complete: loss=1.0286, elapsed=20.71s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:28:19,358 [INFO] Started session 29 (residual WM zero-init)
+2026-04-14 03:28:19,359 [INFO] Mirror-LoRA: started session 29
+2026-04-14 03:28:30,326 [INFO] Consolidating session 29 (15 turns, reservoir 420)
+2026-04-14 03:28:50,697 [INFO] Consolidation complete (loss=0.8228)
+2026-04-14 03:28:50,746 [INFO] Mirror-LoRA consolidation #30 complete: loss=0.8228, elapsed=20.43s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:28:54,375 [INFO] Started session 30 (residual WM zero-init)
+2026-04-14 03:28:54,375 [INFO] Mirror-LoRA: started session 30
+2026-04-14 03:29:05,344 [INFO] Consolidating session 30 (15 turns, reservoir 435)
+2026-04-14 03:29:25,676 [INFO] Consolidation complete (loss=0.5188)
+2026-04-14 03:29:25,728 [INFO] Mirror-LoRA consolidation #31 complete: loss=0.5188, elapsed=20.39s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:29:29,511 [INFO]     Session 30/50 | loss=0.0535 | ret=0.6429
+2026-04-14 03:29:29,524 [INFO] Started session 31 (residual WM zero-init)
+2026-04-14 03:29:29,525 [INFO] Mirror-LoRA: started session 31
+2026-04-14 03:29:40,379 [INFO] Consolidating session 31 (15 turns, reservoir 450)
+2026-04-14 03:30:00,874 [INFO] Consolidation complete (loss=2.4967)
+2026-04-14 03:30:00,924 [INFO] Mirror-LoRA consolidation #32 complete: loss=2.4967, elapsed=20.55s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:30:04,788 [INFO] Started session 32 (residual WM zero-init)
+2026-04-14 03:30:04,789 [INFO] Mirror-LoRA: started session 32
+2026-04-14 03:30:15,486 [INFO] Consolidating session 32 (15 turns, reservoir 465)
+2026-04-14 03:30:35,939 [INFO] Consolidation complete (loss=0.9605)
+2026-04-14 03:30:35,989 [INFO] Mirror-LoRA consolidation #33 complete: loss=0.9605, elapsed=20.51s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:30:39,823 [INFO] Started session 33 (residual WM zero-init)
+2026-04-14 03:30:39,824 [INFO] Mirror-LoRA: started session 33
+2026-04-14 03:30:50,871 [INFO] Consolidating session 33 (15 turns, reservoir 480)
+2026-04-14 03:31:11,503 [INFO] Consolidation complete (loss=0.9105)
+2026-04-14 03:31:11,552 [INFO] Mirror-LoRA consolidation #34 complete: loss=0.9105, elapsed=20.69s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:31:15,527 [INFO] Started session 34 (residual WM zero-init)
+2026-04-14 03:31:15,528 [INFO] Mirror-LoRA: started session 34
+2026-04-14 03:31:26,267 [INFO] Consolidating session 34 (15 turns, reservoir 495)
+2026-04-14 03:31:46,023 [INFO] Consolidation complete (loss=1.2451)
+2026-04-14 03:31:46,071 [INFO] Mirror-LoRA consolidation #35 complete: loss=1.2451, elapsed=19.81s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:31:49,937 [INFO] Started session 35 (residual WM zero-init)
+2026-04-14 03:31:49,938 [INFO] Mirror-LoRA: started session 35
+2026-04-14 03:32:00,331 [INFO] Consolidating session 35 (15 turns, reservoir 510)
+2026-04-14 03:32:19,859 [INFO] Consolidation complete (loss=1.5136)
+2026-04-14 03:32:19,908 [INFO] Mirror-LoRA consolidation #36 complete: loss=1.5136, elapsed=19.58s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:32:23,027 [INFO] Started session 36 (residual WM zero-init)
+2026-04-14 03:32:23,029 [INFO] Mirror-LoRA: started session 36
+2026-04-14 03:32:33,836 [INFO] Consolidating session 36 (15 turns, reservoir 525)
+2026-04-14 03:32:53,296 [INFO] Consolidation complete (loss=0.9009)
+2026-04-14 03:32:53,345 [INFO] Mirror-LoRA consolidation #37 complete: loss=0.9009, elapsed=19.52s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:32:57,675 [INFO] Started session 37 (residual WM zero-init)
+2026-04-14 03:32:57,676 [INFO] Mirror-LoRA: started session 37
+2026-04-14 03:33:07,809 [INFO] Consolidating session 37 (15 turns, reservoir 540)
+2026-04-14 03:33:27,205 [INFO] Consolidation complete (loss=1.0669)
+2026-04-14 03:33:27,256 [INFO] Mirror-LoRA consolidation #38 complete: loss=1.0669, elapsed=19.45s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:33:30,925 [INFO] Started session 38 (residual WM zero-init)
+2026-04-14 03:33:30,926 [INFO] Mirror-LoRA: started session 38
+2026-04-14 03:33:41,217 [INFO] Consolidating session 38 (15 turns, reservoir 555)
+2026-04-14 03:34:00,605 [INFO] Consolidation complete (loss=1.1619)
+2026-04-14 03:34:00,654 [INFO] Mirror-LoRA consolidation #39 complete: loss=1.1619, elapsed=19.44s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:34:04,323 [INFO] Started session 39 (residual WM zero-init)
+2026-04-14 03:34:04,324 [INFO] Mirror-LoRA: started session 39
+2026-04-14 03:34:15,302 [INFO] Consolidating session 39 (15 turns, reservoir 570)
+2026-04-14 03:34:34,685 [INFO] Consolidation complete (loss=0.6637)
+2026-04-14 03:34:34,734 [INFO] Mirror-LoRA consolidation #40 complete: loss=0.6637, elapsed=19.44s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:34:39,079 [INFO] Started session 40 (residual WM zero-init)
+2026-04-14 03:34:39,081 [INFO] Mirror-LoRA: started session 40
+2026-04-14 03:34:50,221 [INFO] Consolidating session 40 (15 turns, reservoir 585)
+2026-04-14 03:35:09,609 [INFO] Consolidation complete (loss=0.7309)
+2026-04-14 03:35:09,657 [INFO] Mirror-LoRA consolidation #41 complete: loss=0.7309, elapsed=19.44s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:35:14,038 [INFO]     Session 40/50 | loss=0.0703 | ret=0.5882
+2026-04-14 03:35:14,050 [INFO] Started session 41 (residual WM zero-init)
+2026-04-14 03:35:14,051 [INFO] Mirror-LoRA: started session 41
+2026-04-14 03:35:25,290 [INFO] Consolidating session 41 (15 turns, reservoir 600)
+2026-04-14 03:35:44,865 [INFO] Consolidation complete (loss=1.5451)
+2026-04-14 03:35:44,913 [INFO] Mirror-LoRA consolidation #42 complete: loss=1.5451, elapsed=19.63s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:35:49,180 [INFO] Started session 42 (residual WM zero-init)
+2026-04-14 03:35:49,182 [INFO] Mirror-LoRA: started session 42
+2026-04-14 03:36:00,437 [INFO] Consolidating session 42 (15 turns, reservoir 615)
+2026-04-14 03:36:19,808 [INFO] Consolidation complete (loss=1.2196)
+2026-04-14 03:36:19,856 [INFO] Mirror-LoRA consolidation #43 complete: loss=1.2196, elapsed=19.42s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:36:24,418 [INFO] Started session 43 (residual WM zero-init)
+2026-04-14 03:36:24,419 [INFO] Mirror-LoRA: started session 43
+2026-04-14 03:36:35,557 [INFO] Consolidating session 43 (15 turns, reservoir 630)
+2026-04-14 03:36:55,004 [INFO] Consolidation complete (loss=0.8374)
+2026-04-14 03:36:55,053 [INFO] Mirror-LoRA consolidation #44 complete: loss=0.8374, elapsed=19.50s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:36:58,841 [INFO] Started session 44 (residual WM zero-init)
+2026-04-14 03:36:58,842 [INFO] Mirror-LoRA: started session 44
+2026-04-14 03:37:10,018 [INFO] Consolidating session 44 (15 turns, reservoir 645)
+2026-04-14 03:37:29,404 [INFO] Consolidation complete (loss=0.6221)
+2026-04-14 03:37:29,453 [INFO] Mirror-LoRA consolidation #45 complete: loss=0.6221, elapsed=19.44s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:37:33,236 [INFO] Started session 45 (residual WM zero-init)
+2026-04-14 03:37:33,238 [INFO] Mirror-LoRA: started session 45
+2026-04-14 03:37:45,279 [INFO] Consolidating session 45 (15 turns, reservoir 660)
+2026-04-14 03:38:04,671 [INFO] Consolidation complete (loss=0.7095)
+2026-04-14 03:38:04,719 [INFO] Mirror-LoRA consolidation #46 complete: loss=0.7095, elapsed=19.45s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:38:08,730 [INFO] Started session 46 (residual WM zero-init)
+2026-04-14 03:38:08,731 [INFO] Mirror-LoRA: started session 46
+2026-04-14 03:38:20,406 [INFO] Consolidating session 46 (15 turns, reservoir 675)
+2026-04-14 03:38:39,950 [INFO] Consolidation complete (loss=1.0466)
+2026-04-14 03:38:39,998 [INFO] Mirror-LoRA consolidation #47 complete: loss=1.0466, elapsed=19.60s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:38:43,680 [INFO] Started session 47 (residual WM zero-init)
+2026-04-14 03:38:43,681 [INFO] Mirror-LoRA: started session 47
+2026-04-14 03:38:55,080 [INFO] Consolidating session 47 (15 turns, reservoir 690)
+2026-04-14 03:39:14,557 [INFO] Consolidation complete (loss=0.7302)
+2026-04-14 03:39:14,606 [INFO] Mirror-LoRA consolidation #48 complete: loss=0.7302, elapsed=19.53s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:39:18,386 [INFO] Started session 48 (residual WM zero-init)
+2026-04-14 03:39:18,387 [INFO] Mirror-LoRA: started session 48
+2026-04-14 03:39:29,817 [INFO] Consolidating session 48 (15 turns, reservoir 705)
+2026-04-14 03:39:49,321 [INFO] Consolidation complete (loss=0.5992)
+2026-04-14 03:39:49,374 [INFO] Mirror-LoRA consolidation #49 complete: loss=0.5992, elapsed=19.56s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:39:53,298 [INFO] Started session 49 (residual WM zero-init)
+2026-04-14 03:39:53,299 [INFO] Mirror-LoRA: started session 49
+2026-04-14 03:40:04,588 [INFO] Consolidating session 49 (15 turns, reservoir 720)
+2026-04-14 03:40:24,270 [INFO] Consolidation complete (loss=0.6326)
+2026-04-14 03:40:24,319 [INFO] Mirror-LoRA consolidation #50 complete: loss=0.6326, elapsed=19.74s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:40:28,259 [INFO] Started session 50 (residual WM zero-init)
+2026-04-14 03:40:28,260 [INFO] Mirror-LoRA: started session 50
+2026-04-14 03:40:39,433 [INFO] Consolidating session 50 (15 turns, reservoir 735)
+2026-04-14 03:40:58,978 [INFO] Consolidation complete (loss=0.7350)
+2026-04-14 03:40:59,026 [INFO] Mirror-LoRA consolidation #51 complete: loss=0.7350, elapsed=19.60s, fast_fisher_keys=192, slow_fisher_keys=192
+2026-04-14 03:41:04,320 [INFO]     Session 50/50 | loss=0.0800 | ret=0.1905
+2026-04-14 03:41:04,796 [INFO]     mirror_lora done: RetF1=0.1905 Forget=0.1435 AdaptSpeed=1.2 PPL=100.42 (1746.7s)
+2026-04-14 03:41:04,801 [INFO]   Saved mirror_lora -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_mirror_lora.json
+2026-04-14 03:41:04,837 [INFO] 
+2026-04-14 03:41:04,838 [INFO] ====================================================================================================
+2026-04-14 03:41:04,838 [INFO] AGGREGATED RESULTS: task=dialogue
+2026-04-14 03:41:04,839 [INFO] ====================================================================================================
+2026-04-14 03:41:04,839 [INFO] Method                       RetF1   Forget  AdaptSpd      PPL     Loss    Latency
+2026-04-14 03:41:04,839 [INFO] ----------------------------------------------------------------------------------------------------
+2026-04-14 03:41:04,840 [INFO] comparison                  0.0000   0.0000       0.0     0.00   0.0000       0.0ms
+2026-04-14 03:41:04,840 [INFO] dual_lora_ema               0.3333   0.0642       1.4    52.87   0.1251      78.5ms
+2026-04-14 03:41:04,841 [INFO] dual_lora_heuristic         0.3333   0.0642       1.4  1224.65   0.1251      76.6ms
+2026-04-14 03:41:04,841 [INFO] dual_lora_periodic_avg      0.3333   0.0642       1.4   826.22   0.1251      76.4ms
+2026-04-14 03:41:04,842 [INFO] frozen                      0.0956   0.0161       2.0   139.28   3.7682      19.0ms
+2026-04-14 03:41:04,842 [INFO] mirror_lora                 0.1905   0.1435       1.2   100.42   0.0764     495.7ms
+2026-04-14 03:41:04,842 [INFO] param_matched_lora          0.2952   0.0571       1.1    12.62   0.1303     223.6ms
+2026-04-14 03:41:04,843 [INFO] retrieval_augmented         0.0956   0.0161       2.0   139.28   3.7682      19.4ms
+2026-04-14 03:41:04,843 [INFO] sdft                        0.0000   0.1078       1.3     5.03   0.1752      92.3ms
+2026-04-14 03:41:04,843 [INFO] single_lora_ewc             0.7778   0.0804       1.2     5.75   0.1302     160.3ms
+2026-04-14 03:41:04,844 [INFO] single_lora_ewc_replay      0.6429   0.0702       1.2     8.34   0.1259     229.0ms
+2026-04-14 03:41:04,844 [INFO] single_lora_replay          0.6190   0.0798       1.1     7.32   0.1338     138.8ms
+2026-04-14 03:41:04,845 [INFO] single_lora_sgd             0.3333   0.0642       1.4     6.20   0.1251      72.4ms
+2026-04-14 03:41:04,845 [INFO] spm                         0.5625   0.0646       1.1    32.87   0.0776     428.3ms
+2026-04-14 03:41:04,856 [INFO] Aggregated comparison -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_comparison.json
+2026-04-14 03:41:04,860 [INFO] LaTeX table -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_results_table.tex
+2026-04-14 03:41:04,861 [INFO] Done. All results in /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct

@@ -1,0 +1,42 @@
+2026-04-14 03:11:53,587 [INFO] Task: dialogue
+2026-04-14 03:11:53,626 [INFO] Methods: ['single_lora_ewc']
+2026-04-14 03:11:53,627 [INFO] Model: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+2026-04-14 03:11:53,627 [INFO] Device: cuda:0
+2026-04-14 03:11:53,628 [INFO] Output: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct
+2026-04-14 03:11:53,631 [WARNING] PersonaChat load failed (Couldn't reach 'bavard/personachat_truecased' on the Hub (OfflineModeIsEnabled)); generating synthetic data
+2026-04-14 03:11:53,633 [INFO] Generated 50 synthetic dialogue sessions
+2026-04-14 03:11:53,633 [INFO] Loading base model: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:01<06:09,  1.28s/it]Loading weights:   9%|▉         | 27/290 [00:01<00:10, 24.81it/s]Loading weights:  14%|█▍        | 40/290 [00:01<00:06, 36.39it/s]Loading weights:  22%|██▏       | 63/290 [00:01<00:03, 60.55it/s]Loading weights:  28%|██▊       | 81/290 [00:01<00:02, 79.60it/s]Loading weights:  34%|███▍      | 99/290 [00:01<00:02, 95.49it/s]Loading weights:  39%|███▉      | 114/290 [00:02<00:01, 98.76it/s]Loading weights:  47%|████▋     | 135/290 [00:02<00:01, 122.10it/s]Loading weights:  55%|█████▍    | 159/290 [00:02<00:00, 147.05it/s]Loading weights:  61%|██████    | 177/290 [00:02<00:00, 152.41it/s]Loading weights:  71%|███████▏  | 207/290 [00:02<00:00, 189.00it/s]Loading weights:  83%|████████▎ | 242/290 [00:02<00:00, 216.16it/s]Loading weights:  92%|█████████▏| 266/290 [00:02<00:00, 221.92it/s]Loading weights: 100%|██████████| 290/290 [00:02<00:00, 225.70it/s]Loading weights: 100%|██████████| 290/290 [00:02<00:00, 102.83it/s]
+2026-04-14 03:11:57,473 [INFO] Base model loaded. Parameters: 494032768
+2026-04-14 03:11:57,474 [INFO] 
+2026-04-14 03:11:57,475 [INFO] ======================================================================
+2026-04-14 03:11:57,475 [INFO] METHOD: single_lora_ewc
+2026-04-14 03:11:57,475 [INFO] ======================================================================
+2026-04-14 03:11:57,626 [INFO]   [dialogue] Evaluating single_lora_ewc (50 sessions)
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+2026-04-14 03:12:06,053 [INFO]     Session 1/50 | loss=1.6682 | ret=0.6613
+2026-04-14 03:12:52,886 [INFO]     Session 10/50 | loss=0.0837 | ret=0.2857
+2026-04-14 03:13:41,683 [INFO]     Session 20/50 | loss=0.1024 | ret=0.8016
+2026-04-14 03:14:33,834 [INFO]     Session 30/50 | loss=0.0932 | ret=0.7857
+2026-04-14 03:15:32,134 [INFO]     Session 40/50 | loss=0.0698 | ret=0.6190
+2026-04-14 03:16:25,357 [INFO]     Session 50/50 | loss=0.0859 | ret=0.7778
+2026-04-14 03:16:25,590 [INFO]     single_lora_ewc done: RetF1=0.7778 Forget=0.0804 AdaptSpeed=1.2 PPL=5.75 (268.0s)
+2026-04-14 03:16:25,610 [INFO]   Saved single_lora_ewc -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_single_lora_ewc.json
+2026-04-14 03:16:25,623 [INFO] 
+2026-04-14 03:16:25,624 [INFO] ====================================================================================================
+2026-04-14 03:16:25,624 [INFO] AGGREGATED RESULTS: task=dialogue
+2026-04-14 03:16:25,625 [INFO] ====================================================================================================
+2026-04-14 03:16:25,625 [INFO] Method                       RetF1   Forget  AdaptSpd      PPL     Loss    Latency
+2026-04-14 03:16:25,626 [INFO] ----------------------------------------------------------------------------------------------------
+2026-04-14 03:16:25,626 [INFO] comparison                  0.0000   0.0000       0.0     0.00   0.0000       0.0ms
+2026-04-14 03:16:25,626 [INFO] dual_lora_ema               0.3333   0.0642       1.4    52.87   0.1251      78.5ms
+2026-04-14 03:16:25,627 [INFO] dual_lora_heuristic         0.3333   0.0642       1.4  1224.65   0.1251      76.6ms
+2026-04-14 03:16:25,627 [INFO] sdft                        0.0000   0.1078       1.3     5.03   0.1752      92.3ms
+2026-04-14 03:16:25,628 [INFO] single_lora_ewc             0.7778   0.0804       1.2     5.75   0.1302     160.3ms
+2026-04-14 03:16:25,628 [INFO] single_lora_replay          0.6190   0.0798       1.1     7.32   0.1338     138.8ms
+2026-04-14 03:16:25,628 [INFO] single_lora_sgd             0.3333   0.0642       1.4     6.20   0.1251      72.4ms
+2026-04-14 03:16:25,634 [INFO] Aggregated comparison -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_comparison.json
+2026-04-14 03:16:25,637 [INFO] LaTeX table -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_results_table.tex
+2026-04-14 03:16:25,638 [INFO] Done. All results in /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct

@@ -16,14 +16,19 @@ set -euo pipefail
 PROJ_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJ_DIR"
 
-# --- HF cache: shared across projects in parent dir ---
-export HF_HOME="${HF_HOME:-$(dirname "$PROJ_DIR")/.cache/hf}"
+# --- HF cache: use existing user cache ---
+export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
+export HF_DATASETS_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false
+# Disable torch.compile to avoid fla/torch 2.10 AssertionError: duplicate template name
+export TORCH_COMPILE_DISABLE=1
+export TORCHDYNAMO_DISABLE=1
 mkdir -p "$HF_HOME"
 
 # ── Defaults ──
 MODEL="${MODEL:-Qwen/Qwen3.5-9B}"
-MODEL_SMALL="${MODEL_SMALL:-Qwen/Qwen3.5-0.8B}"
+MODEL_SMALL="${MODEL_SMALL:-/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct}"
 MAX_SESSIONS="${MAX_SESSIONS:-50}"
 SESSIONS_PER_PERSONA="${SESSIONS_PER_PERSONA:-5}"
 TURNS_PER_SESSION="${TURNS_PER_SESSION:-15}"
@@ -79,10 +84,10 @@ echo "[1/4] Pre-downloading models..."
 python3 -c "
 from transformers import AutoModelForCausalLM, AutoTokenizer
 for m in ['$MODEL', '$MODEL_SMALL']:
-    print(f'  Downloading {m}...')
-    AutoTokenizer.from_pretrained(m)
-    AutoModelForCausalLM.from_pretrained(m, device_map='cpu', torch_dtype='auto')
-    print(f'  {m} cached.')
+    print(f'  Loading {m}...')
+    AutoTokenizer.from_pretrained(m, local_files_only=True)
+    AutoModelForCausalLM.from_pretrained(m, device_map='cpu', torch_dtype='auto', local_files_only=True)
+    print(f'  {m} OK.')
 " 2>&1 | grep -v "^$\|Warning\|HTTP\|token"
 echo "[1/4] Models cached."
 echo ""

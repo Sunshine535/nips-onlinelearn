@@ -6,35 +6,109 @@
   GPU memory (each) : 81920 MiB
   GPU class          : a100_80g
 ============================================
-=========================================
- SPM Full Experiment Pipeline
- GPUs: 8 × a100_80g
-=========================================
->>> Phase 1: Streaming Parameter Memory training
-/usr/local/lib/python3.8/dist-packages/transformers/utils/hub.py:127: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
-  warnings.warn(
-2026-03-26 15:39:23,305 [INFO] === Streaming Parameter Memory Training ===
-2026-03-26 15:39:23,305 [INFO] Base model: Qwen/Qwen3.5-9B
-2026-03-26 15:39:23,305 [INFO] Sessions: 100, Turns/session: 20
-2026-03-26 15:39:31,683 [WARNING] attn_implementation=flash_attention_2 failed: The checkpoint you are trying to load has model type `qwen3_5` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
-2026-03-26 15:39:32,325 [WARNING] attn_implementation=sdpa failed: The checkpoint you are trying to load has model type `qwen3_5` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
-2026-03-26 15:39:33,192 [WARNING] attn_implementation=eager failed: The checkpoint you are trying to load has model type `qwen3_5` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
-Traceback (most recent call last):
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 328, in <module>
-    main()
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 176, in main
-    raise RuntimeError(f"Cannot load model {base_model_name}")
-RuntimeError: Cannot load model Qwen/Qwen3.5-9B
-ot recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
-Traceback (most recent call last):
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 328, in <module>
-    main()
-  File "/ytech_m2v4_hdd/mengzijie/nips-onlinelearn/scripts/train_spm.py", line 176, in main
-    raise RuntimeError(f"Cannot load model {base_model_name}")
-RuntimeError: Cannot load model Qwen/Qwen3.5-9B
 
 ============================================================
- Pipeline failed (exit code: 1)
- Check log: /ytech_m2v4_hdd/mengzijie/nips-onlinelearn/run.log
- To resume: bash run.sh (completed phases are skipped)
+ Streaming Mirror-LoRA — Full Experiment Pipeline
+ Model (large) : Qwen/Qwen3.5-9B
+ Model (small) : /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+ Sessions      : 50
+ Turns/session : 15
+ GPUs          : 8
+ Output        : /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval
+ Time          : Tue Apr 14 01:56:43 AM CST 2026
+============================================================
+
+[1/4] Pre-downloading models...
+  Loading Qwen/Qwen3.5-9B...
+Loading weights:   0%|          | 0/427 [00:00<?, ?it/s]Loading weights: 100%|██████████| 427/427 [00:00<00:00, 7361.24it/s]
+  Qwen/Qwen3.5-9B OK.
+  Loading /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct...
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   4%|▍         | 12/290 [00:00<00:02, 103.37it/s]Loading weights:  10%|▉         | 28/290 [00:00<00:02, 110.07it/s]Loading weights:  14%|█▍        | 40/290 [00:00<00:02, 110.12it/s]Loading weights:  23%|██▎       | 66/290 [00:00<00:01, 152.33it/s]Loading weights:  28%|██▊       | 82/290 [00:00<00:01, 150.19it/s]Loading weights:  34%|███▍      | 99/290 [00:00<00:01, 151.72it/s]Loading weights:  41%|████      | 119/290 [00:00<00:01, 158.54it/s]Loading weights:  49%|████▉     | 143/290 [00:00<00:00, 181.44it/s]Loading weights:  56%|█████▌    | 162/290 [00:01<00:00, 175.19it/s]Loading weights:  62%|██████▏   | 180/290 [00:01<00:00, 156.41it/s]Loading weights:  68%|██████▊   | 197/290 [00:01<00:00, 156.72it/s]Loading weights:  74%|███████▍  | 216/290 [00:01<00:00, 135.36it/s]Loading weights:  86%|████████▌ | 249/290 [00:01<00:00, 169.28it/s]Loading weights:  92%|█████████▏| 267/290 [00:01<00:00, 168.65it/s]Loading weights: 100%|██████████| 290/290 [00:01<00:00, 163.55it/s]
+  /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct OK.
+[1/4] Models cached.
+
+[2/4] Large model evaluation: Qwen/Qwen3.5-9B
+  GPU 0: mirror_lora (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu0_mirror_lora.log
+  GPU 1: spm (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu1_spm.log
+  GPU 2: frozen (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu2_frozen.log
+  GPU 3: single_lora_sgd (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu3_single_lora_sgd.log
+  GPU 4: single_lora_ewc (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu4_single_lora_ewc.log
+  GPU 5: single_lora_replay (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu5_single_lora_replay.log
+  GPU 6: single_lora_ewc_replay (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu6_single_lora_ewc_replay.log
+  GPU 7: param_matched_lora (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu7_param_matched_lora.log
+  GPU 0: dual_lora_ema (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu0_dual_lora_ema.log
+  GPU 1: dual_lora_periodic_avg (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu1_dual_lora_periodic_avg.log
+  GPU 2: dual_lora_heuristic (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu2_dual_lora_heuristic.log
+  GPU 3: retrieval_augmented (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu3_retrieval_augmented.log
+  GPU 4: sdft (Qwen/Qwen3.5-9B) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/large_gpu4_sdft.log
+  Launched 13 methods on 8 GPUs (round-robin)
+  Waiting for large model experiments...
+[Phase 2] All jobs completed successfully.
+[2/4] Done.
+
+[3/4] Small model evaluation: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+  GPU 0: mirror_lora (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu0_mirror_lora.log
+  GPU 1: spm (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu1_spm.log
+  GPU 2: frozen (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu2_frozen.log
+  GPU 3: single_lora_sgd (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu3_single_lora_sgd.log
+  GPU 4: single_lora_ewc (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu4_single_lora_ewc.log
+  GPU 5: single_lora_replay (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu5_single_lora_replay.log
+  GPU 6: single_lora_ewc_replay (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu6_single_lora_ewc_replay.log
+  GPU 7: param_matched_lora (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu7_param_matched_lora.log
+  GPU 0: dual_lora_ema (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu0_dual_lora_ema.log
+  GPU 1: dual_lora_periodic_avg (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu1_dual_lora_periodic_avg.log
+  GPU 2: dual_lora_heuristic (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu2_dual_lora_heuristic.log
+  GPU 3: retrieval_augmented (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu3_retrieval_augmented.log
+  GPU 4: sdft (/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct) → /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/logs/small_gpu4_sdft.log
+  Launched 13 methods on 8 GPUs
+  Waiting for small model experiments...
+[Phase 3] All jobs completed successfully.
+[3/4] Done.
+
+[4/4] Synthetic benchmark...
+[4/4] Done.
+
+============================================================
+ Collecting results...
+============================================================
+
+=== Qwen_Qwen3.5-9B ===
+Method                         AvgRet      PPL     Loss   Forget
+-----------------------------------------------------------------
+comparison                     0.0000     0.00   0.0000   0.0000
+dual_lora_ema                  0.2639    18.56   0.0995   0.0514
+dual_lora_heuristic            0.2095   306.70   0.1005   0.0524
+dual_lora_periodic_avg         0.2328   692.12   0.1083   0.0630
+frozen                         0.1052    24.63   2.4482   0.0081
+mirror_lora                    0.1791    59.05   0.0719   0.0227
+param_matched_lora             0.2814     5.86   0.1063   0.0618
+retrieval_augmented            0.1061    24.56   2.4486   0.0069
+sdft                           0.3070     8.97   0.1047   0.0528
+single_lora_ewc                0.2398     4.33   0.1066   0.0681
+single_lora_ewc_replay         0.2635     7.80   0.1060   0.0787
+single_lora_replay             0.3851     5.40   0.1041   0.0790
+single_lora_sgd                0.2328     6.12   0.1083   0.0630
+spm                            0.2870    30.25   0.0708   0.0844
+
+=== _mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct ===
+Method                         AvgRet      PPL     Loss   Forget
+-----------------------------------------------------------------
+comparison                     0.0000     0.00   0.0000   0.0000
+dual_lora_ema                  0.5586    52.87   0.1251   0.0642
+dual_lora_heuristic            0.5586  1224.65   0.1251   0.0642
+dual_lora_periodic_avg         0.5586   826.22   0.1251   0.0642
+frozen                         0.0797   139.28   3.7682   0.0161
+mirror_lora                    0.4163   100.42   0.0764   0.1435
+param_matched_lora             0.6310    12.62   0.1303   0.0571
+retrieval_augmented            0.0797   139.28   3.7682   0.0161
+sdft                           0.6088     5.03   0.1752   0.1078
+single_lora_ewc                0.6214     5.75   0.1302   0.0804
+single_lora_ewc_replay         0.6454     8.34   0.1259   0.0702
+single_lora_replay             0.6489     7.32   0.1338   0.0798
+single_lora_sgd                0.5586     6.20   0.1251   0.0642
+spm                            0.5644    32.87   0.0776   0.0646
+
+============================================================
+ Pipeline completed at Tue Apr 14 03:42:08 AM CST 2026
+ Results in: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval
 ============================================================

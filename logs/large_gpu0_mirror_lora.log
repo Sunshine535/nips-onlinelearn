@@ -1,0 +1,1102 @@
+2026-04-14 01:57:00,716 [INFO] Task: dialogue
+2026-04-14 01:57:00,717 [INFO] Methods: ['mirror_lora']
+2026-04-14 01:57:00,718 [INFO] Model: Qwen/Qwen3.5-9B
+2026-04-14 01:57:00,718 [INFO] Device: cuda:0
+2026-04-14 01:57:00,719 [INFO] Output: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/Qwen_Qwen3.5-9B
+2026-04-14 01:57:00,720 [WARNING] PersonaChat load failed (Couldn't reach 'bavard/personachat_truecased' on the Hub (OfflineModeIsEnabled)); generating synthetic data
+2026-04-14 01:57:00,721 [INFO] Generated 50 synthetic dialogue sessions
+2026-04-14 01:57:00,722 [INFO] Loading base model: Qwen/Qwen3.5-9B
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/427 [00:00<?, ?it/s]Loading weights:   0%|          | 1/427 [00:23<2:49:54, 23.93s/it]Loading weights:   0%|          | 2/427 [00:24<1:13:36, 10.39s/it]Loading weights:   2%|▏         | 8/427 [00:25<12:35,  1.80s/it]  Loading weights:   3%|▎         | 12/427 [00:27<08:25,  1.22s/it]Loading weights:   5%|▌         | 22/427 [00:27<03:20,  2.02it/s]Loading weights:   6%|▌         | 26/427 [00:28<02:50,  2.36it/s]Loading weights:   7%|▋         | 28/427 [00:29<02:57,  2.25it/s]Loading weights:   9%|▊         | 37/427 [00:30<01:42,  3.82it/s]Loading weights:  10%|▉         | 41/427 [00:31<01:44,  3.71it/s]Loading weights:  10%|█         | 43/427 [00:32<01:45,  3.64it/s]Loading weights:  11%|█         | 46/427 [00:32<01:37,  3.90it/s]Loading weights:  11%|█         | 47/427 [00:34<02:14,  2.83it/s]Loading weights:  12%|█▏        | 52/427 [00:34<01:32,  4.07it/s]Loading weights:  14%|█▍        | 61/427 [00:35<00:58,  6.30it/s]Loading weights:  15%|█▌        | 66/427 [00:35<00:53,  6.73it/s]Loading weights:  16%|█▌        | 67/427 [00:37<01:21,  4.39it/s]Loading weights:  18%|█▊        | 76/427 [00:37<00:53,  6.51it/s]Loading weights:  19%|█▊        | 80/427 [00:38<01:01,  5.66it/s]Loading weights:  19%|█▉        | 81/427 [00:39<01:04,  5.38it/s]Loading weights:  19%|█▉        | 82/427 [00:39<01:14,  4.61it/s]Loading weights:  21%|██        | 90/427 [00:40<00:45,  7.38it/s]Loading weights:  22%|██▏       | 93/427 [00:40<00:44,  7.48it/s]Loading weights:  22%|██▏       | 94/427 [00:41<01:02,  5.32it/s]Loading weights:  22%|██▏       | 95/427 [00:41<01:15,  4.39it/s]Loading weights:  22%|██▏       | 96/427 [00:41<01:18,  4.24it/s]Loading weights:  23%|██▎       | 99/427 [00:43<01:39,  3.30it/s]Loading weights:  24%|██▎       | 101/427 [00:43<01:37,  3.36it/s]Loading weights:  25%|██▍       | 105/427 [00:43<01:01,  5.25it/s]Loading weights:  25%|██▌       | 107/427 [00:44<00:58,  5.49it/s]Loading weights:  27%|██▋       | 114/427 [00:44<00:40,  7.75it/s]Loading weights:  28%|██▊       | 118/427 [00:45<00:37,  8.31it/s]Loading weights:  28%|██▊       | 119/427 [00:45<00:48,  6.35it/s]Loading weights:  28%|██▊       | 120/427 [00:46<01:16,  4.01it/s]Loading weights:  29%|██▉       | 125/427 [00:47<00:57,  5.30it/s]Loading weights:  31%|███       | 132/427 [00:47<00:36,  8.00it/s]Loading weights:  31%|███       | 133/427 [00:48<00:52,  5.64it/s]Loading weights:  31%|███▏      | 134/427 [00:49<01:16,  3.85it/s]Loading weights:  33%|███▎      | 143/427 [00:49<00:39,  7.16it/s]Loading weights:  34%|███▍      | 146/427 [00:50<00:38,  7.32it/s]Loading weights:  34%|███▍      | 147/427 [00:51<00:58,  4.77it/s]Loading weights:  35%|███▍      | 149/427 [00:51<01:03,  4.38it/s]Loading weights:  36%|███▌      | 152/427 [00:52<01:17,  3.54it/s]Loading weights:  36%|███▌      | 153/427 [00:53<01:29,  3.07it/s]Loading weights:  37%|███▋      | 158/427 [00:53<00:57,  4.65it/s]Loading weights:  39%|███▉      | 168/427 [00:54<00:32,  8.00it/s]Loading weights:  40%|████      | 171/427 [00:54<00:29,  8.77it/s]Loading weights:  41%|████      | 173/427 [00:56<00:52,  4.79it/s]Loading weights:  41%|████      | 174/427 [00:56<00:54,  4.62it/s]Loading weights:  43%|████▎     | 182/427 [00:56<00:30,  7.96it/s]Loading weights:  43%|████▎     | 184/427 [00:57<00:31,  7.64it/s]Loading weights:  44%|████▎     | 186/427 [00:58<00:50,  4.74it/s]Loading weights:  44%|████▍     | 187/427 [00:58<01:01,  3.90it/s]Loading weights:  46%|████▌     | 196/427 [00:59<00:34,  6.77it/s]Loading weights:  47%|████▋     | 200/427 [01:00<00:43,  5.27it/s]Loading weights:  47%|████▋     | 202/427 [01:01<00:46,  4.79it/s]Loading weights:  48%|████▊     | 205/427 [01:01<00:45,  4.86it/s]Loading weights:  48%|████▊     | 206/427 [01:03<01:08,  3.25it/s]Loading weights:  49%|████▉     | 211/427 [01:03<00:42,  5.11it/s]Loading weights:  50%|████▉     | 213/427 [01:03<00:39,  5.36it/s]Loading weights:  51%|█████▏    | 219/427 [01:04<00:30,  6.83it/s]Loading weights:  52%|█████▏    | 224/427 [01:04<00:22,  9.16it/s]Loading weights:  53%|█████▎    | 226/427 [01:06<00:45,  4.41it/s]Loading weights:  55%|█████▍    | 234/427 [01:06<00:26,  7.15it/s]Loading weights:  55%|█████▌    | 236/427 [01:06<00:25,  7.54it/s]Loading weights:  56%|█████▌    | 238/427 [01:07<00:27,  6.90it/s]Loading weights:  56%|█████▌    | 240/427 [01:08<00:47,  3.91it/s]Loading weights:  58%|█████▊    | 248/427 [01:09<00:28,  6.21it/s]Loading weights:  59%|█████▉    | 252/427 [01:09<00:26,  6.68it/s]Loading weights:  59%|█████▉    | 253/427 [01:10<00:34,  5.03it/s]Loading weights:  59%|█████▉    | 254/427 [01:10<00:42,  4.08it/s]Loading weights:  60%|█████▉    | 255/427 [01:10<00:39,  4.40it/s]Loading weights:  60%|██████    | 258/427 [01:11<00:36,  4.65it/s]Loading weights:  61%|██████    | 259/427 [01:12<01:00,  2.76it/s]Loading weights:  62%|██████▏   | 264/427 [01:13<00:37,  4.39it/s]Loading weights:  64%|██████▍   | 273/427 [01:13<00:21,  7.04it/s]Loading weights:  65%|██████▍   | 277/427 [01:15<00:29,  5.05it/s]Loading weights:  66%|██████▌   | 280/427 [01:15<00:27,  5.29it/s]Loading weights:  67%|██████▋   | 288/427 [01:16<00:18,  7.60it/s]Loading weights:  68%|██████▊   | 290/427 [01:16<00:17,  7.92it/s]Loading weights:  68%|██████▊   | 292/427 [01:18<00:33,  4.03it/s]Loading weights:  71%|███████   | 302/427 [01:18<00:18,  6.84it/s]Loading weights:  71%|███████   | 304/427 [01:19<00:19,  6.26it/s]Loading weights:  72%|███████▏  | 306/427 [01:20<00:24,  4.86it/s]Loading weights:  72%|███████▏  | 307/427 [01:20<00:28,  4.22it/s]Loading weights:  73%|███████▎  | 311/427 [01:21<00:23,  4.90it/s]Loading weights:  73%|███████▎  | 312/427 [01:22<00:35,  3.21it/s]Loading weights:  74%|███████▍  | 317/427 [01:22<00:21,  5.10it/s]Loading weights:  75%|███████▍  | 319/427 [01:23<00:20,  5.38it/s]Loading weights:  76%|███████▌  | 324/427 [01:23<00:15,  6.64it/s]Loading weights:  77%|███████▋  | 329/427 [01:23<00:11,  8.65it/s]Loading weights:  78%|███████▊  | 331/427 [01:24<00:15,  6.03it/s]Loading weights:  78%|███████▊  | 332/427 [01:25<00:18,  5.14it/s]Loading weights:  78%|███████▊  | 333/427 [01:25<00:20,  4.53it/s]Loading weights:  80%|███████▉  | 341/427 [01:26<00:11,  7.51it/s]Loading weights:  81%|████████  | 345/427 [01:27<00:19,  4.25it/s]Loading weights:  83%|████████▎ | 355/427 [01:28<00:09,  7.48it/s]Loading weights:  84%|████████▎ | 357/427 [01:28<00:08,  8.11it/s]Loading weights:  84%|████████▍ | 359/427 [01:29<00:11,  6.03it/s]Loading weights:  85%|████████▍ | 361/427 [01:30<00:15,  4.23it/s]Loading weights:  85%|████████▌ | 364/427 [01:31<00:17,  3.56it/s]Loading weights:  86%|████████▌ | 366/427 [01:32<00:17,  3.49it/s]Loading weights:  87%|████████▋ | 370/427 [01:32<00:13,  4.27it/s]Loading weights:  88%|████████▊ | 377/427 [01:33<00:08,  5.89it/s]Loading weights:  90%|████████▉ | 383/427 [01:33<00:06,  7.27it/s]Loading weights:  90%|█████████ | 385/427 [01:35<00:08,  4.78it/s]Loading weights:  92%|█████████▏| 394/427 [01:35<00:04,  7.31it/s]Loading weights:  93%|█████████▎| 397/427 [01:35<00:03,  8.49it/s]Loading weights:  93%|█████████▎| 399/427 [01:37<00:05,  5.17it/s]Loading weights:  94%|█████████▍| 401/427 [01:37<00:05,  4.76it/s]Loading weights:  95%|█████████▌| 406/427 [01:38<00:03,  5.97it/s]Loading weights:  96%|█████████▋| 411/427 [01:38<00:02,  7.74it/s]Loading weights:  97%|█████████▋| 413/427 [01:39<00:02,  4.67it/s]Loading weights:  97%|█████████▋| 414/427 [01:40<00:02,  4.37it/s]Loading weights:  98%|█████████▊| 417/427 [01:40<00:02,  4.53it/s]Loading weights:  98%|█████████▊| 418/427 [01:41<00:03,  2.86it/s]Loading weights:  99%|█████████▉| 423/427 [01:42<00:00,  4.85it/s]Loading weights: 100%|█████████▉| 425/427 [01:42<00:00,  5.43it/s]Loading weights: 100%|██████████| 427/427 [01:42<00:00,  4.17it/s]
+2026-04-14 01:58:47,641 [INFO] Base model loaded. Parameters: 8953803264
+2026-04-14 01:58:47,642 [INFO] 
+2026-04-14 01:58:47,642 [INFO] ======================================================================
+2026-04-14 01:58:47,643 [INFO] METHOD: mirror_lora
+2026-04-14 01:58:47,643 [INFO] ======================================================================
+2026-04-14 01:58:49,073 [INFO]   [dialogue] Evaluating mirror_lora (50 sessions)
+2026-04-14 01:58:49,087 [INFO] Started session 1 (residual WM zero-init)
+2026-04-14 01:58:49,088 [INFO] Mirror-LoRA: started session 1
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:00:58,027 [INFO] Consolidating session 1 (10 turns, reservoir 0)
+2026-04-14 02:01:05,545 [INFO] Consolidation complete (loss=11.2667)
+2026-04-14 02:01:05,549 [INFO] Mirror-LoRA consolidation #1 complete: loss=11.2667, elapsed=7.53s, fast_fisher_keys=64, slow_fisher_keys=64
+2026-04-14 02:01:05,550 [INFO] Auto-consolidation #1 triggered at turn 0 (7.53s, loss=11.2667)
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:01:20,942 [INFO] Consolidating session 1 (5 turns, reservoir 10)
+2026-04-14 02:01:31,057 [INFO] Consolidation complete (loss=0.7902)
+2026-04-14 02:01:31,236 [INFO] Mirror-LoRA consolidation #2 complete: loss=0.7902, elapsed=10.30s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:01:56,015 [INFO]     Session 1/50 | loss=0.2282 | ret=0.1595
+2026-04-14 02:01:56,026 [INFO] Started session 2 (residual WM zero-init)
+2026-04-14 02:01:56,027 [INFO] Mirror-LoRA: started session 2
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:02:18,881 [INFO] Consolidating session 2 (15 turns, reservoir 15)
+2026-04-14 02:02:39,922 [INFO] Consolidation complete (loss=1.2745)
+2026-04-14 02:02:40,096 [INFO] Mirror-LoRA consolidation #3 complete: loss=1.2745, elapsed=21.22s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:02:59,568 [INFO] Started session 3 (residual WM zero-init)
+2026-04-14 02:02:59,569 [INFO] Mirror-LoRA: started session 3
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:03:23,040 [INFO] Consolidating session 3 (15 turns, reservoir 30)
+2026-04-14 02:03:54,202 [INFO] Consolidation complete (loss=0.8287)
+2026-04-14 02:03:54,370 [INFO] Mirror-LoRA consolidation #4 complete: loss=0.8287, elapsed=31.34s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:04:14,506 [INFO] Started session 4 (residual WM zero-init)
+2026-04-14 02:04:14,507 [INFO] Mirror-LoRA: started session 4
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:04:48,550 [INFO] Consolidating session 4 (15 turns, reservoir 45)
+2026-04-14 02:05:20,881 [INFO] Consolidation complete (loss=0.7499)
+2026-04-14 02:05:21,053 [INFO] Mirror-LoRA consolidation #5 complete: loss=0.7499, elapsed=32.51s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:05:45,513 [INFO] Started session 5 (residual WM zero-init)
+2026-04-14 02:05:45,514 [INFO] Mirror-LoRA: started session 5
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:06:19,253 [INFO] Consolidating session 5 (15 turns, reservoir 60)
+2026-04-14 02:06:51,682 [INFO] Consolidation complete (loss=0.6009)
+2026-04-14 02:06:51,854 [INFO] Mirror-LoRA consolidation #6 complete: loss=0.6009, elapsed=32.61s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:07:16,422 [INFO] Started session 6 (residual WM zero-init)
+2026-04-14 02:07:16,423 [INFO] Mirror-LoRA: started session 6
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:07:49,648 [INFO] Consolidating session 6 (15 turns, reservoir 75)
+2026-04-14 02:08:20,819 [INFO] Consolidation complete (loss=0.7064)
+2026-04-14 02:08:20,967 [INFO] Mirror-LoRA consolidation #7 complete: loss=0.7064, elapsed=31.32s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:08:40,587 [INFO] Started session 7 (residual WM zero-init)
+2026-04-14 02:08:40,588 [INFO] Mirror-LoRA: started session 7
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:09:13,946 [INFO] Consolidating session 7 (15 turns, reservoir 90)
+2026-04-14 02:09:45,122 [INFO] Consolidation complete (loss=0.7032)
+2026-04-14 02:09:45,294 [INFO] Mirror-LoRA consolidation #8 complete: loss=0.7032, elapsed=31.35s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:10:10,208 [INFO] Started session 8 (residual WM zero-init)
+2026-04-14 02:10:10,209 [INFO] Mirror-LoRA: started session 8
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:10:43,438 [INFO] Consolidating session 8 (15 turns, reservoir 105)
+2026-04-14 02:11:14,875 [INFO] Consolidation complete (loss=0.9546)
+2026-04-14 02:11:15,045 [INFO] Mirror-LoRA consolidation #9 complete: loss=0.9546, elapsed=31.61s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:11:39,520 [INFO] Started session 9 (residual WM zero-init)
+2026-04-14 02:11:39,521 [INFO] Mirror-LoRA: started session 9
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:12:12,552 [INFO] Consolidating session 9 (15 turns, reservoir 120)
+2026-04-14 02:12:42,894 [INFO] Consolidation complete (loss=0.8499)
+2026-04-14 02:12:43,066 [INFO] Mirror-LoRA consolidation #10 complete: loss=0.8499, elapsed=30.52s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:13:07,504 [INFO] Started session 10 (residual WM zero-init)
+2026-04-14 02:13:07,505 [INFO] Mirror-LoRA: started session 10
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:13:40,362 [INFO] Consolidating session 10 (15 turns, reservoir 135)
+2026-04-14 02:14:10,982 [INFO] Consolidation complete (loss=0.7971)
+2026-04-14 02:14:11,155 [INFO] Mirror-LoRA consolidation #11 complete: loss=0.7971, elapsed=30.80s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:14:32,334 [INFO]     Session 10/50 | loss=0.0854 | ret=0.2493
+2026-04-14 02:14:32,345 [INFO] Started session 11 (residual WM zero-init)
+2026-04-14 02:14:32,345 [INFO] Mirror-LoRA: started session 11
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:15:06,135 [INFO] Consolidating session 11 (15 turns, reservoir 150)
+2026-04-14 02:15:37,883 [INFO] Consolidation complete (loss=1.3607)
+2026-04-14 02:15:38,058 [INFO] Mirror-LoRA consolidation #12 complete: loss=1.3607, elapsed=31.93s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:16:02,906 [INFO] Started session 12 (residual WM zero-init)
+2026-04-14 02:16:02,907 [INFO] Mirror-LoRA: started session 12
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:16:36,445 [INFO] Consolidating session 12 (15 turns, reservoir 165)
+2026-04-14 02:17:08,100 [INFO] Consolidation complete (loss=1.4026)
+2026-04-14 02:17:08,273 [INFO] Mirror-LoRA consolidation #13 complete: loss=1.4026, elapsed=31.83s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:17:32,977 [INFO] Started session 13 (residual WM zero-init)
+2026-04-14 02:17:32,978 [INFO] Mirror-LoRA: started session 13
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:18:06,883 [INFO] Consolidating session 13 (15 turns, reservoir 180)
+2026-04-14 02:18:38,873 [INFO] Consolidation complete (loss=1.5137)
+2026-04-14 02:18:39,052 [INFO] Mirror-LoRA consolidation #14 complete: loss=1.5137, elapsed=32.17s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:19:03,877 [INFO] Started session 14 (residual WM zero-init)
+2026-04-14 02:19:03,878 [INFO] Mirror-LoRA: started session 14
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:19:37,478 [INFO] Consolidating session 14 (15 turns, reservoir 195)
+2026-04-14 02:20:08,585 [INFO] Consolidation complete (loss=0.6264)
+2026-04-14 02:20:08,760 [INFO] Mirror-LoRA consolidation #15 complete: loss=0.6264, elapsed=31.29s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:20:33,535 [INFO] Started session 15 (residual WM zero-init)
+2026-04-14 02:20:33,536 [INFO] Mirror-LoRA: started session 15
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:21:06,704 [INFO] Consolidating session 15 (15 turns, reservoir 210)
+2026-04-14 02:21:37,138 [INFO] Consolidation complete (loss=0.6963)
+2026-04-14 02:21:37,314 [INFO] Mirror-LoRA consolidation #16 complete: loss=0.6963, elapsed=30.62s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:22:02,243 [INFO] Started session 16 (residual WM zero-init)
+2026-04-14 02:22:02,245 [INFO] Mirror-LoRA: started session 16
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:22:36,160 [INFO] Consolidating session 16 (15 turns, reservoir 225)
+2026-04-14 02:23:06,840 [INFO] Consolidation complete (loss=0.6886)
+2026-04-14 02:23:06,993 [INFO] Mirror-LoRA consolidation #17 complete: loss=0.6886, elapsed=30.84s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:23:32,088 [INFO] Started session 17 (residual WM zero-init)
+2026-04-14 02:23:32,089 [INFO] Mirror-LoRA: started session 17
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:24:05,605 [INFO] Consolidating session 17 (15 turns, reservoir 240)
+2026-04-14 02:24:35,875 [INFO] Consolidation complete (loss=0.8466)
+2026-04-14 02:24:35,993 [INFO] Mirror-LoRA consolidation #18 complete: loss=0.8466, elapsed=30.39s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:25:01,144 [INFO] Started session 18 (residual WM zero-init)
+2026-04-14 02:25:01,145 [INFO] Mirror-LoRA: started session 18
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:25:34,402 [INFO] Consolidating session 18 (15 turns, reservoir 255)
+2026-04-14 02:26:05,122 [INFO] Consolidation complete (loss=0.8261)
+2026-04-14 02:26:05,244 [INFO] Mirror-LoRA consolidation #19 complete: loss=0.8261, elapsed=30.85s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:26:29,404 [INFO] Started session 19 (residual WM zero-init)
+2026-04-14 02:26:29,405 [INFO] Mirror-LoRA: started session 19
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:27:01,465 [INFO] Consolidating session 19 (15 turns, reservoir 270)
+2026-04-14 02:27:31,345 [INFO] Consolidation complete (loss=0.9864)
+2026-04-14 02:27:31,374 [INFO] Mirror-LoRA consolidation #20 complete: loss=0.9864, elapsed=29.91s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:27:54,861 [INFO] Started session 20 (residual WM zero-init)
+2026-04-14 02:27:54,863 [INFO] Mirror-LoRA: started session 20
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:28:27,320 [INFO] Consolidating session 20 (15 turns, reservoir 285)
+2026-04-14 02:28:58,163 [INFO] Consolidation complete (loss=1.8959)
+2026-04-14 02:28:58,194 [INFO] Mirror-LoRA consolidation #21 complete: loss=1.8959, elapsed=30.88s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:29:21,991 [INFO]     Session 20/50 | loss=0.0819 | ret=0.1709
+2026-04-14 02:29:22,001 [INFO] Started session 21 (residual WM zero-init)
+2026-04-14 02:29:22,002 [INFO] Mirror-LoRA: started session 21
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:29:54,569 [INFO] Consolidating session 21 (15 turns, reservoir 300)
+2026-04-14 02:30:24,676 [INFO] Consolidation complete (loss=1.8324)
+2026-04-14 02:30:24,705 [INFO] Mirror-LoRA consolidation #22 complete: loss=1.8324, elapsed=30.14s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:30:48,386 [INFO] Started session 22 (residual WM zero-init)
+2026-04-14 02:30:48,387 [INFO] Mirror-LoRA: started session 22
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:31:20,827 [INFO] Consolidating session 22 (15 turns, reservoir 315)
+2026-04-14 02:31:50,716 [INFO] Consolidation complete (loss=0.9736)
+2026-04-14 02:31:50,764 [INFO] Mirror-LoRA consolidation #23 complete: loss=0.9736, elapsed=29.94s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:32:14,464 [INFO] Started session 23 (residual WM zero-init)
+2026-04-14 02:32:14,465 [INFO] Mirror-LoRA: started session 23
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:32:46,921 [INFO] Consolidating session 23 (15 turns, reservoir 330)
+2026-04-14 02:33:17,084 [INFO] Consolidation complete (loss=0.9258)
+2026-04-14 02:33:17,113 [INFO] Mirror-LoRA consolidation #24 complete: loss=0.9258, elapsed=30.20s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:33:40,782 [INFO] Started session 24 (residual WM zero-init)
+2026-04-14 02:33:40,782 [INFO] Mirror-LoRA: started session 24
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:34:13,299 [INFO] Consolidating session 24 (15 turns, reservoir 345)
+2026-04-14 02:34:42,882 [INFO] Consolidation complete (loss=1.1151)
+2026-04-14 02:34:42,910 [INFO] Mirror-LoRA consolidation #25 complete: loss=1.1151, elapsed=29.62s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:35:06,674 [INFO] Started session 25 (residual WM zero-init)
+2026-04-14 02:35:06,675 [INFO] Mirror-LoRA: started session 25
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:35:39,271 [INFO] Consolidating session 25 (15 turns, reservoir 360)
+2026-04-14 02:36:08,916 [INFO] Consolidation complete (loss=0.8967)
+2026-04-14 02:36:08,945 [INFO] Mirror-LoRA consolidation #26 complete: loss=0.8967, elapsed=29.68s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:36:32,561 [INFO] Started session 26 (residual WM zero-init)
+2026-04-14 02:36:32,562 [INFO] Mirror-LoRA: started session 26
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:37:04,716 [INFO] Consolidating session 26 (15 turns, reservoir 375)
+2026-04-14 02:37:34,336 [INFO] Consolidation complete (loss=1.0517)
+2026-04-14 02:37:34,365 [INFO] Mirror-LoRA consolidation #27 complete: loss=1.0517, elapsed=29.65s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:37:57,815 [INFO] Started session 27 (residual WM zero-init)
+2026-04-14 02:37:57,818 [INFO] Mirror-LoRA: started session 27
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:38:29,907 [INFO] Consolidating session 27 (15 turns, reservoir 390)
+2026-04-14 02:38:59,483 [INFO] Consolidation complete (loss=0.8107)
+2026-04-14 02:38:59,512 [INFO] Mirror-LoRA consolidation #28 complete: loss=0.8107, elapsed=29.61s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:39:22,994 [INFO] Started session 28 (residual WM zero-init)
+2026-04-14 02:39:22,995 [INFO] Mirror-LoRA: started session 28
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:39:54,834 [INFO] Consolidating session 28 (15 turns, reservoir 405)
+2026-04-14 02:40:23,245 [INFO] Consolidation complete (loss=1.9349)
+2026-04-14 02:40:23,272 [INFO] Mirror-LoRA consolidation #29 complete: loss=1.9349, elapsed=28.44s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:40:46,721 [INFO] Started session 29 (residual WM zero-init)
+2026-04-14 02:40:46,722 [INFO] Mirror-LoRA: started session 29
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:41:18,565 [INFO] Consolidating session 29 (15 turns, reservoir 420)
+2026-04-14 02:41:46,744 [INFO] Consolidation complete (loss=0.8650)
+2026-04-14 02:41:46,772 [INFO] Mirror-LoRA consolidation #30 complete: loss=0.8650, elapsed=28.21s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:42:10,256 [INFO] Started session 30 (residual WM zero-init)
+2026-04-14 02:42:10,259 [INFO] Mirror-LoRA: started session 30
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:42:41,999 [INFO] Consolidating session 30 (15 turns, reservoir 435)
+2026-04-14 02:43:10,331 [INFO] Consolidation complete (loss=0.6201)
+2026-04-14 02:43:10,359 [INFO] Mirror-LoRA consolidation #31 complete: loss=0.6201, elapsed=28.37s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:43:33,804 [INFO]     Session 30/50 | loss=0.0759 | ret=0.1693
+2026-04-14 02:43:33,816 [INFO] Started session 31 (residual WM zero-init)
+2026-04-14 02:43:33,816 [INFO] Mirror-LoRA: started session 31
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:44:05,539 [INFO] Consolidating session 31 (15 turns, reservoir 450)
+2026-04-14 02:44:33,831 [INFO] Consolidation complete (loss=1.2117)
+2026-04-14 02:44:33,860 [INFO] Mirror-LoRA consolidation #32 complete: loss=1.2117, elapsed=28.33s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:44:57,387 [INFO] Started session 32 (residual WM zero-init)
+2026-04-14 02:44:57,390 [INFO] Mirror-LoRA: started session 32
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:45:29,372 [INFO] Consolidating session 32 (15 turns, reservoir 465)
+2026-04-14 02:45:59,132 [INFO] Consolidation complete (loss=0.8802)
+2026-04-14 02:45:59,160 [INFO] Mirror-LoRA consolidation #33 complete: loss=0.8802, elapsed=29.79s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:46:22,678 [INFO] Started session 33 (residual WM zero-init)
+2026-04-14 02:46:22,679 [INFO] Mirror-LoRA: started session 33
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:46:54,396 [INFO] Consolidating session 33 (15 turns, reservoir 480)
+2026-04-14 02:47:22,895 [INFO] Consolidation complete (loss=1.1487)
+2026-04-14 02:47:22,922 [INFO] Mirror-LoRA consolidation #34 complete: loss=1.1487, elapsed=28.53s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:47:46,385 [INFO] Started session 34 (residual WM zero-init)
+2026-04-14 02:47:46,389 [INFO] Mirror-LoRA: started session 34
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:48:18,096 [INFO] Consolidating session 34 (15 turns, reservoir 495)
+2026-04-14 02:48:46,270 [INFO] Consolidation complete (loss=1.2462)
+2026-04-14 02:48:46,312 [INFO] Mirror-LoRA consolidation #35 complete: loss=1.2462, elapsed=28.22s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:49:09,748 [INFO] Started session 35 (residual WM zero-init)
+2026-04-14 02:49:09,749 [INFO] Mirror-LoRA: started session 35
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:49:41,543 [INFO] Consolidating session 35 (15 turns, reservoir 510)
+2026-04-14 02:50:09,698 [INFO] Consolidation complete (loss=2.3019)
+2026-04-14 02:50:09,725 [INFO] Mirror-LoRA consolidation #36 complete: loss=2.3019, elapsed=28.19s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:50:33,133 [INFO] Started session 36 (residual WM zero-init)
+2026-04-14 02:50:33,136 [INFO] Mirror-LoRA: started session 36
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:51:04,846 [INFO] Consolidating session 36 (15 turns, reservoir 525)
+2026-04-14 02:51:33,140 [INFO] Consolidation complete (loss=1.0198)
+2026-04-14 02:51:33,168 [INFO] Mirror-LoRA consolidation #37 complete: loss=1.0198, elapsed=28.33s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:51:56,581 [INFO] Started session 37 (residual WM zero-init)
+2026-04-14 02:51:56,582 [INFO] Mirror-LoRA: started session 37
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:52:28,324 [INFO] Consolidating session 37 (15 turns, reservoir 540)
+2026-04-14 02:52:56,540 [INFO] Consolidation complete (loss=1.2524)
+2026-04-14 02:52:56,567 [INFO] Mirror-LoRA consolidation #38 complete: loss=1.2524, elapsed=28.25s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:53:20,009 [INFO] Started session 38 (residual WM zero-init)
+2026-04-14 02:53:20,010 [INFO] Mirror-LoRA: started session 38
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:53:51,960 [INFO] Consolidating session 38 (15 turns, reservoir 555)
+2026-04-14 02:54:20,413 [INFO] Consolidation complete (loss=1.5403)
+2026-04-14 02:54:20,441 [INFO] Mirror-LoRA consolidation #39 complete: loss=1.5403, elapsed=28.49s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:54:44,234 [INFO] Started session 39 (residual WM zero-init)
+2026-04-14 02:54:44,235 [INFO] Mirror-LoRA: started session 39
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:55:16,390 [INFO] Consolidating session 39 (15 turns, reservoir 570)
+2026-04-14 02:55:44,931 [INFO] Consolidation complete (loss=1.1298)
+2026-04-14 02:55:44,982 [INFO] Mirror-LoRA consolidation #40 complete: loss=1.1298, elapsed=28.60s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:56:08,818 [INFO] Started session 40 (residual WM zero-init)
+2026-04-14 02:56:08,819 [INFO] Mirror-LoRA: started session 40
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:56:41,058 [INFO] Consolidating session 40 (15 turns, reservoir 585)
+2026-04-14 02:57:09,543 [INFO] Consolidation complete (loss=1.4883)
+2026-04-14 02:57:09,572 [INFO] Mirror-LoRA consolidation #41 complete: loss=1.4883, elapsed=28.52s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:57:33,339 [INFO]     Session 40/50 | loss=0.0720 | ret=0.1693
+2026-04-14 02:57:33,351 [INFO] Started session 41 (residual WM zero-init)
+2026-04-14 02:57:33,352 [INFO] Mirror-LoRA: started session 41
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:58:05,512 [INFO] Consolidating session 41 (15 turns, reservoir 600)
+2026-04-14 02:58:33,885 [INFO] Consolidation complete (loss=1.1393)
+2026-04-14 02:58:33,913 [INFO] Mirror-LoRA consolidation #42 complete: loss=1.1393, elapsed=28.41s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:58:57,724 [INFO] Started session 42 (residual WM zero-init)
+2026-04-14 02:58:57,727 [INFO] Mirror-LoRA: started session 42
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 02:59:29,889 [INFO] Consolidating session 42 (15 turns, reservoir 615)
+2026-04-14 02:59:58,296 [INFO] Consolidation complete (loss=0.7708)
+2026-04-14 02:59:58,325 [INFO] Mirror-LoRA consolidation #43 complete: loss=0.7708, elapsed=28.44s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:00:22,179 [INFO] Started session 43 (residual WM zero-init)
+2026-04-14 03:00:22,180 [INFO] Mirror-LoRA: started session 43
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:00:54,315 [INFO] Consolidating session 43 (15 turns, reservoir 630)
+2026-04-14 03:01:22,901 [INFO] Consolidation complete (loss=1.3179)
+2026-04-14 03:01:22,929 [INFO] Mirror-LoRA consolidation #44 complete: loss=1.3179, elapsed=28.62s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:01:46,753 [INFO] Started session 44 (residual WM zero-init)
+2026-04-14 03:01:46,754 [INFO] Mirror-LoRA: started session 44
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:02:18,888 [INFO] Consolidating session 44 (15 turns, reservoir 645)
+2026-04-14 03:02:47,271 [INFO] Consolidation complete (loss=1.0915)
+2026-04-14 03:02:47,322 [INFO] Mirror-LoRA consolidation #45 complete: loss=1.0915, elapsed=28.44s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:03:11,193 [INFO] Started session 45 (residual WM zero-init)
+2026-04-14 03:03:11,194 [INFO] Mirror-LoRA: started session 45
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:03:43,367 [INFO] Consolidating session 45 (15 turns, reservoir 660)
+2026-04-14 03:04:11,806 [INFO] Consolidation complete (loss=0.9178)
+2026-04-14 03:04:11,850 [INFO] Mirror-LoRA consolidation #46 complete: loss=0.9178, elapsed=28.49s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:04:35,651 [INFO] Started session 46 (residual WM zero-init)
+2026-04-14 03:04:35,652 [INFO] Mirror-LoRA: started session 46
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:05:07,910 [INFO] Consolidating session 46 (15 turns, reservoir 675)
+2026-04-14 03:05:37,469 [INFO] Consolidation complete (loss=0.9531)
+2026-04-14 03:05:37,515 [INFO] Mirror-LoRA consolidation #47 complete: loss=0.9531, elapsed=29.61s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:06:01,003 [INFO] Started session 47 (residual WM zero-init)
+2026-04-14 03:06:01,004 [INFO] Mirror-LoRA: started session 47
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:06:33,434 [INFO] Consolidating session 47 (15 turns, reservoir 690)
+2026-04-14 03:07:03,081 [INFO] Consolidation complete (loss=1.3169)
+2026-04-14 03:07:03,109 [INFO] Mirror-LoRA consolidation #48 complete: loss=1.3169, elapsed=29.68s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:07:26,886 [INFO] Started session 48 (residual WM zero-init)
+2026-04-14 03:07:26,887 [INFO] Mirror-LoRA: started session 48
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:07:59,437 [INFO] Consolidating session 48 (15 turns, reservoir 705)
+2026-04-14 03:08:29,312 [INFO] Consolidation complete (loss=1.2232)
+2026-04-14 03:08:29,341 [INFO] Mirror-LoRA consolidation #49 complete: loss=1.2232, elapsed=29.91s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:08:53,069 [INFO] Started session 49 (residual WM zero-init)
+2026-04-14 03:08:53,070 [INFO] Mirror-LoRA: started session 49
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:09:25,683 [INFO] Consolidating session 49 (15 turns, reservoir 720)
+2026-04-14 03:09:55,705 [INFO] Consolidation complete (loss=1.1721)
+2026-04-14 03:09:55,734 [INFO] Mirror-LoRA consolidation #50 complete: loss=1.1721, elapsed=30.06s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:10:19,462 [INFO] Started session 50 (residual WM zero-init)
+2026-04-14 03:10:19,464 [INFO] Mirror-LoRA: started session 50
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:10:52,087 [INFO] Consolidating session 50 (15 turns, reservoir 735)
+2026-04-14 03:11:21,887 [INFO] Consolidation complete (loss=1.6044)
+2026-04-14 03:11:21,915 [INFO] Mirror-LoRA consolidation #51 complete: loss=1.6044, elapsed=29.83s, fast_fisher_keys=64, slow_fisher_keys=64
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:248044 for open-end generation.
+2026-04-14 03:11:45,580 [INFO]     Session 50/50 | loss=0.0716 | ret=0.1755
+2026-04-14 03:11:46,275 [INFO]     mirror_lora done: RetF1=0.1755 Forget=0.0227 AdaptSpeed=2.0 PPL=59.05 (4377.2s)
+2026-04-14 03:11:46,280 [INFO]   Saved mirror_lora -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/Qwen_Qwen3.5-9B/dialogue_mirror_lora.json
+2026-04-14 03:11:46,393 [INFO] 
+2026-04-14 03:11:46,394 [INFO] ====================================================================================================
+2026-04-14 03:11:46,394 [INFO] AGGREGATED RESULTS: task=dialogue
+2026-04-14 03:11:46,395 [INFO] ====================================================================================================
+2026-04-14 03:11:46,395 [INFO] Method                       RetF1   Forget  AdaptSpd      PPL     Loss    Latency
+2026-04-14 03:11:46,396 [INFO] ----------------------------------------------------------------------------------------------------
+2026-04-14 03:11:46,397 [INFO] comparison                  0.0000   0.0000       0.0     0.00   0.0000       0.0ms
+2026-04-14 03:11:46,397 [INFO] dual_lora_ema               0.3939   0.0514       1.8    18.56   0.0995     287.8ms
+2026-04-14 03:11:46,398 [INFO] dual_lora_heuristic         0.1632   0.0524       2.0   306.70   0.1005     289.8ms
+2026-04-14 03:11:46,398 [INFO] dual_lora_periodic_avg      0.1024   0.0630       2.0   692.12   0.1083     287.0ms
+2026-04-14 03:11:46,399 [INFO] frozen                      0.1231   0.0081       2.0    24.63   2.4482     122.5ms
+2026-04-14 03:11:46,399 [INFO] mirror_lora                 0.1755   0.0227       2.0    59.05   0.0719     731.9ms
+2026-04-14 03:11:46,400 [INFO] param_matched_lora          0.3425   0.0618       1.9     5.86   0.1063     561.6ms
+2026-04-14 03:11:46,400 [INFO] retrieval_augmented         0.1240   0.0069       2.0    24.56   2.4486     124.1ms
+2026-04-14 03:11:46,401 [INFO] sdft                        0.5441   0.0528       1.8     8.97   0.1047     290.2ms
+2026-04-14 03:11:46,401 [INFO] single_lora_ewc             0.0906   0.0681       1.9     4.33   0.1066     420.8ms
+2026-04-14 03:11:46,402 [INFO] single_lora_ewc_replay      0.3758   0.0787       1.8     7.80   0.1060     552.1ms
+2026-04-14 03:11:46,402 [INFO] single_lora_replay          0.2549   0.0790       1.7     5.40   0.1041     408.8ms
+2026-04-14 03:11:46,402 [INFO] single_lora_sgd             0.1024   0.0630       2.0     6.12   0.1083     283.0ms
+2026-04-14 03:11:46,403 [INFO] spm                         0.5625   0.0844       1.8    30.25   0.0708     709.9ms
+2026-04-14 03:11:46,414 [INFO] Aggregated comparison -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/Qwen_Qwen3.5-9B/dialogue_comparison.json
+2026-04-14 03:11:46,418 [INFO] LaTeX table -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/Qwen_Qwen3.5-9B/dialogue_results_table.tex
+2026-04-14 03:11:46,419 [INFO] Done. All results in /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/Qwen_Qwen3.5-9B

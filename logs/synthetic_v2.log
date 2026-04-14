@@ -1,0 +1,44 @@
+============================================================
+Exp A: K_T = O(sqrt(T)) decreasing jump frequency
+============================================================
+  T= 1000 K_T= 31 | single=    5847.8 (5.85/step) | dual=     805.1 (0.8051/step) | ratio=7.3x
+  T= 5000 K_T= 70 | single=   28039.4 (5.61/step) | dual=    1882.2 (0.3764/step) | ratio=14.9x
+  T=10000 K_T=100 | single=  413210.7 (41.32/step) | dual=    2620.9 (0.2621/step) | ratio=157.7x
+  T=20000 K_T=141 | single= 1912810.3 (95.64/step) | dual=    3692.8 (0.1846/step) | ratio=518.0x
+
+============================================================
+Exp B: Separated timescales (rho_s=0.001, jump_interval=20)
+============================================================
+  T= 1000 | single=   12812.7 | dual=    3433.8 | ratio=3.7x
+  T= 5000 | single=  187958.5 | dual=  134370.0 | ratio=1.4x
+  T=10000 | single= 1719093.0 | dual= 1360973.8 | ratio=1.3x
+
+============================================================
+Exp C: Timescale separation ratio sweep
+============================================================
+  rho_s=0.0000 ji= 10 sep=0.000 | ratio=107.8x ✓
+  rho_s=0.0000 ji= 20 sep=0.000 | ratio= 31.1x ✓
+  rho_s=0.0000 ji= 50 sep=0.000 | ratio=276.2x ✓
+  rho_s=0.0000 ji=100 sep=0.000 | ratio=117.5x ✓
+  rho_s=0.0001 ji= 10 sep=0.001 | ratio= 78.0x ✓
+  rho_s=0.0001 ji= 20 sep=0.002 | ratio= 21.1x ✓
+  rho_s=0.0001 ji= 50 sep=0.005 | ratio= 98.0x ✓
+  rho_s=0.0001 ji=100 sep=0.010 | ratio= 59.0x ✓
+  rho_s=0.0010 ji= 10 sep=0.010 | ratio=  2.8x ✓
+  rho_s=0.0010 ji= 20 sep=0.020 | ratio=  1.4x ✓
+  rho_s=0.0010 ji= 50 sep=0.050 | ratio=  1.8x ✓
+  rho_s=0.0010 ji=100 sep=0.100 | ratio=  1.5x ✓
+  rho_s=0.0050 ji= 10 sep=0.050 | ratio=  0.7x ✗
+  rho_s=0.0050 ji= 20 sep=0.100 | ratio=  0.6x ✗
+  rho_s=0.0050 ji= 50 sep=0.250 | ratio=  0.7x ✗
+  rho_s=0.0050 ji=100 sep=0.500 | ratio=  0.5x ✗
+  rho_s=0.0100 ji= 10 sep=0.100 | ratio=  0.7x ✗
+  rho_s=0.0100 ji= 20 sep=0.200 | ratio=  0.7x ✗
+  rho_s=0.0100 ji= 50 sep=0.500 | ratio=  0.7x ✗
+  rho_s=0.0100 ji=100 sep=1.000 | ratio=  0.8x ✗
+  rho_s=0.0500 ji= 10 sep=0.500 | ratio=  0.7x ✗
+  rho_s=0.0500 ji= 20 sep=1.000 | ratio=  0.7x ✗
+  rho_s=0.0500 ji= 50 sep=2.500 | ratio=  0.7x ✗
+  rho_s=0.0500 ji=100 sep=5.000 | ratio=  0.7x ✗
+
+All results saved to outputs/synthetic_v2/all_results.json

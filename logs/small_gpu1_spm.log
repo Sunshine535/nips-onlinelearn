@@ -1,0 +1,198 @@
+2026-04-14 03:11:54,221 [INFO] Task: dialogue
+2026-04-14 03:11:54,223 [INFO] Methods: ['spm']
+2026-04-14 03:11:54,223 [INFO] Model: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+2026-04-14 03:11:54,223 [INFO] Device: cuda:0
+2026-04-14 03:11:54,224 [INFO] Output: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct
+2026-04-14 03:11:54,225 [WARNING] PersonaChat load failed (Couldn't reach 'bavard/personachat_truecased' on the Hub (OfflineModeIsEnabled)); generating synthetic data
+2026-04-14 03:11:54,226 [INFO] Generated 50 synthetic dialogue sessions
+2026-04-14 03:11:54,227 [INFO] Loading base model: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/verl/huggingface-model/Qwen2.5-0.5B-Instruct
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<03:14,  1.49it/s]Loading weights:   9%|▉         | 27/290 [00:00<00:06, 40.89it/s]Loading weights:  14%|█▍        | 40/290 [00:00<00:04, 55.14it/s]Loading weights:  22%|██▏       | 63/290 [00:01<00:02, 82.73it/s]Loading weights:  30%|███       | 87/290 [00:01<00:01, 110.62it/s]Loading weights:  35%|███▌      | 102/290 [00:01<00:01, 113.88it/s]Loading weights:  40%|████      | 117/290 [00:01<00:01, 118.90it/s]Loading weights:  47%|████▋     | 135/290 [00:01<00:01, 131.88it/s]Loading weights:  55%|█████▌    | 160/290 [00:01<00:00, 161.19it/s]Loading weights:  61%|██████▏   | 178/290 [00:01<00:00, 164.35it/s]Loading weights:  71%|███████▏  | 207/290 [00:01<00:00, 198.03it/s]Loading weights:  84%|████████▍ | 243/290 [00:02<00:00, 226.14it/s]Loading weights:  92%|█████████▏| 267/290 [00:02<00:00, 212.43it/s]Loading weights: 100%|██████████| 290/290 [00:02<00:00, 130.95it/s]
+2026-04-14 03:11:57,475 [INFO] Base model loaded. Parameters: 494032768
+2026-04-14 03:11:57,476 [INFO] 
+2026-04-14 03:11:57,476 [INFO] ======================================================================
+2026-04-14 03:11:57,476 [INFO] METHOD: spm
+2026-04-14 03:11:57,477 [INFO] ======================================================================
+2026-04-14 03:11:58,066 [INFO]   [dialogue] Evaluating spm (50 sessions)
+2026-04-14 03:11:58,081 [INFO] Started session 1 (residual WM zero-init)
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+2026-04-14 03:12:08,468 [INFO] Consolidating session 1 (15 turns, reservoir 0)
+2026-04-14 03:12:15,305 [INFO] Consolidation complete (loss=14.3285)
+2026-04-14 03:12:18,140 [INFO]     Session 1/50 | loss=0.3787 | ret=0.3333
+2026-04-14 03:12:18,152 [INFO] Started session 2 (residual WM zero-init)
+2026-04-14 03:12:28,256 [INFO] Consolidating session 2 (15 turns, reservoir 15)
+2026-04-14 03:12:41,173 [INFO] Consolidation complete (loss=2.3547)
+2026-04-14 03:12:44,514 [INFO] Started session 3 (residual WM zero-init)
+2026-04-14 03:12:54,466 [INFO] Consolidating session 3 (15 turns, reservoir 30)
+2026-04-14 03:13:13,164 [INFO] Consolidation complete (loss=0.9221)
+2026-04-14 03:13:16,715 [INFO] Started session 4 (residual WM zero-init)
+2026-04-14 03:13:26,851 [INFO] Consolidating session 4 (15 turns, reservoir 45)
+2026-04-14 03:13:45,925 [INFO] Consolidation complete (loss=1.2247)
+2026-04-14 03:13:49,757 [INFO] Started session 5 (residual WM zero-init)
+2026-04-14 03:13:59,344 [INFO] Consolidating session 5 (15 turns, reservoir 60)
+2026-04-14 03:14:18,081 [INFO] Consolidation complete (loss=0.6445)
+2026-04-14 03:14:21,414 [INFO] Started session 6 (residual WM zero-init)
+2026-04-14 03:14:31,126 [INFO] Consolidating session 6 (15 turns, reservoir 75)
+2026-04-14 03:14:49,897 [INFO] Consolidation complete (loss=0.4889)
+2026-04-14 03:14:53,233 [INFO] Started session 7 (residual WM zero-init)
+2026-04-14 03:15:02,996 [INFO] Consolidating session 7 (15 turns, reservoir 90)
+2026-04-14 03:15:21,308 [INFO] Consolidation complete (loss=0.8405)
+2026-04-14 03:15:25,149 [INFO] Started session 8 (residual WM zero-init)
+2026-04-14 03:15:34,840 [INFO] Consolidating session 8 (15 turns, reservoir 105)
+2026-04-14 03:15:53,256 [INFO] Consolidation complete (loss=1.8092)
+2026-04-14 03:15:57,040 [INFO] Started session 9 (residual WM zero-init)
+2026-04-14 03:16:06,610 [INFO] Consolidating session 9 (15 turns, reservoir 120)
+2026-04-14 03:16:24,928 [INFO] Consolidation complete (loss=1.6879)
+2026-04-14 03:16:27,862 [INFO] Started session 10 (residual WM zero-init)
+2026-04-14 03:16:37,473 [INFO] Consolidating session 10 (15 turns, reservoir 135)
+2026-04-14 03:16:55,532 [INFO] Consolidation complete (loss=2.0223)
+2026-04-14 03:16:58,790 [INFO]     Session 10/50 | loss=0.0803 | ret=0.6190
+2026-04-14 03:16:58,802 [INFO] Started session 11 (residual WM zero-init)
+2026-04-14 03:17:08,567 [INFO] Consolidating session 11 (15 turns, reservoir 150)
+2026-04-14 03:17:26,516 [INFO] Consolidation complete (loss=1.2440)
+2026-04-14 03:17:30,811 [INFO] Started session 12 (residual WM zero-init)
+2026-04-14 03:17:40,145 [INFO] Consolidating session 12 (15 turns, reservoir 165)
+2026-04-14 03:17:58,253 [INFO] Consolidation complete (loss=1.0515)
+2026-04-14 03:18:02,551 [INFO] Started session 13 (residual WM zero-init)
+2026-04-14 03:18:12,251 [INFO] Consolidating session 13 (15 turns, reservoir 180)
+2026-04-14 03:18:30,217 [INFO] Consolidation complete (loss=1.0678)
+2026-04-14 03:18:33,227 [INFO] Started session 14 (residual WM zero-init)
+2026-04-14 03:18:42,058 [INFO] Consolidating session 14 (15 turns, reservoir 195)
+2026-04-14 03:19:00,019 [INFO] Consolidation complete (loss=1.7397)
+2026-04-14 03:19:03,744 [INFO] Started session 15 (residual WM zero-init)
+2026-04-14 03:19:13,724 [INFO] Consolidating session 15 (15 turns, reservoir 210)
+2026-04-14 03:19:31,664 [INFO] Consolidation complete (loss=1.3376)
+2026-04-14 03:19:35,181 [INFO] Started session 16 (residual WM zero-init)
+2026-04-14 03:19:44,848 [INFO] Consolidating session 16 (15 turns, reservoir 225)
+2026-04-14 03:20:02,818 [INFO] Consolidation complete (loss=0.8591)
+2026-04-14 03:20:06,793 [INFO] Started session 17 (residual WM zero-init)
+2026-04-14 03:20:15,328 [INFO] Consolidating session 17 (15 turns, reservoir 240)
+2026-04-14 03:20:33,295 [INFO] Consolidation complete (loss=1.1221)
+2026-04-14 03:20:37,124 [INFO] Started session 18 (residual WM zero-init)
+2026-04-14 03:20:46,795 [INFO] Consolidating session 18 (15 turns, reservoir 255)
+2026-04-14 03:21:04,739 [INFO] Consolidation complete (loss=1.2239)
+2026-04-14 03:21:08,552 [INFO] Started session 19 (residual WM zero-init)
+2026-04-14 03:21:18,247 [INFO] Consolidating session 19 (15 turns, reservoir 270)
+2026-04-14 03:21:36,203 [INFO] Consolidation complete (loss=0.9133)
+2026-04-14 03:21:40,745 [INFO] Started session 20 (residual WM zero-init)
+2026-04-14 03:21:50,533 [INFO] Consolidating session 20 (15 turns, reservoir 285)
+2026-04-14 03:22:08,442 [INFO] Consolidation complete (loss=1.0008)
+2026-04-14 03:22:12,463 [INFO]     Session 20/50 | loss=0.0662 | ret=0.6429
+2026-04-14 03:22:12,474 [INFO] Started session 21 (residual WM zero-init)
+2026-04-14 03:22:22,261 [INFO] Consolidating session 21 (15 turns, reservoir 300)
+2026-04-14 03:22:40,097 [INFO] Consolidation complete (loss=1.5688)
+2026-04-14 03:22:44,086 [INFO] Started session 22 (residual WM zero-init)
+2026-04-14 03:22:53,726 [INFO] Consolidating session 22 (15 turns, reservoir 315)
+2026-04-14 03:23:11,778 [INFO] Consolidation complete (loss=1.1320)
+2026-04-14 03:23:16,077 [INFO] Started session 23 (residual WM zero-init)
+2026-04-14 03:23:25,816 [INFO] Consolidating session 23 (15 turns, reservoir 330)
+2026-04-14 03:23:43,636 [INFO] Consolidation complete (loss=0.7805)
+2026-04-14 03:23:47,329 [INFO] Started session 24 (residual WM zero-init)
+2026-04-14 03:23:57,014 [INFO] Consolidating session 24 (15 turns, reservoir 345)
+2026-04-14 03:24:14,879 [INFO] Consolidation complete (loss=1.1251)
+2026-04-14 03:24:18,972 [INFO] Started session 25 (residual WM zero-init)
+2026-04-14 03:24:28,637 [INFO] Consolidating session 25 (15 turns, reservoir 360)
+2026-04-14 03:24:46,495 [INFO] Consolidation complete (loss=0.8208)
+2026-04-14 03:24:49,999 [INFO] Started session 26 (residual WM zero-init)
+2026-04-14 03:24:59,639 [INFO] Consolidating session 26 (15 turns, reservoir 375)
+2026-04-14 03:25:17,475 [INFO] Consolidation complete (loss=0.8960)
+2026-04-14 03:25:20,157 [INFO] Started session 27 (residual WM zero-init)
+2026-04-14 03:25:29,643 [INFO] Consolidating session 27 (15 turns, reservoir 390)
+2026-04-14 03:25:47,472 [INFO] Consolidation complete (loss=1.4384)
+2026-04-14 03:25:51,215 [INFO] Started session 28 (residual WM zero-init)
+2026-04-14 03:26:00,530 [INFO] Consolidating session 28 (15 turns, reservoir 405)
+2026-04-14 03:26:18,496 [INFO] Consolidation complete (loss=0.9414)
+2026-04-14 03:26:24,106 [INFO] Started session 29 (residual WM zero-init)
+2026-04-14 03:26:33,943 [INFO] Consolidating session 29 (15 turns, reservoir 420)
+2026-04-14 03:26:51,872 [INFO] Consolidation complete (loss=1.4515)
+2026-04-14 03:26:55,664 [INFO] Started session 30 (residual WM zero-init)
+2026-04-14 03:27:05,210 [INFO] Consolidating session 30 (15 turns, reservoir 435)
+2026-04-14 03:27:23,236 [INFO] Consolidation complete (loss=0.7647)
+2026-04-14 03:27:26,978 [INFO]     Session 30/50 | loss=0.0691 | ret=0.5714
+2026-04-14 03:27:26,989 [INFO] Started session 31 (residual WM zero-init)
+2026-04-14 03:27:36,636 [INFO] Consolidating session 31 (15 turns, reservoir 450)
+2026-04-14 03:27:54,590 [INFO] Consolidation complete (loss=1.3528)
+2026-04-14 03:27:58,630 [INFO] Started session 32 (residual WM zero-init)
+2026-04-14 03:28:08,296 [INFO] Consolidating session 32 (15 turns, reservoir 465)
+2026-04-14 03:28:26,252 [INFO] Consolidation complete (loss=1.0222)
+2026-04-14 03:28:31,621 [INFO] Started session 33 (residual WM zero-init)
+2026-04-14 03:28:41,300 [INFO] Consolidating session 33 (15 turns, reservoir 480)
+2026-04-14 03:28:59,442 [INFO] Consolidation complete (loss=1.2057)
+2026-04-14 03:29:03,492 [INFO] Started session 34 (residual WM zero-init)
+2026-04-14 03:29:13,536 [INFO] Consolidating session 34 (15 turns, reservoir 495)
+2026-04-14 03:29:31,452 [INFO] Consolidation complete (loss=0.9689)
+2026-04-14 03:29:35,240 [INFO] Started session 35 (residual WM zero-init)
+2026-04-14 03:29:44,824 [INFO] Consolidating session 35 (15 turns, reservoir 510)
+2026-04-14 03:30:02,779 [INFO] Consolidation complete (loss=1.2717)
+2026-04-14 03:30:06,975 [INFO] Started session 36 (residual WM zero-init)
+2026-04-14 03:30:16,507 [INFO] Consolidating session 36 (15 turns, reservoir 525)
+2026-04-14 03:30:34,465 [INFO] Consolidation complete (loss=0.9085)
+2026-04-14 03:30:38,342 [INFO] Started session 37 (residual WM zero-init)
+2026-04-14 03:30:48,297 [INFO] Consolidating session 37 (15 turns, reservoir 540)
+2026-04-14 03:31:06,274 [INFO] Consolidation complete (loss=0.7789)
+2026-04-14 03:31:11,888 [INFO] Started session 38 (residual WM zero-init)
+2026-04-14 03:31:21,473 [INFO] Consolidating session 38 (15 turns, reservoir 555)
+2026-04-14 03:31:39,524 [INFO] Consolidation complete (loss=1.1117)
+2026-04-14 03:31:43,426 [INFO] Started session 39 (residual WM zero-init)
+2026-04-14 03:31:53,270 [INFO] Consolidating session 39 (15 turns, reservoir 570)
+2026-04-14 03:32:11,252 [INFO] Consolidation complete (loss=1.1966)
+2026-04-14 03:32:15,552 [INFO] Started session 40 (residual WM zero-init)
+2026-04-14 03:32:25,300 [INFO] Consolidating session 40 (15 turns, reservoir 585)
+2026-04-14 03:32:43,259 [INFO] Consolidation complete (loss=0.7133)
+2026-04-14 03:32:47,288 [INFO]     Session 40/50 | loss=0.0673 | ret=0.5000
+2026-04-14 03:32:47,300 [INFO] Started session 41 (residual WM zero-init)
+2026-04-14 03:32:57,130 [INFO] Consolidating session 41 (15 turns, reservoir 600)
+2026-04-14 03:33:15,093 [INFO] Consolidation complete (loss=1.4843)
+2026-04-14 03:33:18,886 [INFO] Started session 42 (residual WM zero-init)
+2026-04-14 03:33:29,276 [INFO] Consolidating session 42 (15 turns, reservoir 615)
+2026-04-14 03:33:47,199 [INFO] Consolidation complete (loss=0.9121)
+2026-04-14 03:33:50,892 [INFO] Started session 43 (residual WM zero-init)
+2026-04-14 03:34:00,675 [INFO] Consolidating session 43 (15 turns, reservoir 630)
+2026-04-14 03:34:18,827 [INFO] Consolidation complete (loss=0.6882)
+2026-04-14 03:34:22,570 [INFO] Started session 44 (residual WM zero-init)
+2026-04-14 03:34:32,112 [INFO] Consolidating session 44 (15 turns, reservoir 645)
+2026-04-14 03:34:50,075 [INFO] Consolidation complete (loss=0.8057)
+2026-04-14 03:34:54,274 [INFO] Started session 45 (residual WM zero-init)
+2026-04-14 03:35:04,360 [INFO] Consolidating session 45 (15 turns, reservoir 660)
+2026-04-14 03:35:22,285 [INFO] Consolidation complete (loss=1.4146)
+2026-04-14 03:35:26,080 [INFO] Started session 46 (residual WM zero-init)
+2026-04-14 03:35:36,284 [INFO] Consolidating session 46 (15 turns, reservoir 675)
+2026-04-14 03:35:54,254 [INFO] Consolidation complete (loss=1.2226)
+2026-04-14 03:35:58,455 [INFO] Started session 47 (residual WM zero-init)
+2026-04-14 03:36:09,053 [INFO] Consolidating session 47 (15 turns, reservoir 690)
+2026-04-14 03:36:26,981 [INFO] Consolidation complete (loss=0.8654)
+2026-04-14 03:36:31,228 [INFO] Started session 48 (residual WM zero-init)
+2026-04-14 03:36:40,982 [INFO] Consolidating session 48 (15 turns, reservoir 705)
+2026-04-14 03:36:58,900 [INFO] Consolidation complete (loss=0.7780)
+2026-04-14 03:37:02,751 [INFO] Started session 49 (residual WM zero-init)
+2026-04-14 03:37:12,389 [INFO] Consolidating session 49 (15 turns, reservoir 720)
+2026-04-14 03:37:30,338 [INFO] Consolidation complete (loss=1.0426)
+2026-04-14 03:37:34,427 [INFO] Started session 50 (residual WM zero-init)
+2026-04-14 03:37:44,015 [INFO] Consolidating session 50 (15 turns, reservoir 735)
+2026-04-14 03:38:01,968 [INFO] Consolidation complete (loss=1.0014)
+2026-04-14 03:38:06,243 [INFO]     Session 50/50 | loss=0.0656 | ret=0.5625
+2026-04-14 03:38:06,710 [INFO]     spm done: RetF1=0.5625 Forget=0.0646 AdaptSpeed=1.1 PPL=32.87 (1568.6s)
+2026-04-14 03:38:06,716 [INFO]   Saved spm -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_spm.json
+2026-04-14 03:38:06,747 [INFO] 
+2026-04-14 03:38:06,747 [INFO] ====================================================================================================
+2026-04-14 03:38:06,748 [INFO] AGGREGATED RESULTS: task=dialogue
+2026-04-14 03:38:06,748 [INFO] ====================================================================================================
+2026-04-14 03:38:06,749 [INFO] Method                       RetF1   Forget  AdaptSpd      PPL     Loss    Latency
+2026-04-14 03:38:06,749 [INFO] ----------------------------------------------------------------------------------------------------
+2026-04-14 03:38:06,749 [INFO] comparison                  0.0000   0.0000       0.0     0.00   0.0000       0.0ms
+2026-04-14 03:38:06,750 [INFO] dual_lora_ema               0.3333   0.0642       1.4    52.87   0.1251      78.5ms
+2026-04-14 03:38:06,750 [INFO] dual_lora_heuristic         0.3333   0.0642       1.4  1224.65   0.1251      76.6ms
+2026-04-14 03:38:06,751 [INFO] dual_lora_periodic_avg      0.3333   0.0642       1.4   826.22   0.1251      76.4ms
+2026-04-14 03:38:06,751 [INFO] frozen                      0.0956   0.0161       2.0   139.28   3.7682      19.0ms
+2026-04-14 03:38:06,751 [INFO] param_matched_lora          0.2952   0.0571       1.1    12.62   0.1303     223.6ms
+2026-04-14 03:38:06,752 [INFO] retrieval_augmented         0.0956   0.0161       2.0   139.28   3.7682      19.4ms
+2026-04-14 03:38:06,752 [INFO] sdft                        0.0000   0.1078       1.3     5.03   0.1752      92.3ms
+2026-04-14 03:38:06,753 [INFO] single_lora_ewc             0.7778   0.0804       1.2     5.75   0.1302     160.3ms
+2026-04-14 03:38:06,753 [INFO] single_lora_ewc_replay      0.6429   0.0702       1.2     8.34   0.1259     229.0ms
+2026-04-14 03:38:06,753 [INFO] single_lora_replay          0.6190   0.0798       1.1     7.32   0.1338     138.8ms
+2026-04-14 03:38:06,754 [INFO] single_lora_sgd             0.3333   0.0642       1.4     6.20   0.1251      72.4ms
+2026-04-14 03:38:06,754 [INFO] spm                         0.5625   0.0646       1.1    32.87   0.0776     428.3ms
+2026-04-14 03:38:06,763 [INFO] Aggregated comparison -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_comparison.json
+2026-04-14 03:38:06,767 [INFO] LaTeX table -> /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct/dialogue_results_table.tex
+2026-04-14 03:38:06,768 [INFO] Done. All results in /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/EVA/liujunlin07/nips-onlinelearn/outputs/streaming_eval/_mnt_dolphinfs_hdd_pool_docker_user_hadoop-aipnlp_EVA_liujunlin07_verl_huggingface-model_Qwen2.5-0.5B-Instruct
