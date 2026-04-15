@@ -13,56 +13,71 @@ of distillation steps, and the replay buffer size, all of which are fixed
 hyperparameters.
 \end{definition}
 
-\begin{proposition}[Optimal consolidation period --- fixes Issue~\#21]
+\begin{proposition}[Optimal consolidation period --- heuristic cost model]
 \label{prop:optimal-B}
-Under the setting of \Cref{thm:sufficiency-A}, consider the
-per-consolidation-period regret decomposition:
-\[
-  R(B) = \underbrace{\frac{C_{\mathrm{merge}}}{B}}_{\text{amortized merge cost}}
-  + \underbrace{\frac{L}{2\mu}\, \rho_s \cdot B}_{\text{subspace drift within period}},
-\]
-where $\rho_s = V_s(T)/T$ is the average subspace drift rate per step.
-The regret contribution from subspace tracking error grows linearly with
-$B$ (the subspace drifts further between consolidations) while the
-amortized merge cost decreases as $1/B$.
+Consider the following \emph{stylized cost model} (presented as a
+heuristic, not derived from \Cref{thm:sufficiency-A}).
 
-Minimizing $R(B)$ over $B > 0$:
+If the subspace drifts at rate $\rho_s$ per step and the subspace
+estimate is held fixed for $B$ steps, the accumulated
+\emph{squared} subspace error at time $t$ within the period is
+$\dG^2(U_{mB}, U_{mB+t}) \leq (\rho_s t)^2$ (deterministic drift).
+The per-period regret from the stale subspace is:
 \[
-  B^* = \sqrt{\frac{2\mu\, C_{\mathrm{merge}}}{L\, \rho_s}}.
+  R_{\mathrm{stale}}(B)
+  = \frac{L\bar{A}^2}{2}\sum_{t=1}^B (\rho_s t)^2
+  = \frac{L\bar{A}^2 \rho_s^2 B(B+1)(2B+1)}{12}
+  \approx \frac{L\bar{A}^2 \rho_s^2 B^3}{6},
 \]
+where $\bar{A}^2$ accounts for the coefficient magnitude.
+The per-step amortized regret including merge cost is:
+\[
+  R(B) = \frac{C_{\mathrm{merge}}}{B}
+  + \frac{L\bar{A}^2 \rho_s^2}{6}\, B^2.
+\]
+
+Minimizing $R(B)$:
+\[
+  R'(B) = -\frac{C_{\mathrm{merge}}}{B^2}
+  + \frac{L\bar{A}^2\rho_s^2}{3}\, B = 0
+  \quad\Longrightarrow\quad
+  B^* = \left(\frac{3\, C_{\mathrm{merge}}}{L\bar{A}^2\rho_s^2}
+  \right)^{\!1/3}.
+\]
+The second derivative $2C_{\mathrm{merge}}/B^3 +
+\frac{L\bar{A}^2\rho_s^2}{3} > 0$ confirms this is a minimum.
 \end{proposition}
 
 \begin{proof}
-The per-step regret contribution from the slow track is:
-\[
-  R_{\mathrm{slow}}(B)
-  = \frac{C_{\mathrm{merge}}}{B}
-  + \frac{L}{2\mu}\, \rho_s \cdot B.
-\]
-This is a sum of a decreasing and an increasing function of $B$.
-Taking the derivative and setting to zero:
-\[
-  \frac{dR}{dB} = -\frac{C_{\mathrm{merge}}}{B^2}
-  + \frac{L\rho_s}{2\mu} = 0
-  \quad\Longrightarrow\quad
-  B^{*2} = \frac{2\mu\, C_{\mathrm{merge}}}{L\, \rho_s},
-\]
-confirming the formula. The second derivative $2C_{\mathrm{merge}}/B^3 > 0$
-confirms this is a minimum.
+The per-period stale-subspace cost is computed by summing the
+per-step excess regret $\frac{L\bar{A}^2}{2}(\rho_s t)^2$ for
+$t = 1, \ldots, B$ (from smoothness and the squared Grassmann
+distance accumulation under linear drift). Dividing by $B$ gives
+the per-step cost. Adding the amortized merge cost $C_{\mathrm{merge}}/B$
+yields $R(B)$. Standard calculus gives $B^*$.
 \end{proof}
 
+\begin{remark}[Cube-root vs.\ square-root scaling]
+The original claim stated $B^* \propto \sqrt{C_{\mathrm{merge}}/\rho_s}$,
+which assumed a \emph{linear} drift cost in $B$. The correct
+\emph{quadratic} per-step drift cost (from $\dG^2$ growing as $t^2$)
+yields the cube-root scaling above. The qualitative insight is
+preserved: $B^*$ increases with merge cost and decreases with drift
+rate, but the quantitative formula differs.
+\end{remark}
+
 \begin{remark}[No circular dependence]
-The original formulation had $C_{\mathrm{merge}}$ implicitly depending
-on $B$ through the constants $C_1, C_2, C_3$ of \Cref{thm:sufficiency-A},
-creating a circular optimization. Here, $C_{\mathrm{merge}}$ is defined
-as a \emph{fixed computational cost} (e.g., the GPU-seconds of running
-$N_{\mathrm{distill}}$ distillation steps), breaking the circularity.
+$C_{\mathrm{merge}}$ is a \emph{fixed computational cost} (GPU-seconds
+of running distillation steps), independent of $B$.
 \end{remark}
 
 \begin{remark}[Implementation mapping]
-In \texttt{streaming\_mirror\_lora.py:672--688}, the method
-\texttt{compute\_optimal\_interval()} implements exactly this formula
-with $C_{\mathrm{merge}}$ estimated from the actual consolidation wall-clock
-time converted to regret-equivalent units, and $\rho_s$ estimated from
-recent subspace gradient norms.
+In \texttt{streaming\_mirror\_lora.py:698--714}, the method
+\texttt{compute\_optimal\_interval()} implements the square-root
+formula $B^* = \sqrt{C_{\mathrm{merge}}/\rho_s}$ as a computationally
+simpler approximation. The cube-root formula above is theoretically
+more accurate for deterministic drift; the square-root version
+corresponds to a model where drift cost grows linearly (e.g., under
+a random-walk assumption for subspace perturbations). Both give the
+same qualitative behavior.
 \end{remark}

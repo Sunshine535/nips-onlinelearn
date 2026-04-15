@@ -40,6 +40,8 @@ $p_{\theta_l}$ (long-term memory, slowly consolidated), the
     &+ \underbrace{\lambda_r \cdot \E_{x \sim \mathcal{D}_{\mathrm{replay}}}
     \bigl[-\log p_\theta(y|x)\bigr]
     }_{\text{replay: preserve long-term knowledge}}
+    + \underbrace{\gamma \cdot \norm{\theta - \theta_l^{\mathrm{old}}}_{F_l}^2
+    }_{\text{trust-region: stability}}
   \Big],
   \label{eq:behavioral-merge}
 \end{align}
@@ -60,84 +62,82 @@ as in \eqref{eq:behavioral-merge}.
 \end{proposition}
 
 \begin{proof}
-\textbf{Step 1: Laplace approximation.}
-Approximate the posterior after observing session data $\mathcal{S}$
-and replay data $\mathcal{R}$ as Gaussian:
-\[
-  p(\theta | \mathcal{S}, \mathcal{R})
-  \approx \mathcal{N}\!\left(\theta;\,
-    \hat{\theta}_{\mathrm{MAP}},\,
-    (F_{\mathcal{S}} + F_{\mathcal{R}})^{-1}\right),
-\]
-where $F_{\mathcal{S}}$ and $F_{\mathcal{R}}$ are the empirical Fisher
-information matrices on session and replay data, respectively.
+The argument proceeds entirely in \emph{function/output space},
+avoiding any direct parameter-space subtraction between
+$\theta_w \in \Theta_w$ and $\theta_l \in \Theta_l$ (which may have
+different dimensions).
 
-\textbf{Step 2: MAP estimate in function space.}
-The MAP estimate maximizes:
+\textbf{Step 1: Function-space MAP objective.}
+Given session data $\mathcal{S}$ and replay data $\mathcal{R}$, the
+optimal long-term model $\theta_l^{\mathrm{new}}$ maximizes the
+posterior. The negative log-posterior decomposes as:
 \begin{align*}
-  \hat{\theta}_{\mathrm{MAP}}
-  &= \argmin_\theta \bigl[
-    -\log p(\mathcal{S}|\theta)
-    - \log p(\mathcal{R}|\theta)
-    - \log p(\theta)
-  \bigr].
+  \mathcal{L}(\theta_l)
+  &= \underbrace{-\log p(\mathcal{S}|\theta_l)}_{\text{session fit}}
+   + \underbrace{-\log p(\mathcal{R}|\theta_l)}_{\text{replay fit}}
+   + \underbrace{-\log p(\theta_l)}_{\text{prior}}.
 \end{align*}
 
-\textbf{Step 3: Connection to KL distillation.}
-When $\theta_w$ has been optimized on $\mathcal{S}$, the session
-log-likelihood term can be approximated (to second order around
-$\theta_w$) as:
+\textbf{Step 2: Session term $\to$ KL distillation.}
+Since $\theta_w$ was optimized on $\mathcal{S}$, approximating the
+session log-likelihood near the \emph{predictive distribution}
+$p_{\theta_w}(y|x)$ (not near $\theta_w$ in parameter space):
 \[
-  -\log p(\mathcal{S}|\theta)
+  -\log p(\mathcal{S}|\theta_l)
   \approx -\log p(\mathcal{S}|\theta_w)
-  + \frac{1}{2}(\theta - \theta_w)^\top F_{\mathcal{S}}(\theta-\theta_w).
-\]
-For an output distribution $p_\theta(y|x)$, minimizing
-$(\theta-\theta_w)^\top F_{\mathcal{S}}(\theta-\theta_w)$ is equivalent
-(to second order) to minimizing:
-\[
+  + |\mathcal{S}|\cdot
   \E_{x \sim \mathcal{S}}\bigl[
-    D_{\mathrm{KL}}(p_{\theta_w}(\cdot|x) \,\|\, p_\theta(\cdot|x))
-  \bigr],
+    D_{\mathrm{KL}}\bigl(p_{\theta_w}(\cdot|x)
+    \,\big\|\, p_{\theta_l}(\cdot|x)\bigr)
+  \bigr].
 \]
-by the Bernstein--von Mises theorem connecting Fisher information to
-KL divergence: $D_{\mathrm{KL}}(p_{\theta_1}\|p_{\theta_2})
-\approx \frac{1}{2}(\theta_1-\theta_2)^\top F(\theta_1-\theta_2)$
-locally.
+This uses the \emph{local KL expansion}: for any two models with
+output distributions $p$ and $q$ on the same support,
+$D_{\mathrm{KL}}(p\|q) \geq 0$ with equality iff $p = q$, and
+the log-likelihood difference $\log p(y|x) - \log q(y|x)$ averaged
+under $p$ equals $D_{\mathrm{KL}}(p\|q)$.
+No parameter-space subtraction $\theta_w - \theta_l$ is required.
 
-\textbf{Step 4: Replay term.}
-The replay log-likelihood $-\log p(\mathcal{R}|\theta)$ directly
-corresponds to the NTP loss on replay data:
+\textbf{Step 3: Replay term = NTP loss.}
+The replay log-likelihood is:
+$-\log p(\mathcal{R}|\theta_l) = \sum_{(x,y) \in \mathcal{R}}
+[-\log p_{\theta_l}(y|x)]$.
+
+\textbf{Step 4: Prior term = trust-region.}
+The prior $-\log p(\theta_l)$ regularizes $\theta_l$ toward its
+previous value $\theta_l^{\mathrm{old}}$, implemented as a
+Fisher trust-region $\norm{\theta_l - \theta_l^{\mathrm{old}}}_{F_l}^2
+\leq \delta$ (where $F_l$ is the Fisher of $\theta_l$ on past data).
+This operates within $\Theta_l$ and does not involve $\theta_w$.
+
+\textbf{Step 5: Combined objective.}
 \[
-  -\log p(\mathcal{R}|\theta) = \sum_{(x,y) \in \mathcal{R}}
-  \bigl[-\log p_\theta(y|x)\bigr].
+  \theta_l^{\mathrm{new}} = \argmin_{\theta_l \in \Theta_l}\bigl[
+    \underbrace{\lambda_d \cdot \E_{x \sim \mathcal{S}}
+      [D_{\mathrm{KL}}(p_{\theta_w}\|p_{\theta_l})]
+    }_{\text{distillation}}
+    + \underbrace{\lambda_r \cdot \text{NTP}(\theta_l; \mathcal{R})
+    }_{\text{replay}}
+    + \underbrace{\gamma \cdot
+      \norm{\theta_l-\theta_l^{\mathrm{old}}}_{F_l}^2
+    }_{\text{trust-region/prior}}
+  \bigr].
 \]
-
-\textbf{Step 5: Combining.}
-The MAP objective decomposes as:
-\[
-  \hat{\theta}_{\mathrm{MAP}} = \argmin_\theta\bigl[
-    \underbrace{\lambda_d \cdot \text{KL-distill}(\theta_w \to \theta)}_{\text{session data}}
-    + \underbrace{\lambda_r \cdot \text{NTP-loss}(\theta; \mathcal{R})}_{\text{replay data}}
-    + \underbrace{\text{prior}}_{\text{EWC regularization}}
-  \bigr],
-\]
-which matches \eqref{eq:behavioral-merge}. The weights
-$\lambda_d \propto |\mathcal{S}|$ and $\lambda_r \propto |\mathcal{R}|$
-reflect the relative data sizes.
-
-\textbf{Crucially}, this formulation operates in \emph{function space}
-(via KL divergence of output distributions) and does not require
-$\theta_w$ and $\theta_l$ to have the same shape. The only requirement
-is that both models define conditional distributions $p_\theta(y|x)$.
+This matches \eqref{eq:behavioral-merge} augmented with the prior
+term. The entire objective is defined through output distributions
+$p_\theta(y|x)$ and parameter-space operations \emph{within}
+$\Theta_l$ only.
 \end{proof}
 
 \begin{corollary}[Optimal merge is rank-agnostic]
 \label{cor:rank-agnostic}
 The behavioral merge objective \eqref{eq:behavioral-merge} is well-defined
-for any pair of models $(p_{\theta_w}, p_{\theta_l})$ regardless of their
-parameter dimensions, ranks, or architectures. This resolves the rank
-mismatch between WM-LoRA ($r=16$) and LT-LoRA ($r=64$).
+for any pair of models $(p_{\theta_w}, p_{\theta_l})$ that share the
+same \emph{output space} (i.e., define conditional distributions
+$p_\theta(y|x)$ over the same vocabulary/label set given the same
+input format), regardless of their parameter dimensions or LoRA ranks.
+This resolves the rank mismatch between WM-LoRA ($r=16$) and
+LT-LoRA ($r=64$).
 \end{corollary}
 
 \begin{remark}[Relationship to the code implementation]

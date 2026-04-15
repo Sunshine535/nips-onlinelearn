@@ -86,27 +86,51 @@ $\dG$ is a metric on $\Gr(d,r)$ satisfying:
   \item $0 \leq \dG \leq \sqrt{r}$;
   \item $\dG(\col(U), \col(UR)) = 0$ for all $R \in \mathcal{O}(r)$
         \textup{(gauge invariance)};
-  \item $\dG \leq \norm{U - U'}_F \leq \sqrt{2}\, \dG$ when both
-        $U, U'$ are orthonormal \textup{(Frobenius sandwich)}.
+  \item \textup{(Projection-matrix identity)}
+        $\norm{UU^\top - U'U'^\top}_F = \sqrt{2}\,\dG$
+        for any orthonormal representatives;
+  \item \textup{(Procrustes sandwich)}
+        $\dG \leq \min_{R \in \mathcal{O}(r)}\norm{U - U'R}_F
+        \leq \sqrt{2}\,\dG$.
 \end{enumerate}
 \end{lemma}
 
 \begin{proof}
 (1) follows from $\sin^2\theta_i \in [0,1]$.
+
 (2): $U$ and $UR$ have the same column space, so
 $\sigma_i(U^\top(UR)) = \sigma_i(R) = 1$ for all $i$, giving
 $\theta_i = 0$.
-(3): Using $\norm{U - U'}_F^2 = 2r - 2\tr(U^\top U')$ and the
-relation between trace and singular values:
-$\tr(U^\top U') \leq \sum_i \sigma_i = \sum_i \cos\theta_i$,
-so $\norm{U-U'}_F^2 = 2\sum_i(1-\cos\theta_i) \leq
-2\sum_i \sin^2\theta_i / (1+\cos\theta_i) \cdot 2 \leq
-2\sum_i \sin^2\theta_i = 2\dG^2$ using $1-\cos\theta \leq
-\sin^2\theta$ for $\theta \in [0,\pi/2]$.
-The lower bound: $\norm{U-U'}_F^2 \geq 2\sum_i(1-\cos\theta_i)
-\geq \sum_i \sin^2\theta_i = \dG^2$ using $1-\cos\theta \geq
-\sin^2\theta/2$.
+
+(3): Let $P = UU^\top$, $P' = U'U'^\top$ be the orthogonal
+projectors. Then $\norm{P-P'}_F^2 = 2r - 2\norm{U^\top U'}_F^2$
+$= 2\sum_{i=1}^r (1 - \cos^2\theta_i) = 2\sum_i \sin^2\theta_i
+= 2\dG^2$.
+
+(4): The Procrustes-optimal rotation is $R^* = V W^\top$ where
+$U^\top U' = V \Sigma W^\top$ is the SVD. Then
+$\norm{U - U'R^*}_F^2 = 2r - 2\tr(\Sigma)
+= 2\sum_i(1-\cos\theta_i)$.
+
+Upper bound: $1-\cos\theta \leq \sin^2\theta$ for
+$\theta \in [0,\pi/2]$ (since $1+\cos\theta \geq 1$),
+so $\norm{U-U'R^*}_F^2 \leq 2\dG^2$.
+
+Lower bound: $1-\cos\theta \geq \sin^2\theta/2$
+(since $\sin^2\theta = (1-\cos\theta)(1+\cos\theta)
+\leq 2(1-\cos\theta)$),
+so $\norm{U-U'R^*}_F^2 \geq \dG^2$.
 \end{proof}
+
+\begin{remark}[Gauge-aware usage convention]
+\label{rem:gauge-convention}
+Throughout the proofs, all Frobenius-norm statements about subspace
+bases implicitly use \emph{Procrustes-aligned} representatives or,
+equivalently, the projection-matrix norm $\norm{UU^\top-U'U'^\top}_F$.
+The na\"ive $\norm{U-U'}_F$ without alignment is gauge-dependent
+and NOT bounded by $\sqrt{2}\dG$ (e.g., $U' = -U$ gives
+$\norm{U-U'}_F = 2\sqrt{r}$ but $\dG = 0$).
+\end{remark}
 
 %% ======================================================================
 \subsection{Drift Variation Budgets}
@@ -124,7 +148,8 @@ The \emph{slow (subspace) variation} over horizon $T$ is
 \label{def:fast-variation}
 The fast (coefficient) variation is modeled as a \emph{piecewise-constant
 jump process}: there exist times $0 = \tau_0 < \tau_1 < \cdots < \tau_{K_T} \leq T$
-such that $a_t = a_{\tau_k}$ for $t \in [\tau_k, \tau_{k+1})$. We write
+such that $a_t = a_{\tau_k}$ for $t \in [\tau_k, \tau_{k+1})$, where
+$\tau_{K_T+1} \coloneqq T+1$. We write
 $K_T$ for the number of jumps and define
 \[
   V_f(T) \coloneqq \sum_{k=1}^{K_T} \norm{a_{\tau_k} - a_{\tau_{k-1}}}.
@@ -168,7 +193,12 @@ For all $t \in [T]$, the population loss $L_t$ is $\mu$-strongly convex:
   + \frac{\mu}{2}\norm{\theta'-\theta}^2,
   \qquad \forall\, \theta, \theta' \in \R^d,
 \]
-where $\mu = \inf_{t \in [T]} \lambda_{\min}\bigl(\nabla^2 L_t(\theta^*_t)\bigr) > 0$.
+where $\mu > 0$ is a uniform lower bound on the Hessian:
+$\nabla^2 L_t(\theta) \succeq \mu I_d$ for all $\theta \in \R^d$
+and all $t \in [T]$.
+For the linear-Gaussian model $L_t(\theta) = \frac{1}{2}\theta^\top
+\Sigma_t\theta - \theta^\top b_t + c_t$, this reduces to
+$\mu = \inf_t \lambda_{\min}(\Sigma_t)$.
 \end{assumption}
 
 \begin{assumption}[$L$-smoothness of population loss]
@@ -208,13 +238,15 @@ where the expectation is over the randomness in $(x_t, y_t)_{t=1}^T$
 and any internal randomness of the algorithm.
 \end{definition}
 
-\begin{remark}[Probability mode --- fixes Issue~\#13]
+\begin{remark}[Probability mode]
 \label{rem:prob-mode}
-All bounds in this supplement are stated \emph{in expectation}.
-By Markov's inequality, an expected regret bound of $\E[\reg_T] \leq R$
-implies a high-probability bound $\Pr[\reg_T > R/\delta] \leq \delta$.
-Sharper high-probability bounds (e.g., via Azuma--Hoeffding for bounded
-differences) are possible but beyond the scope of these proofs.
+Define the \emph{realized regret} $\widetilde{\reg}_T \coloneqq
+\sum_{t=1}^T (L_t(\theta_t) - L_t(\theta^*_t))$, which is a random
+variable depending on the data and the algorithm's randomness.
+The expected regret is $\reg_T = \E[\widetilde{\reg}_T]$.
+All bounds in this supplement are stated for $\reg_T$ (in expectation).
+By Markov's inequality, $\Pr[\widetilde{\reg}_T > R/\delta] \leq \delta$
+whenever $\reg_T \leq R$.
 \end{remark}
 
 %% ======================================================================

@@ -1,7 +1,7 @@
 # PyTorch installed separately (via setup.sh or system)
 # Install: pip3 install -r requirements.txt -i https://pypi.org/simple/
 
-transformers>=4.48.0
+transformers>=4.51.0  # Qwen3.5 architecture support requires >=4.51
 datasets>=2.21.0
 accelerate>=0.34.0
 numpy>=1.26.0

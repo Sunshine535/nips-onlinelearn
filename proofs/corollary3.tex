@@ -7,21 +7,24 @@
 \subsection{Formal Definition of Invariant Coordinates}
 %% ======================================================================
 
-\begin{definition}[Gradient-sign stability --- fixes Issue~\#23]
+\begin{definition}[Gradient-sign stability --- gauge-invariant formulation]
 \label{def:gradient-sign-stability}
-For parameter coordinate $j \in [d]$ and a window of $W$ consecutive
-consolidation gradients $\{g^{(m)}_j\}_{m=1}^W$, define the
-\emph{gradient-sign stability} as:
-\[
-  s_j \coloneqq \frac{1}{W}\left|\sum_{m=1}^W \sign(g^{(m)}_j)\right|
-  \in [0, 1].
-\]
-A coordinate $j$ is \emph{invariant} if $s_j \geq \tau_s$ for a
-threshold $\tau_s \in (0, 1]$, and \emph{transient} otherwise.
+We work with the \emph{projection-matrix gradient}
+$G^{(m)} = \nabla_P \hat{L}_{mB}(P) \in \R^{d \times d}$ (symmetric),
+evaluated at $P = \hat{U}\hat{U}^\top$. This is gauge-invariant:
+$G^{(m)}$ depends on the subspace $\col(\hat{U})$, not on the
+choice of orthonormal basis.
 
-Denote the invariant index set as
-$\mathcal{I} = \{j : s_j \geq \tau_s\}$ and the transient set as
-$\mathcal{T} = [d] \setminus \mathcal{I}$.
+For each entry $(i,j)$ with $i \leq j$ (upper triangle),
+define the \emph{entry-wise sign stability} over $W$ consecutive
+consolidation rounds:
+\[
+  s_{ij} \coloneqq \frac{1}{W}\left|\sum_{m=1}^W
+  \sign\bigl(G^{(m)}_{ij}\bigr)\right| \in [0, 1].
+\]
+An entry $(i,j)$ is \emph{stable} if $s_{ij} \geq \tau_s$ for a
+threshold $\tau_s \in (0, 1]$, and \emph{transient} otherwise.
+The stable index set is $\mathcal{I} = \{(i,j) : s_{ij} \geq \tau_s\}$.
 \end{definition}
 
 \begin{remark}[Interpretation]
@@ -37,105 +40,110 @@ randomly, indicating noise or transient effects.
 
 \begin{definition}[Selective consolidation]
 \label{def:selective-consolidation}
-Given the partition $(\mathcal{I}, \mathcal{T})$, \emph{selective
-consolidation} applies the slow-track update only to invariant
-coordinates:
+Given the stable set $\mathcal{I}$, \emph{selective consolidation}
+applies the projection-matrix gradient update only to stable entries:
 \[
-  [\hat{U}^{\mathrm{new}}]_j =
+  \hat{P}^{\mathrm{new}}_{ij} =
   \begin{cases}
-    [\hat{U}^{\mathrm{old}}]_j - \eta_s g_j & \text{if } j \in \mathcal{I}, \\
-    [\hat{U}^{\mathrm{old}}]_j & \text{if } j \in \mathcal{T}.
+    \hat{P}^{\mathrm{old}}_{ij} - \eta_s G_{ij}
+      & \text{if } (i,j) \in \mathcal{I}, \\
+    \hat{P}^{\mathrm{old}}_{ij}
+      & \text{otherwise},
   \end{cases}
 \]
-\emph{Indiscriminate consolidation} applies the update to all coordinates.
+followed by a retraction step $\hat{P}^{\mathrm{new}} \gets
+\mathrm{Proj}_{\mathcal{P}_r}(\hat{P}^{\mathrm{new}})$ (eigenvalue
+thresholding to the nearest rank-$r$ projector) to restore feasibility.
+\emph{Indiscriminate consolidation} applies the gradient update to all
+entries before retraction.
 \end{definition}
 
-\begin{proposition}[Selective consolidation bound]
+\begin{proposition}[Selective consolidation bound --- conditional]
 \label{prop:selective}
-Suppose the population gradient decomposes as:
-\[
-  \nabla_j L = \mu_j + \xi_j,
-\]
-where $\mu_j = \E[g_j]$ is the signal and $\xi_j$ is zero-mean noise
-with $\E[\xi_j^2] = \sigma_j^2$. Define the \emph{signal-to-noise
-ratio} $\mathrm{SNR}_j = |\mu_j|/\sigma_j$.
+For each entry $(i,j)$ of the projection-matrix gradient, decompose the
+stochastic gradient as $G_{ij} = \mu_{ij} + \xi_{ij}$, where
+$\mu_{ij} = \E[G_{ij}]$ is the signal and $\xi_{ij}$ is zero-mean
+noise with $\E[\xi_{ij}^2] = \sigma_{ij}^2$. Assume the gradient
+entries $\{G_{ij}^{(m)}\}_{m=1}^W$ are independent across
+consolidation rounds (valid when different data batches are used).
 
-Then for coordinates with $\mathrm{SNR}_j < 1$ (noise-dominated):
+\textbf{Sign-stability characterization:}
 \begin{enumerate}[nosep]
-  \item The expected gradient-sign stability satisfies
-        $\E[s_j] \leq \frac{|\mu_j|}{\sigma_j} + O(W^{-1/2})$.
-  \item Consolidating coordinate $j$ adds expected regret
-        $\eta_s^2 \sigma_j^2$ per round without reducing the subspace
-        tracking error (since $|\mu_j| < \sigma_j$).
+  \item The expected sign-stability satisfies
+        $\E[s_{ij}] = |2p_{ij} - 1| + O(W^{-1/2})$,
+        where $p_{ij} = \Pr(G_{ij} > 0)$. Under Gaussian noise:
+        $p_{ij} = \Phi(\mu_{ij}/\sigma_{ij})$ and
+        $|2\Phi(x)-1| \leq \sqrt{2/\pi}\,|x|$ for $|x| \leq 1$.
+  \item By Hoeffding's inequality applied to the i.i.d.\ $\pm 1$ signs
+        $X_m = \sign(G_{ij}^{(m)})$:
+        $\Pr(s_{ij} \geq \tau_s) \leq 2\exp(-W(\tau_s - |2p_{ij}-1|)^2/2)$
+        when $\tau_s > |2p_{ij}-1|$.
 \end{enumerate}
 
-Conversely, for $\mathrm{SNR}_j \geq 1$ (signal-dominated):
-\begin{enumerate}[nosep]
-  \item $\E[s_j] \geq 1 - 2\exp(-W|\mu_j|^2/(2\sigma_j^2))$ (by Hoeffding).
-  \item Consolidating coordinate $j$ reduces subspace error by
-        $\Theta(\eta_s |\mu_j|)$ per round.
-\end{enumerate}
-
-Therefore, with threshold $\tau_s$ chosen such that
-$\mathcal{T} \subseteq \{j : \mathrm{SNR}_j < 1\}$:
+\textbf{Selective vs.\ indiscriminate regret (state-dependent):}
+The per-round improvement from updating entry $(i,j)$ is
 \[
-  \E[\reg_T^{\mathrm{selective}}]
-  \leq \E[\reg_T^{\mathrm{indiscriminate}}]
-  - \eta_s^2 |\mathcal{T}|\, \bar{\sigma}_{\mathcal{T}}^2 \cdot T/B
-  + \eta_s |\mathcal{T}|\, \bar{\mu}_{\mathcal{T}} \cdot T/B,
+  \Delta R_{ij} = 2\eta_s \mu_{ij}\, e_{ij}
+  - \eta_s^2(\mu_{ij}^2 + \sigma_{ij}^2),
 \]
-where $\bar{\sigma}_{\mathcal{T}}^2 = \frac{1}{|\mathcal{T}|}
-\sum_{j \in \mathcal{T}} \sigma_j^2$ and
-$\bar{\mu}_{\mathcal{T}} = \frac{1}{|\mathcal{T}|}
-\sum_{j \in \mathcal{T}} |\mu_j|$.
-
-When $\bar{\mu}_{\mathcal{T}} \leq \eta_s \bar{\sigma}_{\mathcal{T}}^2$
-(i.e., transient coordinates are truly noise-dominated), selective
-consolidation has lower regret:
+where $e_{ij} = \hat{P}_{ij} - P_{ij}$ is the current tracking error
+(with sign chosen so $\mu_{ij}\, e_{ij} \geq 0$ when the gradient
+points toward the truth). Selective consolidation skips
+all $(i,j) \in \mathcal{T}$. The net effect is:
 \[
-  \E[\reg_T^{\mathrm{selective}}] \leq \E[\reg_T^{\mathrm{indiscriminate}}].
+  \E[\reg_T^{\mathrm{selective}}] -
+  \E[\reg_T^{\mathrm{indiscriminate}}]
+  = \frac{T}{B}\sum_{(i,j) \in \mathcal{T}}
+    \bigl(-2\eta_s |\mu_{ij}| |e_{ij}|
+    + \eta_s^2(\mu_{ij}^2 + \sigma_{ij}^2)\bigr).
 \]
+Selective consolidation is \emph{weakly better} when, for all
+$(i,j) \in \mathcal{T}$:
+\[
+  |\mu_{ij}|\, |e_{ij}| \leq \frac{\eta_s}{2}(\mu_{ij}^2 + \sigma_{ij}^2).
+\]
+This holds when either (a) $\mathrm{SNR}_{ij} \ll 1$ (noise-dominated,
+regardless of $e_{ij}$), or (b) $|e_{ij}|$ is small
+(near-converged subspace).
 \end{proposition}
 
 \begin{proof}
-\textbf{Step 1: Sign stability characterization.}
-For a noise-dominated coordinate ($|\mu_j| < \sigma_j$), the gradient
-$g_j = \mu_j + \xi_j$ has $\Pr(\sign(g_j) = \sign(\mu_j))
-= \Phi(|\mu_j|/\sigma_j)$ where $\Phi$ is the standard normal CDF
-(under Gaussian noise assumption). The sample sign average satisfies:
-\[
-  \E[s_j] = \left|2\Phi\!\left(\frac{|\mu_j|}{\sigma_j}\right) - 1\right|
-  \leq \frac{|\mu_j|}{\sigma_j} + O(W^{-1/2}).
-\]
-By Hoeffding's inequality applied to the $\pm 1$ signs:
-$\Pr(s_j \geq \tau_s) \leq \exp(-W(\tau_s - \E[s_j])^2/2)$.
+\textbf{Step 1: Sign stability.}
+For each entry, $X_m = \sign(G_{ij}^{(m)})$ are i.i.d.\ (by the
+independence assumption) with $\E[X_m] = 2p_{ij} - 1$ where
+$p_{ij} = \Pr(G_{ij} > 0)$.
+The sample mean $\bar{X} = \frac{1}{W}\sum X_m$ satisfies
+$\E[\bar{X}] = 2p_{ij}-1$ and
+$s_{ij} = |\bar{X}|$. By Jensen: $\E[s_{ij}] \geq |\E[\bar{X}]|
+= |2p_{ij}-1|$. For the reverse direction, $\E[|\bar{X}|]
+\leq |2p_{ij}-1| + \E[|\bar{X} - \E[\bar{X}]|]
+\leq |2p_{ij}-1| + \sqrt{\mathrm{Var}(\bar{X})}
+= |2p_{ij}-1| + O(W^{-1/2})$.
 
-\textbf{Step 2: Regret decomposition per coordinate.}
-The subspace update for coordinate $j$ contributes to the next-period
-error as:
+Under Gaussian noise: $p_{ij} = \Phi(\mu_{ij}/\sigma_{ij})$.
+For small SNR: $|2\Phi(x)-1| \leq \sqrt{2/\pi}\,|x| < |x|$ for $|x| \leq 1$.
+
+Hoeffding on the bounded $X_m \in \{-1,+1\}$:
+$\Pr(|\bar{X}| \geq \tau_s)
+\leq 2\exp(-W(\tau_s-|2p_{ij}-1|)^2/2)$ when $\tau_s > |2p_{ij}-1|$.
+
+\textbf{Step 2: Per-entry regret from updating.}
+Updating entry $(i,j)$ of the projection matrix changes the
+tracking error as:
+$\hat{P}_{ij}^{\mathrm{new}} = \hat{P}_{ij}^{\mathrm{old}} - \eta_s G_{ij}$.
+The expected squared error change (before retraction):
 \begin{align*}
-  \E[\norm{[\hat{U}^{\mathrm{new}}]_j - [U]_j}^2]
-  &= \E[\norm{[\hat{U}^{\mathrm{old}}]_j - \eta_s g_j - [U]_j}^2] \\
-  &= \underbrace{\norm{[\hat{U}^{\mathrm{old}}]_j - [U]_j}^2}_{e_j^2}
-    - 2\eta_s \mu_j \cdot (\hat{U}^{\mathrm{old}}_j - U_j)
-    + \eta_s^2(\mu_j^2 + \sigma_j^2).
+  \E[(\hat{P}_{ij}^{\mathrm{new}} - P_{ij})^2]
+  &= e_{ij}^2 - 2\eta_s\mu_{ij}e_{ij} + \eta_s^2(\mu_{ij}^2+\sigma_{ij}^2).
 \end{align*}
-The expected improvement is $2\eta_s |\mu_j| e_j$ (when the gradient
-points toward the truth) minus the noise penalty $\eta_s^2 \sigma_j^2$.
+The improvement $\Delta R_{ij} = 2\eta_s\mu_{ij}e_{ij}
+- \eta_s^2(\mu_{ij}^2+\sigma_{ij}^2)$.
 
-\textbf{Step 3: Selective vs.\ indiscriminate.}
-Selective consolidation skips all $j \in \mathcal{T}$. The difference
-in one-period regret is:
-\[
-  \Delta R = \sum_{j \in \mathcal{T}}
-  \bigl(-2\eta_s |\mu_j| e_j + \eta_s^2 \sigma_j^2\bigr).
-\]
-When $|\mu_j| e_j \leq \eta_s \sigma_j^2/2$ for noise-dominated
-coordinates (which holds for small $e_j$ or small $|\mu_j|$),
-$\Delta R \geq 0$, meaning selective is at least as good as
-indiscriminate.
-
-Summing over $T/B$ consolidation periods gives the claimed bound.
+\textbf{Step 3: When skipping helps.}
+Skipping entry $(i,j)$ is beneficial when $\Delta R_{ij} \leq 0$, i.e.,
+$2|\mu_{ij}||e_{ij}| \leq \eta_s(\mu_{ij}^2+\sigma_{ij}^2)$.
+This is the state-dependent condition stated in the proposition.
+Summing over all skipped entries and $T/B$ periods gives the bound.
 \end{proof}
 
 \begin{remark}[When selective consolidation can fail]
