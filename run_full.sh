@@ -165,9 +165,33 @@ if [[ "$PHASE" == "all" || "$PHASE" == "3" ]]; then
     # Ablations are Mirror-LoRA variants with specific components disabled
     # We run these by modifying config and using mirror_lora method
 
-    ABLATION_DIR="$OUTPUT_DIR/$(echo "$MODEL_SMALL" | tr '/' '_')/ablations"
-    mkdir -p "$ABLATION_DIR"
+    ABLATION_OUT="$OUTPUT_DIR/$(echo "$MODEL_SMALL" | tr '/' '_')/ablations"
+    ABLATION_CFGS="$PROJ_DIR/configs/ablations"
+    mkdir -p "$ABLATION_OUT"
 
+    # Use pre-created configs from configs/ablations/*.yaml
+    PIDS=()
+    gpu_idx=0
+    for cfg_file in "$ABLATION_CFGS"/*.yaml; do
+        name=$(basename "$cfg_file" .yaml)
+        gpu=$((gpu_idx % NUM_GPUS))
+        out="$ABLATION_OUT/${name}"
+        log="$LOG_DIR/ablation_${name}.log"
+        mkdir -p "$out"
+        echo "  GPU $gpu: ablation=$name (config: $cfg_file)"
+        CUDA_VISIBLE_DEVICES=$gpu nohup python3 -u "$EVAL_SCRIPT" \
+            --task dialogue --methods mirror_lora --model "$MODEL_SMALL" \
+            --config "$cfg_file" --output_dir "$out" \
+            --max_sessions 20 --no_nli \
+            > "$log" 2>&1 &
+        PIDS+=($!)
+        gpu_idx=$((gpu_idx + 1))
+    done
+    wait_jobs "E8-ablation" "${PIDS[@]}"
+    echo "[Phase 3] Done."
+fi
+
+: << 'REMOVED_INLINE_GENERATOR'
     python3 -u << 'PYEOF'
 import json, os, sys, subprocess, yaml, copy
 
@@ -227,28 +251,7 @@ print("Run each with:")
 print(f"  python3 {eval_script} --task dialogue --methods mirror_lora "
       f"--model $MODEL_SMALL --config <config> --output_dir <out>")
 PYEOF
-
-    # Launch ablations (small model, dialogue task only)
-    PIDS=()
-    gpu_idx=0
-    for cfg_file in "$ABLATION_DIR"/config_*.yaml; do
-        name=$(basename "$cfg_file" .yaml | sed 's/config_//')
-        gpu=$((gpu_idx % NUM_GPUS))
-        out="$ABLATION_DIR/results_${name}"
-        log="$LOG_DIR/ablation_${name}.log"
-        mkdir -p "$out"
-        echo "  GPU $gpu: ablation=$name"
-        CUDA_VISIBLE_DEVICES=$gpu nohup python3 -u "$EVAL_SCRIPT" \
-            --task dialogue --methods mirror_lora --model "$MODEL_SMALL" \
-            --config "$cfg_file" --output_dir "$out" \
-            --max_sessions 20 --no_nli \
-            > "$log" 2>&1 &
-        PIDS+=($!)
-        gpu_idx=$((gpu_idx + 1))
-    done
-    wait_jobs "E8-ablation" "${PIDS[@]}"
-    echo "[Phase 3] Done."
-fi
+REMOVED_INLINE_GENERATOR
 
 # ======================================================================
 # Phase 4: Efficiency benchmark (E9)

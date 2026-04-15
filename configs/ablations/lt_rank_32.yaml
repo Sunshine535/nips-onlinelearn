@@ -1,0 +1,18 @@
+working_memory:
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  learning_rate: 5.0e-4
+  online_update_steps: 3
+long_term_memory:
+  lora_r: 32
+  lora_alpha: 64
+  lora_dropout: 0.02
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  consolidation_lr: 1.0e-4
+  consolidation_epochs: 3
+  max_memory_buffer: 5000
+consolidation:
+  beta: 1.0
+  gamma: 0.0

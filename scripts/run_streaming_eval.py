@@ -83,6 +83,30 @@ def _cast_lora_params_to_fp32(model):
         if "lora" in name and param.requires_grad:
             param.data = param.data.to(torch.float32)
 
+def _reset_to_primary_adapter(method):
+    """Reset model to its primary adapter before inference.
+
+    Multi-adapter methods (mirror_lora, dual_lora_*, sdft) leave multiple
+    adapters active after process_turn(). This causes shape mismatches or
+    incorrect outputs during classification evaluation. This function resets
+    to the single primary adapter.
+    """
+    model = getattr(method, "model", None)
+    if model is None:
+        return
+    try:
+        if hasattr(model, "peft_config"):
+            adapters = list(model.peft_config.keys())
+            if "working" in adapters:
+                _set_adapters_layerwise(model, ["working"])
+            elif "fast" in adapters:
+                _set_adapters_layerwise(model, ["fast"])
+            elif len(adapters) == 1:
+                _set_adapters_layerwise(model, [adapters[0]])
+    except Exception:
+        pass
+
+
 # ---------------------------------------------------------------------------
 # Optional NLI model for semantic retention
 # ---------------------------------------------------------------------------
@@ -1219,6 +1243,8 @@ def evaluate_classification(
 
         # Predict before update: get logits for last token
         try:
+            # Reset to primary adapter before inference (fixes multi-adapter bug)
+            _reset_to_primary_adapter(method)
             method.model.eval()
             with torch.no_grad():
                 logits = method.model(input_ids=input_ids).logits
