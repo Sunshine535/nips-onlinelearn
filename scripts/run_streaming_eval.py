@@ -195,18 +195,25 @@ def compute_semantic_retention_f1(
     # CRITICAL: Reset to correct adapter state before probing.
     # Multi-adapter methods (mirror_lora, dual_lora_*) may leave the model
     # in an incorrect adapter state after process_turn() or end_session().
-    # For mirror_lora: after zero-init of WM, we need LT-only for probing.
-    from peft.tuners.tuners_utils import BaseTunerLayer
-    if hasattr(model, "peft_config"):
-        adapters = list(model.peft_config.keys())
-        if "longterm" in adapters:
-            # Mirror-LoRA / SPM: use longterm adapter only for retention probes
-            # (WM may be zero-init'd after session end)
-            _set_adapters_layerwise(model, ["longterm"])
-        elif "slow" in adapters:
-            _set_adapters_layerwise(model, ["slow"])
-        elif len(adapters) == 1:
-            _set_adapters_layerwise(model, [adapters[0]])
+    # Save the prior state so we can restore it after probing.
+    prev_adapter_state = None
+    try:
+        if hasattr(model, "peft_config"):
+            from peft.tuners.tuners_utils import BaseTunerLayer
+            for module in model.modules():
+                if isinstance(module, BaseTunerLayer):
+                    prev_adapter_state = list(module.active_adapters) \
+                        if hasattr(module, "active_adapters") else None
+                    break
+            adapters = list(model.peft_config.keys())
+            if "longterm" in adapters:
+                _set_adapters_layerwise(model, ["longterm"])
+            elif "slow" in adapters:
+                _set_adapters_layerwise(model, ["slow"])
+            elif len(adapters) == 1:
+                _set_adapters_layerwise(model, [adapters[0]])
+    except Exception:
+        pass
 
     model.eval()
     prev_cache = getattr(model.config, "use_cache", True)
@@ -228,12 +235,12 @@ def compute_semantic_retention_f1(
                 scores.append(_rouge_l_f1(fact, resp))
     finally:
         model.config.use_cache = prev_cache
-        # Restore dual-adapter mode for next training turn
-        if hasattr(model, "peft_config"):
-            adapters = list(model.peft_config.keys())
-            if "working" in adapters and "longterm" in adapters:
-                _set_adapters_layerwise(model, ["working", "longterm"],
-                                        trainable_adapters={"working"})
+        # Restore prior adapter state (best effort)
+        try:
+            if prev_adapter_state is not None:
+                _set_adapters_layerwise(model, prev_adapter_state)
+        except Exception:
+            pass
     return sum(scores) / max(len(scores), 1)
 
 
