@@ -188,32 +188,13 @@ def compute_semantic_retention_f1(
 
     For each persona fact, generate a response to a probing question and check
     whether the fact is entailed in the response.
+
+    Note: Does NOT modify adapter state — callers are responsible for ensuring
+    the model is in the desired inference state. Modifying state here caused
+    regressions (Loss=1.5 bug in multiple methods) during multi-adapter runs.
     """
     if use_nli:
         _load_nli()
-
-    # CRITICAL: Reset to correct adapter state before probing.
-    # Multi-adapter methods (mirror_lora, dual_lora_*) may leave the model
-    # in an incorrect adapter state after process_turn() or end_session().
-    # Save the prior state so we can restore it after probing.
-    prev_adapter_state = None
-    try:
-        if hasattr(model, "peft_config"):
-            from peft.tuners.tuners_utils import BaseTunerLayer
-            for module in model.modules():
-                if isinstance(module, BaseTunerLayer):
-                    prev_adapter_state = list(module.active_adapters) \
-                        if hasattr(module, "active_adapters") else None
-                    break
-            adapters = list(model.peft_config.keys())
-            if "longterm" in adapters:
-                _set_adapters_layerwise(model, ["longterm"])
-            elif "slow" in adapters:
-                _set_adapters_layerwise(model, ["slow"])
-            elif len(adapters) == 1:
-                _set_adapters_layerwise(model, [adapters[0]])
-    except Exception:
-        pass
 
     model.eval()
     prev_cache = getattr(model.config, "use_cache", True)
@@ -235,12 +216,6 @@ def compute_semantic_retention_f1(
                 scores.append(_rouge_l_f1(fact, resp))
     finally:
         model.config.use_cache = prev_cache
-        # Restore prior adapter state (best effort)
-        try:
-            if prev_adapter_state is not None:
-                _set_adapters_layerwise(model, prev_adapter_state)
-        except Exception:
-            pass
     return sum(scores) / max(len(scores), 1)
 
 
