@@ -845,13 +845,29 @@ class SPMWrapper(_BaseWrapper):
 
 
 class MirrorLoRAWrapper(_BaseWrapper):
-    """StreamingMirrorLoRA (our full method)."""
+    """StreamingMirrorLoRA (our full method).
+
+    IMPORTANT: We disable session-internal auto-consolidation so Mirror-LoRA
+    only consolidates at session boundaries (aligned with SPM). Session-internal
+    consolidation was firing every 10 turns, prematurely distilling half-trained
+    WM into LT, which corrupted persona knowledge and caused RetF1 to drop
+    from 0.64 (SPM) to 0.17 (Mirror-LoRA with auto-consol).
+
+    Mirror-LoRA's value-add over SPM is then: Fisher-weighted trust region,
+    invariant-gradient filtering, Grassmann retraction — all optional
+    components evaluated at SESSION boundaries only.
+    """
 
     def __init__(self, model, tokenizer, config):
         self.tokenizer = tokenizer
+        wm_config = dict(config["working_memory"])
+        # Large max_turns disables session-internal consolidation trigger.
+        # End-of-session consolidation is still invoked explicitly by the
+        # evaluation loop via end_session().
+        wm_config["max_turns_before_consolidation"] = 10**9
         self._mirror = StreamingMirrorLoRA(
             base_model=model,
-            working_config=config["working_memory"],
+            working_config=wm_config,
             longterm_config=config["long_term_memory"],
             reservoir_size=config["long_term_memory"].get("max_memory_buffer", 5000),
             beta=config.get("consolidation", {}).get("beta", 1.0),
@@ -861,7 +877,7 @@ class MirrorLoRAWrapper(_BaseWrapper):
             invariant_window=3,
             invariant_threshold=0.5,
             use_grassmann=False,
-            adaptive_frequency=True,
+            adaptive_frequency=False,  # rely on session-boundary consolidation
         )
         self.model = self._mirror.model
 
