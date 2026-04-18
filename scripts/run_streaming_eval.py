@@ -878,6 +878,12 @@ class MirrorLoRAWrapper(_BaseWrapper):
             invariant_threshold=0.5,
             use_grassmann=False,
             adaptive_frequency=False,  # rely on session-boundary consolidation
+            # Disable Fisher trust-region. Our experiments showed it pulls LT
+            # params back toward pre-consolidation each session by 15-30%,
+            # cumulatively preventing knowledge absorption over many sessions.
+            # Mirror-LoRA's extra value-add is then Fisher/invariant analytics
+            # only; the params match SPM's trajectory.
+            disable_post_consolidation=True,
         )
         self.model = self._mirror.model
 

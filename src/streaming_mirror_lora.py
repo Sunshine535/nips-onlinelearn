@@ -262,6 +262,7 @@ class StreamingMirrorLoRA:
         invariant_threshold: float = 0.5,
         use_grassmann: bool = False,
         adaptive_frequency: bool = True,
+        disable_post_consolidation: bool = False,
     ):
         # Delegate core adapter setup to StreamingParameterMemory.
         self._spm = StreamingParameterMemory(
@@ -272,6 +273,7 @@ class StreamingMirrorLoRA:
             beta=beta,
             gamma=gamma,
         )
+        self.disable_post_consolidation: bool = disable_post_consolidation
 
         # Expose inner attributes for backward-compat access.
         self.model: PeftModel = self._spm.model
@@ -483,7 +485,12 @@ class StreamingMirrorLoRA:
         # 2. Post-consolidation modulation.
         fast_fisher = self.fisher_fast.get_fisher()
 
-        if self.use_fisher_precision_merge and fast_fisher:
+        if self.disable_post_consolidation:
+            # Diagnostic mode: skip ALL post-consolidation modulation, making
+            # Mirror-LoRA behave identically to SPM (plus Fisher/invariant
+            # observation state that doesn't modify params).
+            pass
+        elif self.use_fisher_precision_merge and fast_fisher:
             # Fisher-precision merge (Cor1): modulate consolidation update
             # using Fisher importance + invariant mask.
             invariant_mask = {}
